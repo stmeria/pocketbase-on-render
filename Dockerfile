@@ -1,7 +1,17 @@
 
-FROM alpine:latest
-WORKDIR /app
-COPY pocketbase /app/pocketbase
-COPY pb_data /app/pb_data
-EXPOSE 8080
-CMD ["./pocketbase", "serve", "--http=0.0.0.0:8080"]
+FROM alpine:3.19
+
+ENV PB_VERSION=0.21.0 \
+    PORT=8090
+
+WORKDIR /pb
+
+RUN apk add --no-cache ca-certificates curl unzip \
+ && curl -L -o pocketbase.zip "https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip" \
+ && unzip pocketbase.zip -d /pb \
+ && rm pocketbase.zip
+
+EXPOSE 8090
+
+CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090"]
+``
