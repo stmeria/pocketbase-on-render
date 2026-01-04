@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Schedule • Precast Manager</title>
+  <script src="/vendor/pocketbase.umd.js"></script>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a33;
+      --muted:#9fb2d1;
+      --text:#e9f1ff;
+      --line:#22355f;
+      --accent:#5aa7ff;
+      --danger:#ff5a7a;
+      --warn:#ffbf5a;
+      --ok:#66e3a2;
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius2: 12px;
+      --pad: 14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 700px at 15% 0%, rgba(90,167,255,.14), transparent 60%),
+                  radial-gradient(900px 600px at 90% 20%, rgba(255,191,90,.10), transparent 55%),
+                  var(--bg);
+         color:var(--text); font-family:var(--font);}
+    .wrap{max-width:1300px;margin:0 auto;padding:18px;}
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:14px 16px;border-bottom:1px solid rgba(34,53,95,.7);
+      background: rgba(11,18,32,.65); backdrop-filter: blur(10px);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .title{display:flex;align-items:center;gap:10px;min-width:0}
+    .title h1{font-size:18px;margin:0;letter-spacing:.2px;white-space:nowrap}
+    .pill{
+      font-size:12px; color: var(--muted);
+      border:1px solid rgba(34,53,95,.7);
+      background: rgba(15,26,51,.55);
+      padding:6px 10px; border-radius:999px;
+    }
+    .btn{
+      border:1px solid rgba(34,53,95,.7);
+      background: rgba(15,26,51,.75);
+      color:var(--text);
+      padding:9px 12px;border-radius:12px;
+      cursor:pointer;font-weight:650;
+      transition: transform .06s ease, border-color .15s ease, background .15s ease, opacity .15s ease;
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(90,167,255,.65);}
+    .btn.primary{background: rgba(90,167,255,.18); border-color: rgba(90,167,255,.65);}
+    .btn.ghost{background: transparent;}
+    .btn.danger{background: rgba(255,90,122,.12); border-color: rgba(255,90,122,.45);}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    input, select, textarea{
+      width:100%;
+      border:1px solid rgba(34,53,95,.7);
+      background: rgba(11,18,32,.35);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      outline:none;
+    }
+    .gridTop{display:grid;grid-template-columns: 1fr 320px; gap:14px; margin-top:16px;}
+    .card{
+      background: rgba(15,26,51,.68);
+      border:1px solid rgba(34,53,95,.7);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .panel{padding:14px; min-width:0;}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .muted{color:var(--muted)}
+    table{width:100%; border-collapse:collapse; font-size:13px; overflow:hidden;}
+    th, td{padding:10px 10px; border-bottom:1px solid rgba(34,53,95,.55); vertical-align:top;}
+    th{color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; font-size:11px;}
+    tr:hover td{background: rgba(90,167,255,.06);}
+    .right{text-align:right}
+    .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid rgba(34,53,95,.65); background: rgba(11,18,32,.25);}
+    .tag.ok{border-color: rgba(102,227,162,.55); background: rgba(102,227,162,.10);}
+    .tag.warn{border-color: rgba(255,191,90,.55); background: rgba(255,191,90,.10);}
+    .tag.danger{border-color: rgba(255,90,122,.55); background: rgba(255,90,122,.10);}
+    .kpis{display:grid;grid-template-columns: repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:12px;}
+    .kpi{padding:12px;border-radius: var(--radius2); background: rgba(11,18,32,.35); border:1px solid rgba(34,53,95,.6);}
+    .kpi .k{font-size:12px;color:var(--muted)}
+    .kpi .v{font-size:18px;font-weight:800;margin-top:4px}
+    .note{
+      margin-top:10px; padding:10px 12px; border-radius: 12px;
+      border:1px dashed rgba(34,53,95,.7); color:var(--muted);
+      background: rgba(11,18,32,.25);
+      font-size:12px;
+    }
+    .modal{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background: rgba(0,0,0,.55); z-index:100;
+      padding:18px;
+    }
+    .modal.open{display:flex;}
+    .modalCard{width:min(820px, 96vw); max-height: 92vh; overflow:auto; padding:14px;}
+    .modalHeader{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;}
+    .hr{height:1px;background: rgba(34,53,95,.6); margin:10px 0;}
+    .grid{display:grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap:10px;}
+    .col-6{grid-column: span 6;}
+    .col-4{grid-column: span 4;}
+    .col-12{grid-column: span 12;}
+    @media (max-width: 980px){
+      .gridTop{grid-template-columns: 1fr;}
+      .kpis{grid-template-columns: repeat(2, minmax(0, 1fr));}
+    }
+    @media (max-width: 560px){
+      .kpis{grid-template-columns: 1fr;}
+      .col-6,.col-4{grid-column: span 12;}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <button class="btn ghost" id="btnBack" type="button">← Back</button>
+    <h1>Project Schedule</h1>
+    <span class="pill" id="modePill">Loading…</span>
+  </div>
+  <div class="row">
+    <span class="pill" id="userPill">Not signed in</span>
+    <button class="btn" id="btnLogout" type="button" style="display:none">Logout</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="kpis">
+    <div class="kpi"><div class="k">Projects</div><div class="v" id="kpiProjects">0</div></div>
+    <div class="kpi"><div class="k">In Production</div><div class="v" id="kpiInProd">0</div></div>
+    <div class="kpi"><div class="k">Allocated/Reserved</div><div class="v" id="kpiAlloc">0</div></div>
+    <div class="kpi"><div class="k">Shipped</div><div class="v" id="kpiShipped">0</div></div>
+  </div>
+
+  <div class="gridTop">
+    <div class="card panel">
+      <div class="toolbar">
+        <div class="row" style="flex:1;min-width:240px">
+          <input id="q" placeholder="Search project name…"/>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btnNew" type="button">+ Add / Override</button>
+          <button class="btn" id="btnRefresh" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;border-radius:14px;overflow:hidden">
+        <table>
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Status</th>
+              <th class="right">Qty</th>
+              <th class="right">In Prod</th>
+              <th class="right">On Hand</th>
+              <th class="right">Alloc</th>
+              <th class="right">Shipped</th>
+              <th>First Cast</th>
+              <th>Last Cast</th>
+              <th>Delivery</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        This view is built from your <b>Items</b> collection’s <code>project</code>, <code>status</code>, <code>qty</code> and <code>castDate</code>.
+        Optional schedule fields (delivery date / notes / manual status) are stored as <b>Overrides</b> in PB collection <code>project_schedule</code> (or local mode).
+      </div>
+    </div>
+
+    <div class="card panel">
+      <div class="toolbar">
+        <div class="pill">Overrides</div>
+      </div>
+      <div class="muted" style="font-size:13px; line-height:1.5">
+        Use <b>Add / Override</b> to set:
+        <ul style="margin:8px 0 0 18px;padding:0">
+          <li>Delivery date</li>
+          <li>Manual project status</li>
+          <li>Notes / constraints</li>
+        </ul>
+        <div class="hr"></div>
+        <div id="overrideMode" class="pill">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Editor Modal -->
+<div class="modal" id="editor">
+  <div class="card modalCard">
+    <div class="modalHeader">
+      <div style="min-width:0">
+        <div class="pill">Project Override</div>
+        <div style="font-size:18px;font-weight:900;margin-top:6px" id="editorTitle">Add / Override</div>
+      </div>
+      <div class="row">
+        <button class="btn danger" id="btnDelete" type="button" style="display:none">Delete Override</button>
+        <button class="btn" id="btnClose" type="button">Close</button>
+        <button class="btn primary" id="btnSave" type="button">Save</button>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div class="grid">
+      <div class="col-12">
+        <label class="muted">Project Name (must match Items.project)</label>
+        <input id="f_project" placeholder="e.g., Job 24-118 • Downtown Garage"/>
+      </div>
+      <div class="col-6">
+        <label class="muted">Manual Status</label>
+        <select id="f_status">
+          <option value="">(auto)</option>
+          <option>Planning</option>
+          <option>In Production</option>
+          <option>On Hand</option>
+          <option>Allocated</option>
+          <option>Shipped</option>
+          <option>Closed</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="muted">Delivery Date</label>
+        <input id="f_delivery" type="date"/>
+      </div>
+      <div class="col-12">
+        <label class="muted">Notes</label>
+        <textarea id="f_notes" placeholder="Constraints, site needs, approvals, trucking, etc."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal" id="loginModal">
+  <div class="card modalCard" style="max-width:520px">
+    <div class="modalHeader">
+      <div>
+        <div class="pill">PocketBase</div>
+        <div style="font-size:18px;font-weight:900;margin-top:6px">Sign in</div>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <form id="loginForm">
+      <div class="grid">
+        <div class="col-12"><label class="muted">Email</label><input id="loginEmail" type="email" required></div>
+        <div class="col-12"><label class="muted">Password</label><input id="loginPassword" type="password" required></div>
+        <div class="col-12"><button class="btn primary" style="width:100%" type="submit">Login</button></div>
+        <div class="col-12 muted" id="loginErr" style="display:none"></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(() => {
+  const PB_URL = window.location.origin;
+  const ITEMS = "items";
+  const TX = "transactions";
+  const OVERRIDES = "project_schedule";
+  const OVERRIDES_LS = "project_schedule_overrides_v1";
+
+  const $ = (id) => document.getElementById(id);
+  const escapeHtml = (s) => (s ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const parseNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  let pb = null;
+  let overridesMode = "local";
+  let overrides = []; // {id, project, status, delivery, notes}
+
+  function openModal(id){ $(id).classList.add("open"); }
+  function closeModal(id){ $(id).classList.remove("open"); }
+
+  function uid(){ return (crypto?.randomUUID ? crypto.randomUUID() : ("id_" + Math.random().toString(16).slice(2))); }
+
+  function getUserEmail(){
+    const u = pb?.authStore?.model;
+    return (u && (u.email || u.username)) || "";
+  }
+
+  async function canUsePBCollection(name){
+    try{ await pb.collection(name).getList(1,1,{fields:"id"}); return true; }catch{ return false; }
+  }
+
+  function loadOverridesLocal(){
+    try{ return JSON.parse(localStorage.getItem(OVERRIDES_LS) || "[]"); }catch{ return []; }
+  }
+  function saveOverridesLocal(arr){
+    localStorage.setItem(OVERRIDES_LS, JSON.stringify(arr));
+  }
+
+  async function loadOverrides(){
+    if(pb && await canUsePBCollection(OVERRIDES)){
+      overridesMode = "pb";
+      const res = await pb.collection(OVERRIDES).getList(1, 500, { sort: "-updated" });
+      overrides = res.items.map(r => ({
+        id: r.id,
+        project: r.project || r.name || r.projectName || "",
+        status: r.status || "",
+        delivery: r.delivery || r.deliveryDate || "",
+        notes: r.notes || ""
+      }));
+    }else{
+      overridesMode = "local";
+      overrides = loadOverridesLocal();
+    }
+    $("overrideMode").textContent = overridesMode === "pb" ? "PocketBase Overrides" : "Local Overrides";
+  }
+
+  function overrideForProject(project){
+    const p = (project||"").trim().toLowerCase();
+    return overrides.find(o => (o.project||"").trim().toLowerCase() === p) || null;
+  }
+
+  async function upsertOverride(data){
+    const project = (data.project||"").trim();
+    if(!project) throw new Error("Project is required.");
+    const existing = overrideForProject(project);
+
+    if(overridesMode === "pb"){
+      // IMPORTANT: send only common field names (project, status, delivery, notes).
+      // Ensure your PB collection fields match these.
+      const payload = { project, status: data.status || "", delivery: data.delivery || "", notes: data.notes || "" };
+      if(existing){
+        const r = await pb.collection(OVERRIDES).update(existing.id, payload);
+        existing.status = r.status || payload.status;
+        existing.delivery = r.delivery || payload.delivery;
+        existing.notes = r.notes || payload.notes;
+      }else{
+        const r = await pb.collection(OVERRIDES).create(payload);
+        overrides.unshift({ id:r.id, project: payload.project, status: payload.status, delivery: payload.delivery, notes: payload.notes });
+      }
+      return;
+    }
+
+    if(existing){
+      existing.status = data.status || "";
+      existing.delivery = data.delivery || "";
+      existing.notes = data.notes || "";
+    }else{
+      overrides.unshift({ id: uid(), project, status: data.status || "", delivery: data.delivery || "", notes: data.notes || "" });
+    }
+    saveOverridesLocal(overrides);
+  }
+
+  async function deleteOverride(project){
+    const existing = overrideForProject(project);
+    if(!existing) return;
+    if(overridesMode === "pb"){
+      await pb.collection(OVERRIDES).delete(existing.id);
+      overrides = overrides.filter(o => o.id !== existing.id);
+      return;
+    }
+    overrides = overrides.filter(o => o.id !== existing.id);
+    saveOverridesLocal(overrides);
+  }
+
+  function tagClass(status){
+    const x = (status||"").toLowerCase();
+    if(["shipped","closed"].includes(x)) return "ok";
+    if(["allocated","in production","planning"].includes(x)) return "warn";
+    return "";
+  }
+
+  function inferProjectStatus(stats){
+    const total = stats.totalQty;
+    if(total <= 0) return "—";
+    if(stats.shipped >= total) return "Shipped";
+    if(stats.inProd > 0) return "In Production";
+    if(stats.allocated + stats.reserved > 0) return "Allocated";
+    if(stats.onHand > 0) return "On Hand";
+    return "—";
+  }
+
+  function minDate(a,b){
+    if(!a) return b || "";
+    if(!b) return a || "";
+    return (a < b) ? a : b;
+  }
+  function maxDate(a,b){
+    if(!a) return b || "";
+    if(!b) return a || "";
+    return (a > b) ? a : b;
+  }
+
+  async function fetchAll(col, perPage=200, filter=""){
+    const all = [];
+    let page = 1;
+    while(true){
+      const res = await pb.collection(col).getList(page, perPage, { filter, sort: "-updated" });
+      all.push(...res.items);
+      if(res.items.length < perPage) break;
+      page++;
+      if(page > 20) break; // safety
+    }
+    return all;
+  }
+
+  async function buildScheduleRows(){
+    if(!pb?.authStore?.isValid) return [];
+
+    // Items drive most schedule stats
+    const items = await fetchAll(ITEMS, 200);
+
+    // Group by project + keep a map from itemId -> project for tx joins
+    const map = new Map();
+    const itemToProject = new Map();
+
+    for(const it of items){
+      const project = (it.project || "").toString().trim();
+      if(!project) continue;
+
+      itemToProject.set(it.id, project);
+
+      const qty = parseNum(it.qty ?? it.Qty ?? 0);
+      const status = (it.status ?? it.Status ?? "").toString();
+      const castDate = (it.castDate ?? it.CastDate ?? "").toString().slice(0,10);
+
+      if(!map.has(project)){
+        map.set(project, {
+          project,
+          totalQty: 0,      // current on-hand qty (we'll add shipped later)
+          inProd: 0,
+          onHand: 0,
+          allocated: 0,
+          reserved: 0,
+          shipped: 0,       // from transactions (audit trail)
+          firstCast: "",
+          lastCast: "",
+        });
+      }
+
+      const s = map.get(project);
+      s.totalQty += qty;
+
+      const st = status.toLowerCase();
+      if(st === "in production") s.inProd += qty;
+      else if(st === "on hand") s.onHand += qty;
+      else if(st === "allocated") s.allocated += qty;
+      else if(st === "reserved") s.reserved += qty;
+
+      if(castDate){
+        s.firstCast = minDate(s.firstCast, castDate);
+        s.lastCast  = maxDate(s.lastCast, castDate);
+      }
+    }
+
+    // Shipped totals come from OUT transactions so the schedule stays auditable,
+    // even when item.qty is reduced to 0 after shipping.
+    const shippedByProject = new Map();
+    try{
+      const outs = await fetchAll(TX, 200, `type="OUT"`);
+      for(const t of outs){
+        const itemId =
+          (typeof t.item === "string" ? t.item :
+          (t.item?.id || t.itemId || t.item_id || (t.expand?.item?.id) || ""));
+
+        const project = itemToProject.get(itemId);
+        if(!project) continue;
+
+        const q = parseNum(t.qtyChange ?? t.qty ?? t.quantity ?? 0);
+        const shippedQty = Math.abs(q);
+        if(shippedQty <= 0) continue;
+
+        shippedByProject.set(project, (shippedByProject.get(project) || 0) + shippedQty);
+      }
+    }catch(err){
+      console.warn("Schedule: could not load shipped totals from transactions.", err);
+    }
+
+    // Apply shipped totals and make totalQty include shipped + current
+    for(const [project, s] of map.entries()){
+      const shipped = shippedByProject.get(project) || 0;
+      s.shipped = shipped;
+      s.totalQty = s.totalQty + shipped;
+    }
+
+    // Also show projects that have shipments but no remaining items
+    for(const [project, shipped] of shippedByProject.entries()){
+      if(map.has(project)) continue;
+      map.set(project, {
+        project,
+        totalQty: shipped,
+        inProd: 0,
+        onHand: 0,
+        allocated: 0,
+        reserved: 0,
+        shipped: shipped,
+        firstCast: "",
+        lastCast: "",
+      });
+    }
+
+    const rows = Array.from(map.values()).sort((a,b)=>a.project.localeCompare(b.project));
+
+    // Merge overrides
+    for(const r of rows){
+      const ov = overrideForProject(r.project);
+      r.override = ov;
+      const autoStatus = inferProjectStatus(r);
+      r.status = (ov && ov.status) ? ov.status : autoStatus;
+      r.delivery = (ov && ov.delivery) ? ov.delivery : "";
+      r.notes = (ov && ov.notes) ? ov.notes : "";
+    }
+
+    // KPIs
+    $("kpiProjects").textContent = rows.length.toLocaleString();
+    $("kpiInProd").textContent = rows.filter(r => (r.status||"").toLowerCase() === "in production").length.toLocaleString();
+    $("kpiAlloc").textContent = rows.filter(r => ["allocated","reserved"].includes((r.status||"").toLowerCase())).length.toLocaleString();
+    $("kpiShipped").textContent = rows.filter(r => ["shipped","closed"].includes((r.status||"").toLowerCase())).length.toLocaleString();
+
+    return rows;
+  }
+
+  function renderTable(rows){
+    const q = $("q").value.trim().toLowerCase();
+    const filtered = q ? rows.filter(r => r.project.toLowerCase().includes(q)) : rows;
+
+    $("tbody").innerHTML = filtered.length ? filtered.map(r=>{
+      const st = r.status || "—";
+      const tag = st !== "—" ? `<span class="tag ${tagClass(st)}">${escapeHtml(st)}</span>` : '<span class="muted">—</span>';
+      return `<tr data-project="${escapeHtml(r.project)}">
+        <td><b>${escapeHtml(r.project)}</b></td>
+        <td>${tag}</td>
+        <td class="right">${escapeHtml(String(Math.round(r.totalQty)))}</td>
+        <td class="right">${escapeHtml(String(Math.round(r.inProd)))}</td>
+        <td class="right">${escapeHtml(String(Math.round(r.onHand)))}</td>
+        <td class="right">${escapeHtml(String(Math.round(r.allocated + r.reserved)))}</td>
+        <td class="right">${escapeHtml(String(Math.round(r.shipped)))}</td>
+        <td>${r.firstCast ? escapeHtml(r.firstCast) : '<span class="muted">—</span>'}</td>
+        <td>${r.lastCast ? escapeHtml(r.lastCast) : '<span class="muted">—</span>'}</td>
+        <td>${r.delivery ? escapeHtml(r.delivery) : '<span class="muted">—</span>'}</td>
+        <td>${r.notes ? escapeHtml(r.notes).slice(0,70) + (String(r.notes).length>70?"…":"") : '<span class="muted">—</span>'}</td>
+      </tr>`;
+    }).join("") : `<tr><td colspan="11" class="muted" style="padding:16px">No projects found (need Items.project).</td></tr>`;
+  }
+
+  // ---- Editor
+  let currentRows = [];
+  function openEditor(project){
+    const ov = project ? overrideForProject(project) : null;
+    $("f_project").value = project || "";
+    $("f_status").value = (ov && ov.status) ? ov.status : "";
+    $("f_delivery").value = (ov && ov.delivery) ? ov.delivery : "";
+    $("f_notes").value = (ov && ov.notes) ? ov.notes : "";
+    $("btnDelete").style.display = ov ? "" : "none";
+    openModal("editor");
+  }
+
+  async function saveEditor(){
+    const data = {
+      project: $("f_project").value.trim(),
+      status: $("f_status").value,
+      delivery: $("f_delivery").value,
+      notes: $("f_notes").value.trim(),
+    };
+    try{
+      await upsertOverride(data);
+      closeModal("editor");
+      await refresh();
+    }catch(err){
+      console.error(err);
+      alert("Save failed: " + (err?.response?.message || err?.message || "Unknown error") +
+        "\n\nIf you're using PocketBase overrides, ensure the 'project_schedule' collection has fields: project (text), status (text/select), delivery (date/text), notes (text).");
+    }
+  }
+
+  async function doDeleteOverride(){
+    const p = $("f_project").value.trim();
+    if(!p) return;
+    if(!confirm("Delete override for this project?")) return;
+    await deleteOverride(p);
+    closeModal("editor");
+    await refresh();
+  }
+
+  // ---- Auth
+  async function initAuth(){
+    pb = new PocketBase(PB_URL);
+    pb.autoCancellation(false);
+
+    $("btnLogout").addEventListener("click", async ()=>{
+      pb.authStore.clear();
+      await initAuth();
+    });
+
+    if(pb.authStore.isValid){
+      $("loginModal").classList.remove("open");
+      $("btnLogout").style.display = "";
+      $("userPill").textContent = getUserEmail() || "Signed in";
+    }else{
+      $("btnLogout").style.display = "none";
+      $("userPill").textContent = "Not signed in";
+      openModal("loginModal");
+    }
+  }
+
+  async function refresh(){
+    await loadOverrides();
+    currentRows = await buildScheduleRows();
+    $("modePill").textContent = (pb?.authStore?.isValid ? "Signed in • " : "Not signed in • ") + (overridesMode === "pb" ? "PocketBase Overrides" : "Local Overrides");
+    renderTable(currentRows);
+  }
+
+  // ---- auto refresh (status updates automatically)
+  let _refreshBusy = false;
+  let _refreshPending = false;
+
+  async function refreshSafe(){
+    if(_refreshBusy){ _refreshPending = true; return; }
+    _refreshBusy = true;
+    try{ await refresh(); }
+    finally{
+      _refreshBusy = false;
+      if(_refreshPending){ _refreshPending = false; refreshSafe(); }
+    }
+  }
+
+  function startAutoRefresh(){
+    // Poll (works even if realtime is blocked by proxies)
+    setInterval(()=>{
+      if(pb?.authStore?.isValid && document.visibilityState === "visible"){
+        refreshSafe();
+      }
+    }, 12000);
+
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.visibilityState === "visible") refreshSafe();
+    });
+
+    // Realtime subscriptions (best UX)
+    try{
+      pb.collection(ITEMS).subscribe("*", ()=> refreshSafe());
+      pb.collection(TX).subscribe("*", ()=> refreshSafe());
+      pb.collection(OVERRIDES).subscribe("*", ()=> refreshSafe());
+
+      window.addEventListener("beforeunload", ()=>{
+        try{
+          pb.collection(ITEMS).unsubscribe("*");
+          pb.collection(TX).unsubscribe("*");
+          pb.collection(OVERRIDES).unsubscribe("*");
+        }catch{}
+      });
+    }catch(err){
+      console.warn("Schedule: realtime subscriptions not available.", err);
+    }
+  }
+
+  // ---- events
+  $("btnBack").addEventListener("click", ()=>{
+    try{
+      if(window.top && window.top !== window) window.top.location.href = "index.html";
+      else window.location.href = "index.html";
+    }catch{ window.location.href = "index.html"; }
+  });
+
+  $("btnNew").addEventListener("click", ()=> openEditor(""));
+  $("btnRefresh").addEventListener("click", refresh);
+  $("q").addEventListener("input", ()=> renderTable(currentRows));
+
+  $("tbody").addEventListener("click", (e)=>{
+    const tr = e.target.closest("tr[data-project]");
+    if(!tr) return;
+    openEditor(tr.getAttribute("data-project"));
+  });
+
+  $("btnClose").addEventListener("click", ()=> closeModal("editor"));
+  $("btnSave").addEventListener("click", saveEditor);
+  $("btnDelete").addEventListener("click", doDeleteOverride);
+
+  $("loginForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    $("loginErr").style.display = "none";
+    try{
+      await pb.collection("users").authWithPassword($("loginEmail").value.trim(), $("loginPassword").value);
+      closeModal("loginModal");
+      $("btnLogout").style.display = "";
+      $("userPill").textContent = getUserEmail() || "Signed in";
+      await refresh();
+    }catch(err){
+      $("loginErr").style.display = "";
+      $("loginErr").textContent = "Login failed: " + (err?.response?.message || err?.message || "Unknown error");
+    }
+  });
+
+  // boot
+  (async ()=>{
+    $("modePill").textContent = "Connecting…";
+    await initAuth();
+    await refresh();
+    startAutoRefresh();
+  })();
+})();
+</script>
+</body>
+</html>

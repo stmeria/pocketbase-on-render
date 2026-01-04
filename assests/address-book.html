@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Address Book</title>
+<style>
+  :root{
+    --bg:#111827; --card:#1f2937; --muted:#9ca3af; --text:#e5e7eb;
+    --btn:#2563eb; --btn2:#374151; --danger:#ef4444; --border:#374151;
+  }
+  body{margin:0;padding:16px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+  .wrap{max-width:980px;margin:0 auto;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:12px 0;}
+  h1{margin:0 0 6px 0;font-size:22px;}
+  .sub{color:var(--muted);font-size:13px;margin:0;}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:10px;margin-top:12px;}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
+  input, textarea, select{
+    width:100%; box-sizing:border-box; padding:8px 10px; border-radius:10px;
+    border:1px solid var(--border); background:#0b1220; color:var(--text); font:inherit;
+  }
+  textarea{min-height:72px;resize:vertical;}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+  button{
+    padding:8px 12px;border-radius:999px;border:1px solid transparent;
+    background:var(--btn);color:#fff;font-weight:700;cursor:pointer;
+  }
+  button.secondary{background:var(--btn2);border-color:var(--border);}
+  button.danger{background:transparent;border-color:var(--danger);color:var(--danger);}
+  button:disabled{opacity:.55;cursor:not-allowed;}
+  table{width:100%;border-collapse:collapse;margin-top:10px;}
+  th,td{border-bottom:1px solid var(--border);padding:8px 6px;font-size:13px;text-align:left;vertical-align:top;}
+  th{color:var(--muted);font-weight:700;}
+  tr.selected{background:#0b1220;}
+  .right{margin-left:auto}
+  .tiny{font-size:12px;color:var(--muted)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <h1>Address Book</h1>
+    <p class="sub">Entries are saved locally (in your browser). Use Export/Import to store them as a file and share across computers.</p>
+
+    <div class="btnrow">
+      <button type="button" onclick="exportJSON()">Export JSON</button>
+      <button type="button" class="secondary" onclick="document.getElementById('importFile').click()">Import JSON</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none" onchange="importJSON(this.files && this.files[0])"/>
+      <span class="pill" id="countPill">0 entries</span>
+      <span class="right tiny">Storage key: <code>fisher_addressBook_v1</code></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 8px 0;font-size:18px;">Add / Edit Entry</h2>
+
+    <div class="grid">
+      <div style="grid-column:span 4">
+        <label>Name</label>
+        <input id="abName" placeholder="John Smith"/>
+      </div>
+      <div style="grid-column:span 4">
+        <label>Company</label>
+        <input id="abCompany" placeholder="ABC Contractors"/>
+      </div>
+      <div style="grid-column:span 4">
+        <label>Role</label>
+        <input id="abRole" placeholder="Contractor / Engineer / PM"/>
+      </div>
+
+      <div style="grid-column:span 4">
+        <label>Email</label>
+        <input id="abEmail" placeholder="name@company.com"/>
+      </div>
+      <div style="grid-column:span 4">
+        <label>Phone</label>
+        <input id="abPhone" placeholder="(555) 555-5555"/>
+      </div>
+      <div style="grid-column:span 4">
+        <label>Default For</label>
+        <select id="abDefaultFor">
+          <option value="">—</option>
+          <option value="preparedBy">Prepared By</option>
+          <option value="contractorName">Contractor Name</option>
+          <option value="both">Prepared By + Contractor</option>
+        </select>
+      </div>
+
+      <div style="grid-column:span 12">
+        <label>Notes</label>
+        <textarea id="abNotes" placeholder="Optional notes..."></textarea>
+      </div>
+    </div>
+
+    <div class="btnrow">
+      <button type="button" onclick="saveEntry()">Save Entry</button>
+      <button type="button" class="secondary" onclick="clearForm()">Clear</button>
+      <button type="button" class="danger" onclick="deleteEntry()" id="deleteBtn" disabled>Delete Selected</button>
+
+      <span class="right tiny" id="status"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="btnrow">
+      <h2 style="margin:0;font-size:18px;">Entries</h2>
+      <span class="right"></span>
+      <button type="button" class="secondary" onclick="sendToDesigner()" id="sendBtn" disabled>Send to Stack Designer</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">Name</th>
+          <th style="width:18%">Company</th>
+          <th style="width:14%">Role</th>
+          <th style="width:18%">Email</th>
+          <th style="width:12%">Phone</th>
+          <th style="width:20%">Default</th>
+        </tr>
+      </thead>
+      <tbody id="abTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const KEY = "fisher_addressBook_v1";
+  const AUTO_KEY = "stackDesigner_autofill_v1";
+  let entries = [];
+  let selectedId = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  function uid(){ return "ab_" + Math.random().toString(16).slice(2) + "_" + Date.now(); }
+
+  function load(){
+    try{
+      entries = JSON.parse(localStorage.getItem(KEY) || "[]");
+      if(!Array.isArray(entries)) entries = [];
+    }catch(_){ entries = []; }
+    render();
+  }
+
+  function persist(){
+    localStorage.setItem(KEY, JSON.stringify(entries));
+    $("countPill").textContent = `${entries.length} entr${entries.length===1?'y':'ies'}`;
+  }
+
+  function setStatus(msg){
+    $("status").textContent = msg || "";
+    if(msg) setTimeout(()=>{$("status").textContent="";}, 2500);
+  }
+
+  function render(){
+    const tb = $("abTable");
+    tb.innerHTML = "";
+    persist();
+
+    entries.forEach(e => {
+      const tr = document.createElement("tr");
+      tr.dataset.id = e.id;
+      if(e.id === selectedId) tr.classList.add("selected");
+
+      tr.innerHTML = `
+        <td>${escapeHtml(e.name||"")}</td>
+        <td>${escapeHtml(e.company||"")}</td>
+        <td>${escapeHtml(e.role||"")}</td>
+        <td>${escapeHtml(e.email||"")}</td>
+        <td>${escapeHtml(e.phone||"")}</td>
+        <td>${escapeHtml(labelDefault(e.defaultFor))}</td>
+      `;
+      tr.addEventListener("click", () => selectRow(e.id));
+      tb.appendChild(tr);
+    });
+
+    $("sendBtn").disabled = !selectedId;
+    $("deleteBtn").disabled = !selectedId;
+  }
+
+  function labelDefault(v){
+    if(v==="preparedBy") return "Prepared By";
+    if(v==="contractorName") return "Contractor";
+    if(v==="both") return "Prepared By + Contractor";
+    return "";
+  }
+
+  function selectRow(id){
+    selectedId = id;
+    const e = entries.find(x => x.id === id);
+    if(e){
+      $("abName").value = e.name || "";
+      $("abCompany").value = e.company || "";
+      $("abRole").value = e.role || "";
+      $("abEmail").value = e.email || "";
+      $("abPhone").value = e.phone || "";
+      $("abDefaultFor").value = e.defaultFor || "";
+      $("abNotes").value = e.notes || "";
+    }
+    render();
+  }
+
+  function clearForm(){
+    selectedId = null;
+    ["abName","abCompany","abRole","abEmail","abPhone","abNotes"].forEach(id => $(id).value="");
+    $("abDefaultFor").value = "";
+    render();
+  }
+
+  function saveEntry(){
+    const obj = {
+      id: selectedId || uid(),
+      name: $("abName").value.trim(),
+      company: $("abCompany").value.trim(),
+      role: $("abRole").value.trim(),
+      email: $("abEmail").value.trim(),
+      phone: $("abPhone").value.trim(),
+      defaultFor: $("abDefaultFor").value,
+      notes: $("abNotes").value.trim(),
+      updatedAt: new Date().toISOString()
+    };
+
+    if(!obj.name && !obj.company){
+      setStatus("Enter at least Name or Company.");
+      return;
+    }
+
+    const idx = entries.findIndex(x => x.id === obj.id);
+    if(idx >= 0) entries[idx] = obj;
+    else entries.unshift(obj);
+
+    selectedId = obj.id;
+    persist();
+    render();
+    setStatus("Saved.");
+  }
+
+  function deleteEntry(){
+    if(!selectedId) return;
+    entries = entries.filter(x => x.id !== selectedId);
+    selectedId = null;
+    persist();
+    clearForm();
+    setStatus("Deleted.");
+  }
+
+  function sendToDesigner(){
+    const e = entries.find(x => x.id === selectedId);
+    if(!e){ setStatus("Select an entry first."); return; }
+
+    const payload = {};
+    const df = e.defaultFor || "";
+    if(df === "preparedBy" || df === "both"){
+      payload.preparedBy = e.name || "";
+    }
+    if(df === "contractorName" || df === "both"){
+      payload.contractorName = e.company || e.name || "";
+    }
+    // Fallback: if no default set, send both best guesses
+    if(!df){
+      payload.preparedBy = e.name || "";
+      payload.contractorName = e.company || "";
+    }
+    payload._ts = Date.now();
+
+    // 1) localStorage broadcast (works even cross-tab)
+    try{ localStorage.setItem(AUTO_KEY, JSON.stringify(payload)); }catch(_){}
+
+    // 2) postMessage to opener (best if opened by designer)
+    try{
+      if(window.opener && !window.opener.closed){
+        window.opener.postMessage({type:"addressBookAutofill", payload}, "*");
+      }
+    }catch(_){}
+
+    setStatus("Sent to Stack Designer.");
+  }
+
+  function exportJSON(){
+    const data = { version: 1, exportedAt: new Date().toISOString(), entries };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "address-book.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  }
+
+  async function importJSON(file){
+    if(!file) return;
+    try{
+      const txt = await file.text();
+      const obj = JSON.parse(txt);
+      const arr = Array.isArray(obj) ? obj : obj.entries;
+      if(!Array.isArray(arr)) throw new Error("Invalid format");
+      // normalize
+      entries = arr.map(x => ({
+        id: x.id || uid(),
+        name: x.name || "",
+        company: x.company || "",
+        role: x.role || "",
+        email: x.email || "",
+        phone: x.phone || "",
+        defaultFor: x.defaultFor || "",
+        notes: x.notes || "",
+        updatedAt: x.updatedAt || new Date().toISOString()
+      }));
+      selectedId = null;
+      persist();
+      render();
+      clearForm();
+      setStatus("Imported.");
+    }catch(err){
+      setStatus("Import failed: " + (err && err.message ? err.message : "Invalid file"));
+    }finally{
+      $("importFile").value = "";
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // expose for buttons
+  window.saveEntry = saveEntry;
+  window.clearForm = clearForm;
+  window.deleteEntry = deleteEntry;
+  window.sendToDesigner = sendToDesigner;
+  window.exportJSON = exportJSON;
+  window.importJSON = importJSON;
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>CRM • Precast Manager</title>
+  <script src="/vendor/pocketbase.umd.js"></script>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1a33;
+      --muted:#9fb2d1;
+      --text:#e9f1ff;
+      --line:#22355f;
+      --accent:#5aa7ff;
+      --danger:#ff5a7a;
+      --warn:#ffbf5a;
+      --ok:#66e3a2;
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius2: 12px;
+      --pad: 14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(1200px 700px at 15% 0%, rgba(90,167,255,.14), transparent 60%),
+                  radial-gradient(900px 600px at 90% 20%, rgba(102,227,162,.12), transparent 55%),
+                  var(--bg);
+         color:var(--text); font-family:var(--font);}
+    a{color:inherit}
+    .wrap{max-width:1200px;margin:0 auto;padding:18px;}
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:14px 16px;border-bottom:1px solid rgba(34,53,95,.7);
+      background: rgba(11,18,32,.65); backdrop-filter: blur(10px);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .title{display:flex;align-items:center;gap:10px;min-width:0}
+    .title h1{font-size:18px;margin:0;letter-spacing:.2px;white-space:nowrap}
+    .pill{
+      font-size:12px; color: var(--muted);
+      border:1px solid rgba(34,53,95,.7);
+      background: rgba(15,26,51,.55);
+      padding:6px 10px; border-radius:999px;
+    }
+    .btn{
+      border:1px solid rgba(34,53,95,.7);
+      background: rgba(15,26,51,.75);
+      color:var(--text);
+      padding:9px 12px;border-radius:12px;
+      cursor:pointer;font-weight:650;
+      transition: transform .06s ease, border-color .15s ease, background .15s ease, opacity .15s ease;
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(90,167,255,.65);}
+    .btn.primary{background: rgba(90,167,255,.18); border-color: rgba(90,167,255,.65);}
+    .btn.danger{background: rgba(255,90,122,.12); border-color: rgba(255,90,122,.45);}
+    .btn.ghost{background: transparent;}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .layout{display:grid;grid-template-columns: 260px minmax(0, 1fr); gap:14px; margin-top:16px;}
+    .card{
+      background: rgba(15,26,51,.68);
+      border:1px solid rgba(34,53,95,.7);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .side{padding:12px;}
+    .navBtn{width:100%; text-align:left; margin:6px 0; display:flex; justify-content:space-between; align-items:center;}
+    .navBtn.active{background: rgba(90,167,255,.18); border-color: rgba(90,167,255,.65);}
+    .content{padding:14px; min-width:0;}
+    .kpis{display:grid;grid-template-columns: repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:12px;}
+    .kpi{padding:12px;border-radius: var(--radius2); background: rgba(11,18,32,.35); border:1px solid rgba(34,53,95,.6);}
+    .kpi .k{font-size:12px;color:var(--muted)}
+    .kpi .v{font-size:18px;font-weight:800;margin-top:4px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:10px 0 12px;}
+    .search{flex:1; min-width:240px; display:flex; gap:8px; align-items:center;}
+    input, select, textarea{
+      width:100%;
+      border:1px solid rgba(34,53,95,.7);
+      background: rgba(11,18,32,.35);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      outline:none;
+    }
+    textarea{min-height:90px; resize:vertical}
+    table{width:100%; border-collapse:collapse; font-size:13px; overflow:hidden;}
+    th, td{padding:10px 10px; border-bottom:1px solid rgba(34,53,95,.55); vertical-align:top;}
+    th{color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; font-size:11px;}
+    tr:hover td{background: rgba(90,167,255,.06);}
+    .muted{color:var(--muted)}
+    .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid rgba(34,53,95,.65); background: rgba(11,18,32,.25);}
+    .tag.ok{border-color: rgba(102,227,162,.55); background: rgba(102,227,162,.10);}
+    .tag.warn{border-color: rgba(255,191,90,.55); background: rgba(255,191,90,.10);}
+    .tag.danger{border-color: rgba(255,90,122,.55); background: rgba(255,90,122,.10);}
+    .note{
+      margin-top:10px; padding:10px 12px; border-radius: 12px;
+      border:1px dashed rgba(34,53,95,.7); color:var(--muted);
+      background: rgba(11,18,32,.25);
+      font-size:12px;
+    }
+    .modal{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background: rgba(0,0,0,.55); z-index:100;
+      padding:18px;
+    }
+    .modal.open{display:flex;}
+    .modalCard{width:min(820px, 96vw); max-height: 92vh; overflow:auto; padding:14px;}
+    .modalHeader{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;}
+    .grid{display:grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap:10px;}
+    .col-6{grid-column: span 6;}
+    .col-4{grid-column: span 4;}
+    .col-8{grid-column: span 8;}
+    .col-12{grid-column: span 12;}
+    .hr{height:1px;background: rgba(34,53,95,.6); margin:10px 0;}
+    @media (max-width: 980px){
+      .layout{grid-template-columns: 1fr;}
+      .kpis{grid-template-columns: repeat(2, minmax(0, 1fr));}
+    }
+    @media (max-width: 560px){
+      .kpis{grid-template-columns: 1fr;}
+      .col-6,.col-4,.col-8{grid-column: span 12;}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <button class="btn ghost" id="btnBack" type="button">← Back</button>
+    <h1>CRM</h1>
+    <span class="pill" id="modePill">Loading…</span>
+  </div>
+  <div class="row">
+    <span class="pill" id="userPill">Not signed in</span>
+    <button class="btn" id="btnLogout" type="button" style="display:none">Logout</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <div class="card side">
+      <button class="btn navBtn active" data-view="contacts" type="button">Contacts <span class="muted" id="count_contacts">—</span></button>
+      <button class="btn navBtn" data-view="companies" type="button">Companies <span class="muted" id="count_companies">—</span></button>
+      <button class="btn navBtn" data-view="opps" type="button">Opportunities <span class="muted" id="count_opps">—</span></button>
+      <button class="btn navBtn" data-view="activities" type="button">Activities <span class="muted" id="count_activities">—</span></button>
+
+      <div class="note" id="setupNote" style="display:none">
+        <b>PocketBase collections not found.</b><br/>
+        You're in <b>Local Mode</b> (data stored only in this browser).<br/><br/>
+        To enable multi-user CRM, create these PB collections:
+        <ul style="margin:8px 0 0 18px;padding:0">
+          <li><code>crm_contacts</code></li>
+          <li><code>crm_companies</code></li>
+          <li><code>crm_opportunities</code></li>
+          <li><code>crm_activities</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card content">
+      <div class="kpis">
+        <div class="kpi"><div class="k">Open Leads</div><div class="v" id="kpiLeads">0</div></div>
+        <div class="kpi"><div class="k">Customers</div><div class="v" id="kpiCustomers">0</div></div>
+        <div class="kpi"><div class="k">Open Opportunities</div><div class="v" id="kpiOpps">0</div></div>
+        <div class="kpi"><div class="k">Pipeline Value</div><div class="v" id="kpiPipeline">$0</div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search">
+          <input id="q" placeholder="Search (name, company, email, phone, notes)…"/>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btnNew" type="button">+ New</button>
+          <button class="btn" id="btnRefresh" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;border-radius:14px;overflow:hidden">
+        <table>
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="note" id="helpNote">
+        Tip: Keep everything short & searchable — use <b>next follow-up</b> and <b>stage</b> to stay on top of jobs.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Editor Modal -->
+<div class="modal" id="editor">
+  <div class="card modalCard">
+    <div class="modalHeader">
+      <div style="min-width:0">
+        <div class="pill" id="editorKind">—</div>
+        <div style="font-size:18px;font-weight:900;margin-top:6px" id="editorTitle">New</div>
+      </div>
+      <div class="row">
+        <button class="btn danger" id="btnDelete" type="button" style="display:none">Delete</button>
+        <button class="btn" id="btnClose" type="button">Close</button>
+        <button class="btn primary" id="btnSave" type="button">Save</button>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <form id="editorForm">
+      <div class="grid" id="editorFields"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal" id="loginModal">
+  <div class="card modalCard" style="max-width:520px">
+    <div class="modalHeader">
+      <div>
+        <div class="pill">PocketBase</div>
+        <div style="font-size:18px;font-weight:900;margin-top:6px">Sign in</div>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <form id="loginForm">
+      <div class="grid">
+        <div class="col-12"><label class="muted">Email</label><input id="loginEmail" type="email" required></div>
+        <div class="col-12"><label class="muted">Password</label><input id="loginPassword" type="password" required></div>
+        <div class="col-12"><button class="btn primary" style="width:100%" type="submit">Login</button></div>
+        <div class="col-12 muted" id="loginErr" style="display:none"></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(() => {
+  const PB_URL = window.location.origin;
+  let pb = null;
+
+  const ENTITIES = {
+    contacts:   { col: "crm_contacts",      label: "Contact",      storageKey: "crm_contacts_v2" },
+    companies:  { col: "crm_companies",     label: "Company",      storageKey: "crm_companies_v2" },
+    opps:       { col: "crm_opportunities", label: "Opportunity",  storageKey: "crm_opps_v2" },
+    activities: { col: "crm_activities",    label: "Activity",     storageKey: "crm_acts_v2" },
+  };
+
+  // For prettier tables (PB relations return ids; expand is best-effort).
+  const EXPANDS = {
+    contacts: "company",
+    opps: "company,primaryContact",
+    activities: "company,contact,opportunity",
+  };
+
+  // ---- helpers
+  const $ = (id) => document.getElementById(id);
+  const escapeHtml = (s) => (s ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const uid = () => (crypto?.randomUUID ? crypto.randomUUID() : ("id_" + Math.random().toString(16).slice(2)));
+  const fmtMoney = (n) => Number(n || 0).toLocaleString(undefined, { style:"currency", currency:"USD", maximumFractionDigits:0 });
+
+  function openModal(id){ $(id).classList.add("open"); }
+  function closeModal(id){ $(id).classList.remove("open"); }
+
+  function getUserEmail(){
+    const u = pb?.authStore?.model;
+    return (u && (u.email || u.username)) || "";
+  }
+
+  // ---- Storage layer (PB if available, otherwise localStorage)
+  // availability[col] = true | false | "denied"
+  let availability = {};
+
+  async function checkPBCollection(col){
+    // reset availability whenever auth changes (handled in initAuth)
+    if(availability[col] !== undefined) return availability[col];
+    if(!pb) return (availability[col] = false);
+
+    try{
+      await pb.collection(col).getList(1, 1, { fields: "id" });
+      availability[col] = true;
+    }catch(e){
+      const status = e?.status || e?.response?.status;
+      // If we get denied, the collection likely exists but rules block access.
+      if(status === 401 || status === 403){
+        availability[col] = "denied";
+      }else{
+        availability[col] = false;
+      }
+    }
+    return availability[col];
+  }
+
+  function localLoad(key){
+    try{ return JSON.parse(localStorage.getItem(key) || "[]"); }catch{ return []; }
+  }
+  function localSave(key, arr){
+    localStorage.setItem(key, JSON.stringify(arr));
+  }
+
+  function storeFor(entityKey){
+    const ent = ENTITIES[entityKey];
+    return {
+      async mode(){
+        if(!pb) return "local";
+        const ok = await checkPBCollection(ent.col);
+        if(ok === true) return "pb";
+        if(ok === "denied") return "denied";
+        return "local";
+      },
+      async list(){
+        const mode = await this.mode();
+        if(mode === "pb"){
+          const params = { sort: "-created" };
+          if(EXPANDS[entityKey]) params.expand = EXPANDS[entityKey];
+          const res = await pb.collection(ent.col).getList(1, 200, params);
+          return res.items.map(r => ({ ...r, _id: r.id }));
+        }
+        return localLoad(ent.storageKey);
+      },
+      async create(data){
+        const mode = await this.mode();
+        if(mode === "denied") throw new Error("Access denied by PocketBase rules for " + ent.col);
+        if(mode === "pb"){
+          return await pb.collection(ent.col).create(data);
+        }
+        const arr = localLoad(ent.storageKey);
+        const rec = { _id: uid(), ...data, created: new Date().toISOString() };
+        arr.unshift(rec);
+        localSave(ent.storageKey, arr);
+        return rec;
+      },
+      async update(id, data){
+        const mode = await this.mode();
+        if(mode === "denied") throw new Error("Access denied by PocketBase rules for " + ent.col);
+        if(mode === "pb"){
+          return await pb.collection(ent.col).update(id, data);
+        }
+        const arr = localLoad(ent.storageKey);
+        const i = arr.findIndex(x => x._id === id);
+        if(i >= 0){ arr[i] = { ...arr[i], ...data, updated: new Date().toISOString() }; }
+        localSave(ent.storageKey, arr);
+        return arr[i];
+      },
+      async remove(id){
+        const mode = await this.mode();
+        if(mode === "denied") throw new Error("Access denied by PocketBase rules for " + ent.col);
+        if(mode === "pb"){
+          return await pb.collection(ent.col).delete(id);
+        }
+        const arr = localLoad(ent.storageKey).filter(x => x._id !== id);
+        localSave(ent.storageKey, arr);
+        return true;
+      }
+    };
+  }
+
+  // ---- UI schema (MATCHES your PB collections)
+  // Types: text, email, number, date, textarea, select, checkbox, relation
+  const SCHEMA = {
+    contacts: [
+      {key:"firstName", label:"First Name", type:"text", span:6, required:true},
+      {key:"lastName", label:"Last Name", type:"text", span:6, required:true},
+      {key:"company", label:"Company", type:"relation", span:6, relation:"companies"},
+      {key:"title", label:"Title", type:"text", span:6},
+      {key:"phone", label:"Phone", type:"text", span:6},
+      {key:"email", label:"Email", type:"email", span:6},
+      {key:"preferredContact", label:"Preferred Contact", type:"select", span:6, options:["Phone","Email","Text"]},
+      {key:"status", label:"Status", type:"select", span:6, options:["Active","Prospect","Inactive"]},
+      {key:"isPrimary", label:"Primary Contact", type:"checkbox", span:6},
+      {key:"tags", label:"Tags", type:"text", span:6, placeholder:"e.g. city, gc, engineer"},
+      {key:"notes", label:"Notes", type:"textarea", span:12},
+    ],
+    companies: [
+      {key:"name", label:"Company Name", type:"text", span:8, required:true},
+      {key:"type", label:"Type", type:"select", span:4, options:["GC","Municipality","Engineer","Developer","Supplier","Other"]},
+      {key:"status", label:"Status", type:"select", span:4, options:["Active","Prospect","Inactive"]},
+      {key:"phone", label:"Phone", type:"text", span:4},
+      {key:"email", label:"Email", type:"email", span:4},
+      {key:"website", label:"Website", type:"text", span:6},
+      {key:"address", label:"Address", type:"text", span:6},
+      {key:"city", label:"City", type:"text", span:4},
+      {key:"state", label:"State", type:"text", span:4},
+      {key:"zip", label:"Zip", type:"text", span:4},
+      {key:"tags", label:"Tags", type:"text", span:6},
+      {key:"notes", label:"Notes", type:"textarea", span:12},
+    ],
+    opps: [
+      {key:"name", label:"Opportunity", type:"text", span:8, required:true},
+      {key:"company", label:"Company", type:"relation", span:4, relation:"companies", required:true},
+      {key:"primaryContact", label:"Primary Contact", type:"relation", span:4, relation:"contacts"},
+      {key:"stage", label:"Stage", type:"select", span:4, options:["Lead","Qualified","Quoted","Negotiation","Won","Lost"]},
+      {key:"estimatedValue", label:"Estimated Value", type:"number", span:4},
+      {key:"probability", label:"Probability %", type:"number", span:4},
+      {key:"bidDate", label:"Bid Date", type:"date", span:4},
+      {key:"expectedCloseDate", label:"Expected Close", type:"date", span:4},
+      {key:"source", label:"Source", type:"select", span:4, options:["Referral","Website","Cold Call","Repeat","Other"]},
+      {key:"relatedProject", label:"Related Project", type:"text", span:4},
+      {key:"notes", label:"Notes", type:"textarea", span:12},
+    ],
+    activities: [
+      {key:"date", label:"Date", type:"date", span:4, required:true},
+      {key:"type", label:"Type", type:"select", span:4, options:["Call","Email","Meeting","Site Visit","Task","Note"]},
+      {key:"status", label:"Status", type:"select", span:4, options:["Planned","Done","Cancelled"]},
+      {key:"company", label:"Company", type:"relation", span:6, relation:"companies"},
+      {key:"contact", label:"Contact", type:"relation", span:6, relation:"contacts"},
+      {key:"opportunity", label:"Opportunity", type:"relation", span:12, relation:"opps"},
+      {key:"subject", label:"Subject", type:"text", span:12, required:true},
+      {key:"dueDate", label:"Due Date", type:"date", span:6},
+      {key:"details", label:"Details", type:"textarea", span:12},
+    ],
+  };
+
+  function schemaFor(view){ return SCHEMA[view] || []; }
+
+  // ---- lookup cache for relations
+  let LOOKUPS = { companies: [], contacts: [], opps: [] };
+  let MAPS = { companyName: {}, contactName: {}, oppName: {} };
+
+  function toId(r){ return r? (r._id || r.id) : ""; }
+
+  function displayContact(r){
+    const fn = (r?.firstName || "").trim();
+    const ln = (r?.lastName || "").trim();
+    const name = (fn + " " + ln).trim();
+    return name || r?.name || "—";
+  }
+
+  async function refreshLookups(){
+    // best-effort; if a collection is missing/denied, we keep empty arrays
+    try{
+      LOOKUPS.companies = await storeFor("companies").list();
+    }catch{ LOOKUPS.companies = []; }
+    MAPS.companyName = Object.fromEntries(LOOKUPS.companies.map(r => [toId(r), r.name || ""]));
+
+    try{
+      LOOKUPS.contacts = await storeFor("contacts").list();
+    }catch{ LOOKUPS.contacts = []; }
+    MAPS.contactName = Object.fromEntries(LOOKUPS.contacts.map(r => [toId(r), displayContact(r)]));
+
+    try{
+      LOOKUPS.opps = await storeFor("opps").list();
+    }catch{ LOOKUPS.opps = []; }
+    MAPS.oppName = Object.fromEntries(LOOKUPS.opps.map(r => [toId(r), r.name || ""]));
+  }
+
+  function relLabel(relationKey, id, expandObj){
+    if(expandObj && typeof expandObj === "object"){
+      // expand from PB takes precedence
+      if(relationKey === "companies") return expandObj.name || "—";
+      if(relationKey === "contacts") return displayContact(expandObj);
+      if(relationKey === "opps") return expandObj.name || "—";
+    }
+    if(!id) return "—";
+    if(relationKey === "companies") return MAPS.companyName[id] || "—";
+    if(relationKey === "contacts") return MAPS.contactName[id] || "—";
+    if(relationKey === "opps") return MAPS.oppName[id] || "—";
+    return "—";
+  }
+
+  function tagClassForStatus(s){
+    const x = (s||"").toLowerCase();
+    if(["won","active","done"].includes(x)) return "ok";
+    if(["lead","qualified","quoted","negotiation","prospect","planned"].includes(x)) return "warn";
+    if(["lost","inactive","cancelled"].includes(x)) return "danger";
+    return "";
+  }
+
+  function matchesQuery(row, q){
+    if(!q) return true;
+    const hay = JSON.stringify(row||{}).toLowerCase();
+    return hay.includes(q.toLowerCase());
+  }
+
+  // ---- View state
+  let currentView = "contacts";
+  let currentRows = [];
+  let editingId = null;
+  let currentColCount = 6;
+
+  function setActiveNav(view){
+    currentView = view;
+    document.querySelectorAll(".navBtn").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    render();
+  }
+
+  function buildThead(){
+    const cols = ({
+      contacts: ["Name","Company","Email","Phone","Status","Preferred"],
+      companies: ["Company","Type","Status","Phone","City/State","Tags"],
+      opps: ["Opportunity","Company","Stage","Est Value","Bid","Close","Prob"],
+      activities: ["Date","Type","Subject","Company","Contact","Status"],
+    })[currentView] || [];
+
+    currentColCount = cols.length || 6;
+    return "<tr>" + cols.map(c=>`<th>${escapeHtml(c)}</th>`).join("") + "</tr>";
+  }
+
+  function cell(v){ return v ? escapeHtml(String(v)) : '<span class="muted">—</span>'; }
+
+  function buildRow(r){
+    const rid = escapeHtml(toId(r));
+    if(currentView === "contacts"){
+      const name = displayContact(r);
+      const company = relLabel("companies", r.company, r.expand?.company);
+      return `<tr data-id="${rid}">
+        <td><b>${cell(name)}</b></td>
+        <td>${cell(company)}</td>
+        <td>${cell(r.email)}</td>
+        <td>${cell(r.phone)}</td>
+        <td>${r.status ? `<span class="tag ${tagClassForStatus(r.status)}">${escapeHtml(r.status)}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${cell(r.preferredContact)}</td>
+      </tr>`;
+    }
+    if(currentView === "companies"){
+      const cityState = [r.city, r.state].filter(Boolean).join(", ");
+      const tags = (r.tags||"").toString();
+      return `<tr data-id="${rid}">
+        <td><b>${cell(r.name)}</b></td>
+        <td>${cell(r.type)}</td>
+        <td>${r.status ? `<span class="tag ${tagClassForStatus(r.status)}">${escapeHtml(r.status)}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${cell(r.phone)}</td>
+        <td>${cell(cityState)}</td>
+        <td>${tags ? escapeHtml(tags) : '<span class="muted">—</span>'}</td>
+      </tr>`;
+    }
+    if(currentView === "opps"){
+      const company = relLabel("companies", r.company, r.expand?.company);
+      const stage = r.stage;
+      return `<tr data-id="${rid}">
+        <td><b>${cell(r.name)}</b></td>
+        <td>${cell(company)}</td>
+        <td>${stage ? `<span class="tag ${tagClassForStatus(stage)}">${escapeHtml(stage)}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${cell(fmtMoney(r.estimatedValue))}</td>
+        <td>${cell(r.bidDate)}</td>
+        <td>${cell(r.expectedCloseDate)}</td>
+        <td>${r.probability !== undefined && r.probability !== null && r.probability !== "" ? escapeHtml(String(r.probability)) + "%" : '<span class="muted">—</span>'}</td>
+      </tr>`;
+    }
+    // activities
+    const company = relLabel("companies", r.company, r.expand?.company);
+    const contact = relLabel("contacts", r.contact, r.expand?.contact);
+    const status = r.status ? `<span class="tag ${tagClassForStatus(r.status)}">${escapeHtml(r.status)}</span>` : '<span class="muted">—</span>';
+    return `<tr data-id="${rid}">
+      <td><b>${cell(r.date)}</b></td>
+      <td>${r.type ? `<span class="tag">${escapeHtml(r.type)}</span>` : '<span class="muted">—</span>'}</td>
+      <td>${cell(r.subject)}</td>
+      <td>${cell(company)}</td>
+      <td>${cell(contact)}</td>
+      <td>${status}</td>
+    </tr>`;
+  }
+
+  async function computeKPIs(){
+    const companies = await storeFor("companies").list().catch(()=>[]);
+    const opps = await storeFor("opps").list().catch(()=>[]);
+
+    const openOpps = opps.filter(o => !["won","lost"].includes((o.stage||"").toLowerCase()));
+    const leadOpps = opps.filter(o => ["lead","qualified"].includes((o.stage||"").toLowerCase()));
+    const customers = companies.filter(c => (c.status||"").toLowerCase() === "active");
+    const pipeline = openOpps.reduce((sum,o)=> sum + Number(o.estimatedValue||0), 0);
+
+    $("kpiLeads").textContent = leadOpps.length.toLocaleString();
+    $("kpiCustomers").textContent = customers.length.toLocaleString();
+    $("kpiOpps").textContent = openOpps.length.toLocaleString();
+    $("kpiPipeline").textContent = fmtMoney(pipeline);
+  }
+
+  async function refreshCounts(){
+    for(const k of Object.keys(ENTITIES)){
+      const rows = await storeFor(k).list().catch(()=>[]);
+      $("count_"+k).textContent = rows.length.toLocaleString();
+    }
+  }
+
+  async function render(){
+    // keep relation labels correct
+    await refreshLookups();
+
+    const store = storeFor(currentView);
+    const rows = await store.list().catch(err => {
+      console.error(err);
+      return [];
+    });
+
+    const q = $("q").value.trim();
+    currentRows = rows.filter(r => matchesQuery(r, q));
+
+    $("thead").innerHTML = buildThead();
+    $("tbody").innerHTML = currentRows.length
+      ? currentRows.map(buildRow).join("")
+      : `<tr><td colspan="${currentColCount}" class="muted" style="padding:16px">No records.</td></tr>`;
+
+    // Mode pill + setup banner
+    const mode = await store.mode();
+    const anyPB = Object.values(ENTITIES).some(e => availability[e.col] === true);
+    const anyDenied = Object.values(ENTITIES).some(e => availability[e.col] === "denied");
+    const signed = pb?.authStore?.isValid;
+
+    if(anyDenied){
+      $("modePill").textContent = (signed ? "Signed in • " : "Not signed in • ") + "PocketBase (rules deny access)";
+    }else if(anyPB){
+      $("modePill").textContent = (signed ? "Signed in • " : "Not signed in • ") + "PocketBase";
+    }else{
+      $("modePill").textContent = (signed ? "Signed in • " : "Not signed in • ") + "Local Mode";
+    }
+
+    $("setupNote").style.display = anyPB ? "none" : "";
+
+    await refreshCounts();
+    await computeKPIs();
+  }
+
+  function relationOptions(relation){
+    if(relation === "companies"){
+      return LOOKUPS.companies.map(r => ({ value: toId(r), label: r.name || "—" }));
+    }
+    if(relation === "contacts"){
+      return LOOKUPS.contacts.map(r => ({ value: toId(r), label: displayContact(r) }));
+    }
+    if(relation === "opps"){
+      return LOOKUPS.opps.map(r => ({ value: toId(r), label: r.name || "—" }));
+    }
+    return [];
+  }
+
+  async function ensureLookupsFor(kind){
+    // ensure we're not showing empty selects
+    if(kind === "contacts" && LOOKUPS.companies.length === 0) await refreshLookups();
+    if(kind === "opps" && (LOOKUPS.companies.length === 0 || LOOKUPS.contacts.length === 0)) await refreshLookups();
+    if(kind === "activities" && (LOOKUPS.companies.length === 0 || LOOKUPS.contacts.length === 0 || LOOKUPS.opps.length === 0)) await refreshLookups();
+  }
+
+  async function openEditor(kind, row){
+    await ensureLookupsFor(kind);
+
+    editingId = row ? toId(row) : null;
+    $("editorKind").textContent = kind.toUpperCase();
+    $("editorTitle").textContent = editingId ? ("Edit " + ENTITIES[kind].label) : ("New " + ENTITIES[kind].label);
+    $("btnDelete").style.display = editingId ? "" : "none";
+
+    const schema = schemaFor(kind);
+
+    const htmlFields = schema.map(f=>{
+      const span = f.span || 12;
+      const val = row ? (row[f.key] ?? "") : "";
+      const req = f.required ? "required" : "";
+      const ph = f.placeholder ? `placeholder="${escapeHtml(f.placeholder)}"` : "";
+      let input = "";
+
+      if(f.type === "select"){
+        const opts = (f.options || []);
+        input =
+          `<select id="f_${f.key}" ${req}>` +
+          `<option value="" ${String(val)==="" ? "selected":""}>—</option>` +
+          opts.map(o => `<option value="${escapeHtml(o)}" ${(String(o)===String(val)) ? "selected":""}>${escapeHtml(o)}</option>`).join("") +
+          `</select>`;
+      } else if(f.type === "textarea"){
+        input = `<textarea id="f_${f.key}" ${req} ${ph}>${escapeHtml(val)}</textarea>`;
+      } else if(f.type === "checkbox"){
+        const checked = !!val;
+        input = `<div style="display:flex;align-items:center;gap:10px;height:44px">
+                  <input id="f_${f.key}" type="checkbox" ${checked ? "checked":""} style="width:18px;height:18px"/>
+                  <span class="muted">Yes</span>
+                </div>`;
+      } else if(f.type === "relation"){
+        const options = relationOptions(f.relation);
+        input =
+          `<select id="f_${f.key}" ${req}>` +
+          `<option value="" ${String(val)==="" ? "selected":""}>—</option>` +
+          options.map(o => `<option value="${escapeHtml(o.value)}" ${(String(o.value)===String(val)) ? "selected":""}>${escapeHtml(o.label)}</option>`).join("") +
+          `</select>`;
+      } else {
+        input = `<input id="f_${f.key}" type="${f.type||"text"}" value="${escapeHtml(val)}" ${req} ${ph}/>`;
+      }
+
+      return `<div class="col-${span}">
+                <label class="muted">${escapeHtml(f.label)}</label>
+                ${input}
+              </div>`;
+    }).join("");
+
+    $("editorFields").innerHTML = htmlFields;
+    openModal("editor");
+  }
+
+  function collectEditorData(kind){
+    const schema = schemaFor(kind);
+    const data = {};
+    for(const f of schema){
+      const el = $("f_"+f.key);
+      if(!el) continue;
+
+      let v;
+      if(f.type === "checkbox"){
+        v = !!el.checked;
+      } else {
+        v = el.value;
+      }
+
+      if(f.type === "number"){
+        v = v === "" ? null : Number(v);
+      }
+      if(f.type === "relation"){
+        v = v === "" ? null : v; // relation id or null
+      }
+      if(f.type === "date"){
+        v = v === "" ? null : v; // keep YYYY-MM-DD
+      }
+      data[f.key] = v;
+    }
+    return data;
+  }
+
+  async function saveEditor(){
+    const kind = currentView;
+    const store = storeFor(kind);
+
+    const mode = await store.mode();
+    if(mode === "denied"){
+      alert("PocketBase rules are denying access to this CRM collection.\n\nAsk the admin to set List/View/Create/Update rules for: " + ENTITIES[kind].col);
+      return;
+    }
+
+    const data = collectEditorData(kind);
+
+    // Simple required check (client-side)
+    for(const f of schemaFor(kind)){
+      if(f.required){
+        const v = data[f.key];
+        if(v === null || v === "" || v === undefined){
+          alert("Please fill: " + f.label);
+          return;
+        }
+      }
+    }
+
+    // Local-only audit hint
+    data._clientUser = getUserEmail();
+
+    // PB must not receive unknown fields
+    if(mode === "pb"){
+      delete data._clientUser;
+    }
+
+    try{
+      if(editingId) await store.update(editingId, data);
+      else await store.create(data);
+
+      closeModal("editor");
+      await render();
+    }catch(err){
+      console.error(err);
+      const msg =
+        (err?.response?.message || err?.message || "Unknown error") +
+        (err?.response?.data ? ("\n\nDetails:\n" + JSON.stringify(err.response.data, null, 2)) : "");
+      alert("Save failed: " + msg);
+    }
+  }
+
+  async function deleteEditor(){
+    if(!editingId) return;
+    if(!confirm("Delete this record?")) return;
+
+    try{
+      await storeFor(currentView).remove(editingId);
+      closeModal("editor");
+      await render();
+    }catch(err){
+      console.error(err);
+      alert("Delete failed: " + (err?.response?.message || err?.message || "Unknown error"));
+    }
+  }
+
+  async function initAuth(){
+    pb = new PocketBase(PB_URL);
+    pb.autoCancellation(false);
+
+    // IMPORTANT: availability cache must reset when auth changes
+    availability = {};
+    LOOKUPS = { companies: [], contacts: [], opps: [] };
+    MAPS = { companyName: {}, contactName: {}, oppName: {} };
+
+    $("btnLogout").addEventListener("click", async ()=>{
+      pb.authStore.clear();
+      await initAuth();
+      await render();
+    });
+
+    if(pb.authStore.isValid){
+      closeModal("loginModal");
+      $("btnLogout").style.display = "";
+      $("userPill").textContent = getUserEmail() || "Signed in";
+    }else{
+      $("btnLogout").style.display = "none";
+      $("userPill").textContent = "Not signed in";
+      openModal("loginModal");
+    }
+  }
+
+  // ---- events
+  document.querySelectorAll(".navBtn").forEach(b=>{
+    b.addEventListener("click", ()=> setActiveNav(b.dataset.view));
+  });
+
+  $("btnNew").addEventListener("click", async ()=> openEditor(currentView, null));
+  $("btnRefresh").addEventListener("click", render);
+  $("q").addEventListener("input", ()=> render());
+
+  $("tbody").addEventListener("click", async (e)=>{
+    const tr = e.target.closest("tr[data-id]");
+    if(!tr) return;
+    const id = tr.getAttribute("data-id");
+    const row = currentRows.find(r => String(toId(r)) === String(id));
+    await openEditor(currentView, row);
+  });
+
+  $("btnClose").addEventListener("click", ()=> closeModal("editor"));
+  $("btnSave").addEventListener("click", saveEditor);
+  $("btnDelete").addEventListener("click", deleteEditor);
+
+  $("btnBack").addEventListener("click", ()=>{
+    try{
+      if(window.top && window.top !== window) window.top.location.href = "index.html";
+      else window.location.href = "index.html";
+    }catch{
+      window.location.href = "index.html";
+    }
+  });
+
+  $("loginForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    $("loginErr").style.display = "none";
+    try{
+      await pb.collection("users").authWithPassword($("loginEmail").value.trim(), $("loginPassword").value);
+      closeModal("loginModal");
+      $("btnLogout").style.display = "";
+      $("userPill").textContent = getUserEmail() || "Signed in";
+
+      // re-check collections now that we have auth
+      availability = {};
+      await render();
+    }catch(err){
+      $("loginErr").style.display = "";
+      $("loginErr").textContent = "Login failed: " + (err?.response?.message || err?.message || "Unknown error");
+    }
+  });
+
+  // boot
+  (async ()=>{
+    $("modePill").textContent = "Connecting…";
+    await initAuth();
+
+    // Prime collection availability checks (best effort)
+    for(const k of Object.keys(ENTITIES)){
+      try{ await storeFor(k).mode(); }catch{}
+    }
+    await render();
+  })();
+})();
+</script>
+</body>
+</html>
