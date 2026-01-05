@@ -3,6 +3,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<script>(function(){try{document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l){var h=(l.getAttribute('href')||'').toLowerCase();if(h.includes('precastflow')) l.remove();});}catch(e){}})();</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Fisher Precast Stack Designer</title>
 <style>
 *{box-sizing:border-box}
@@ -50,8 +56,6 @@ button{
   margin-top:8px;
 }
 button:hover{background:#1d4ed8}
-.backBtn{background:#374151}
-.backBtn:hover{background:#4b5563}
 #inputGrid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
@@ -485,6 +489,27 @@ button:hover{background:#1d4ed8}
 
 .inline-check{display:inline-flex;align-items:center;gap:8px;}
 #extendedBaseWrap.disabled{opacity:0.5;pointer-events:none;}
+
+/* Back button (Estimator only) */
+.back-link{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  margin-bottom:10px;
+  background:#0ea5e9;
+  color:#ffffff !important;
+  text-decoration:none;
+  border-radius:10px;
+  font-weight:700;
+  font-size:13px;
+  width:fit-content;
+}
+.back-link:hover{background:#0284c7}
+@media (max-width: 640px){
+  .back-link{width:100%; justify-content:center}
+}
+
 </style>
 </head>
 <body>
@@ -501,6 +526,32 @@ button:hover{background:#1d4ed8}
 </div>
 <!-- INPUT AREA -->
 <div class="card" style="margin-top:12px;">
+<a id="backLink" class="back-link" href="estimates.html">← Back to Estimates</a>
+<script>
+(function(){
+  try{
+    var p=new URLSearchParams(location.search);
+    var back=p.get("back");
+    if(back){
+      var a=document.getElementById("backLink");
+      a.setAttribute("href", back);
+      a.textContent = "← Back";
+    }
+  }catch(e){}
+})();
+</script>
+<script>
+(function(){
+  try{
+    var p=new URLSearchParams(location.search);
+    var back=p.get("back");
+    if(back){
+      document.getElementById("backLink").setAttribute("href", back);
+      document.getElementById("backLink").textContent = "← Back";
+    }
+  }catch(e){}
+})();
+</script>
 <h1 style="margin:0;">Fisher Precast Stack Designer</h1>
 </div>
 <div aria-label="Application Tabs" class="tabs" role="tablist">
@@ -509,7 +560,6 @@ button:hover{background:#1d4ed8}
 <button class="tab-btn" data-tab="tab-drawings" type="button">Drawings</button>
 <button class="tab-btn" data-tab="tab-report" type="button">Report</button>
 <div class="tab-actions">
-<button class="backBtn" onclick="window.top.location.href='index.html'" type="button">← Back to Precast Manager</button>
 <button onclick="updateAllAndGoReport()" type="button">Update Drawings &amp; Report</button>
 <button onclick="validateStructure()" type="button">Validate the Structure</button>
 <button onclick="window.print()" type="button">Export / Print (PDF)</button>
@@ -660,8 +710,7 @@ button:hover{background:#1d4ed8}
 </div>
 <div class="ref-wrap" id="refWrap">
 <!-- Manhole reference image (must exist in same folder as this HTML) -->
-<img alt="Precast Concrete Manhole reference" id="refManholeImg" data-filenames="Manhole image.png|Manhole%20image.png|Manhole_image.png|Manhole-image.png|manhole_image.png|manhole-image.png" loading="eager" decoding="async" />
-<img alt="Precast Concrete Vault reference" id="refVaultImg" style="display:none;" data-filenames="Vault image.png|Vault%20image.png|Vault_image.png|Vault-image.png|vault_image.png|vault-image.png" loading="eager" decoding="async" />
+<img alt="Precast Concrete Manhole reference" id="refManholeImg" src="Manhole image.png" loading="eager" decoding="async" /><img alt="Precast Concrete Vault reference" id="refVaultImg" src="Vault image.png" style="display:none;" loading="eager" decoding="async" />
 <!-- Vault reference image (must exist in same folder as this HTML) -->
 <!-- Vault reference (inline schematic fallback) -->
 <svg aria-label="Vault reference schematic" id="refVaultSvg" role="img" viewbox="0 0 320 420">
@@ -690,7 +739,6 @@ button:hover{background:#1d4ed8}
 <div class="callout c8" data-callout="c8" style="left:48%;top:48%;">8</div> <!-- ID / inside -->
 <div class="callout c9" data-callout="c9" style="left:40%;top:93%;">9</div> <!-- Sump -->
 </div>
-<div id="refImgNotice" style="display:none;margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(251,146,60,0.35);background:rgba(251,146,60,0.08);color:#fdba74;font-size:12px;line-height:1.3;"></div>
 <div class="hint">
 <b>Tip:</b> The reference image is a guide. The drawings and report are generated from the inputs.
   </div>
@@ -5968,7 +6016,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
 </script>
 <script>
 /* UI helpers (do not change inputs/calcs) */
@@ -6648,67 +6695,59 @@ function applyUserInputs(state){
 }
 
 
-// Reference images: try multiple filename variants (PocketBase/static servers can be picky with spaces).
-function initReferenceImages(){
-  const notice = document.getElementById('refImgNotice');
-  const svgFallback = document.getElementById('refVaultSvg');
-
-  function setNotice(html){
-    if(!notice) return;
-    notice.style.display = 'block';
-    notice.innerHTML = html;
+// --- Robust loader for reference images (handles spaces, subpaths, caching) ---
+(function(){
+  function withBust(url){
+    const b = "cb=" + Date.now();
+    return url + (url.includes("?") ? "&" : "?") + b;
   }
-  function clearNotice(){
-    if(!notice) return;
-    notice.style.display = 'none';
-    notice.innerHTML = '';
+  function trySources(img, sources){
+    if(!img) return;
+    let i = 0;
+    const tried = new Set();
+    const next = () => {
+      while(i < sources.length && tried.has(sources[i])) i++;
+      if(i >= sources.length) return;
+      const src = sources[i++];
+      tried.add(src);
+      img.src = withBust(src);
+    };
+    img.addEventListener("error", () => next());
+    next();
   }
+  function init(){
+    const man = document.getElementById("refManholeImg");
+    const vault = document.getElementById("refVaultImg");
 
-  function loadWithFallback(imgEl){
-    if(!imgEl) return;
-    const list = (imgEl.dataset.filenames || '').split('|').map(s => s.trim()).filter(Boolean);
-    let idx = 0;
+    const manCandidates = [
+      "Manhole image.png",
+      "Manhole%20image.png",
+      "./Manhole%20image.png",
+      "/Manhole%20image.png",
+      "Manhole_image.png",
+      "manhole_image.png",
+      "manhole-image.png"
+    ];
+    const vaultCandidates = [
+      "Vault image.png",
+      "Vault%20image.png",
+      "./Vault%20image.png",
+      "/Vault%20image.png",
+      "Vault_image.png",
+      "vault_image.png",
+      "vault-image.png"
+    ];
 
-    function attemptNext(){
-      if(idx >= list.length){
-        // Final fallback: hide image, show notice, show inline schematic.
-        imgEl.style.display = 'none';
-        setNotice(
-          '<b>Reference image could not be loaded.</b><br/>' +
-          'Your server may not be serving this file name correctly (spaces and case-sensitivity can break on some setups).<br/>' +
-          'Best fix: create copies named <code>Manhole_image.png</code> and <code>Vault_image.png</code> in the same folder.'
-        );
-        if(svgFallback){ svgFallback.style.display = 'block'; }
-        return;
-      }
-
-      // Resolve relative to THIS HTML file location (works even if hosted under a sub-path).
-      const u = new URL(list[idx], window.location.href);
-      // Cache-bust so browser doesn't keep a prior 404.
-      u.searchParams.set('v', String(Date.now()));
-      idx += 1;
-      imgEl.src = u.toString();
-    }
-
-    imgEl.addEventListener('load', () => {
-      clearNotice();
-      if(svgFallback){ svgFallback.style.display = 'none'; }
-      imgEl.style.display = 'block';
-    });
-
-    imgEl.addEventListener('error', () => {
-      attemptNext();
-    });
-
-    // Start.
-    attemptNext();
+    trySources(man, manCandidates);
+    trySources(vault, vaultCandidates);
   }
 
-  loadWithFallback(document.getElementById('refManholeImg'));
-  loadWithFallback(document.getElementById('refVaultImg'));
-}
-
-document.addEventListener('DOMContentLoaded', initReferenceImages);
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  }else{
+    init();
+  }
+})();
 
 </script>
 </body>

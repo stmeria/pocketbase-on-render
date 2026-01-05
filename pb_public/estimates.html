@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fisher Precast • Estimates</title>
+  <script src="/vendor/pocketbase.umd.js"></script>
+  <link rel="stylesheet" href="precastflow-ui.css">
+  <style>
+    .pf-topbar-title #pageSubtitle{display:block}
+    .pf-search{max-width:520px}
+    .pf-card{overflow:hidden}
+    .pf-cardTop{padding:16px 16px 0 16px}
+    .pf-cardBody{padding:14px 16px 16px 16px}
+    .pf-estStats .pf-statValue{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pf-miniHint{font-size:12px;color:var(--muted);font-weight:650}
+    .pf-empty{padding:16px;color:var(--muted);font-weight:650}
+    .modal .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:720px){.modal .grid2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header class="pf-topbar">
+  <button class="pf-iconBtn pf-mobileToggle" id="btnSidebarToggle" type="button" title="Menu" aria-label="Open menu">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>
+  </button>
+
+  <div class="pf-topbar-title">
+    <div id="pageTitle">Estimates</div>
+    <div id="pageSubtitle">Manage quotations and proposals</div>
+  </div>
+
+  <div class="pf-search" role="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 4a6 6 0 1 1-4.472 10.03l-3.28 3.28a1 1 0 0 1-1.415-1.415l3.28-3.28A6 6 0 0 1 10 4Zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
+    <input id="q" type="search" placeholder="Search estimates…" autocomplete="off"/>
+  </div>
+
+  <div class="pf-topbar-actions">
+    <span class="badge" id="modePill">Loading…</span>
+
+    <details class="pf-dropdown" id="quickAddMenu">
+      <summary class="primary">+ Quick Add</summary>
+      <div class="pf-menu">
+        <button id="btnNewEstTop" class="primary" type="button">+ New Estimate</button>
+        <button id="btnOpenFisherTop" type="button">Open Fisher Stack</button>
+        <button id="btnRefresh" type="button">Refresh</button>
+        <div class="sep"></div>
+        <button id="btnLogout" class="ghost" type="button" style="display:none">Logout</button>
+      </div>
+    </details>
+
+    <button class="pf-iconBtn" id="btnBell" type="button" title="Notifications" aria-label="Notifications">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5-6.71V3a2 2 0 1 0-4 0v1.29A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="shell">
+  <div class="appShell">
+    <aside class="sidebar" aria-label="Sidebar navigation">
+  <div class="pf-brandRow">
+    <div class="pf-brandMark" aria-hidden="true">
+      <img src="Fisher_no.png" alt="Fisher Associates" class="pf-brandLogo">
+    </div>
+    <div class="pf-brandName">Fisher Precast Management System</div>
+    <div class="pf-brandHint">›</div>
+  </div>
+
+  <div class="pf-sideBtns">
+    <button type="button" id="btnSidebarCustomer">+ Customer</button>
+    <button type="button" id="btnSidebarScan">Scan</button>
+  </div>
+
+  <div class="tabs" id="tabs" aria-label="Navigation tabs">
+    <button type="button" class="tab" data-tab="dashboard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11Z"/></svg><span class="navLabel">Dashboard</span></button>
+    <button type="button" class="tab" data-tab="crm"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11a4 4 0 1 0-8 0a4 4 0 0 0 8 0Zm-4 6c-4.42 0-8 2.01-8 4.5V23h16v-1.5C20 19.01 16.42 17 12 17Z"/></svg><span class="navLabel">CRM</span></button>
+    <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
+    <button type="button" class="tab active" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
+    <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
+    <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
+    <button type="button" class="tab" data-tab="reports"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19V5a2 2 0 0 1 2-2h12v2H6v14h14v2H6a2 2 0 0 1-2-2Zm5-2V9h2v8H9Zm4 0V7h2v10h-2Zm4 0v-5h2v5h-2Z"/></svg><span class="navLabel">Reports</span></button>
+
+    <div class="pf-more">
+      <details>
+        <summary>More</summary>
+        <div class="pf-moreItems">
+          <button type="button" class="tab" data-tab="schedule"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2Zm15 8H4v11h18V10Z"/></svg><span class="navLabel">Schedule</span></button>
+          <button type="button" class="tab" data-tab="projects"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v2H3V6Zm0 6h22v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8Z"/></svg><span class="navLabel">Projects</span></button>
+          <button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="pf-userFooter">
+    <div class="pf-userRow">
+      <div class="pf-avatar" id="userInitials">JD</div>
+      <div class="pf-userMeta">
+        <div class="pf-userName" id="userName">John Doe</div>
+        <div class="pf-userRole" id="userRole">Plant Manager</div>
+      </div>
+    </div>
+    <div class="pf-userBadgeWrap">
+      <span class="badge" id="userBadge">Signed in</span>
+    </div>
+  </div>
+</aside>
+    <main class="content">
+      <section class="pf-page">
+        <div class="pf-sectionHead">
+          <div>
+            <div class="pf-h2">Estimates</div>
+            <div class="pf-sub">Open quotes, pipeline value, and proposal activity</div>
+          </div>
+          <div class="pf-headRight">
+            <button class="btn ghost" type="button" id="btnFilter">Filter</button>
+            <button class="btn ghost" type="button" id="btnOpenFisher">Open Fisher Stack</button>
+            <button class="btn primary" type="button" id="btnNewEst">+ New Estimate</button>
+          </div>
+        </div>
+
+        <div class="pf-kpiRow" id="kpiRow"></div>
+
+        <div class="pf-card" style="margin-top:14px">
+          <div class="pf-cardTop">
+            <div>
+              <div class="pf-cardTitle">Quotes</div>
+              <div class="pf-cardSub">Pulled from <span class="mono">crm_opportunities</span> (stage = Quoted/Negotiation)</div>
+            </div>
+            <div class="pf-miniHint" id="summaryHint"></div>
+          </div>
+          <div class="pf-cardBody">
+            <div class="pf-estList" id="estList"></div>
+          </div>
+        </div>
+
+        <div class="pf-card" style="margin-top:14px">
+          <div class="pf-cardTop">
+            <div>
+              <div class="pf-cardTitle">Estimator Tools</div>
+              <div class="pf-cardSub">Quick calculators and stack designer</div>
+            </div>
+          </div>
+          <div class="pf-cardBody" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+            <div style="min-width:240px">
+              <div style="font-weight:900;color:var(--text)">Fisher Stack Designer</div>
+              <div class="pf-miniHint">Open the stack designer tool in a new page (keeps printing/export intact).</div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn ghost" type="button" id="btnOpenFisher2">Open Fisher Stack</button>
+              <a class="btn" href="Fisher_Stack_with_back.html?legacy=1&back=estimates.html" style="text-decoration:none">Open (with Back)</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- New/Edit Estimate Modal -->
+<div class="modal-backdrop" id="estModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="estModalTitle">
+    <header>
+      <h3 id="estModalTitle">New Estimate</h3>
+      <button class="iconBtn" id="btnEstClose" type="button" aria-label="Close">✕</button>
+    </header>
+    <div class="body">
+      <div class="grid2">
+        <div>
+          <label>Estimate Name</label>
+          <input id="estName" type="text" placeholder="e.g., Riverside Complex Phase 2">
+        </div>
+        <div>
+          <label>Company</label>
+          <select id="estCompany"></select>
+        </div>
+        <div>
+          <label>Value</label>
+          <input id="estValue" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+          <label>Due Date</label>
+          <input id="estDue" type="date">
+        </div>
+        <div>
+          <label>Stage</label>
+          <select id="estStage">
+            <option>Lead</option>
+            <option>Qualified</option>
+            <option selected>Quoted</option>
+            <option>Negotiation</option>
+            <option>Won</option>
+            <option>Lost</option>
+          </select>
+        </div>
+        <div>
+          <label>Notes</label>
+          <input id="estNotes" type="text" placeholder="Optional">
+        </div>
+      </div>
+      <div class="small" style="margin-top:10px;color:var(--muted)">
+        This module stores estimates in <span class="mono">crm_opportunities</span>. If your field names differ, the page uses safe fallbacks.
+      </div>
+      <div class="card" id="errBox" style="display:none;margin-top:12px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#7f1d1d"></div>
+    </div>
+    <div class="foot">
+      <button class="btn ghost" type="button" id="btnEstDelete" style="display:none">Delete</button>
+      <span style="flex:1"></span>
+      <button class="btn" type="button" id="btnEstCancel">Cancel</button>
+      <button class="btn primary" type="button" id="btnEstSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const PB_URL = window.location.origin;
+  const pb = new PocketBase(PB_URL);
+  pb.autoCancellation(false);
+
+  const $$ = (id) => document.getElementById(id);
+  const money = (n) => {
+    const x = Number(n);
+    if(!Number.isFinite(x)) return "—";
+    return x.toLocaleString(undefined, { style:"currency", currency:"USD", maximumFractionDigits:0 });
+  };
+  const fmtDate = (iso) => {
+    if(!iso) return "—";
+    const d = new Date(iso);
+    if(String(d) === "Invalid Date") return "—";
+    return d.toLocaleDateString(undefined, {year:"numeric", month:"short", day:"numeric"});
+  };
+  const daysBetween = (a,b) => Math.round((b-a)/(1000*60*60*24));
+
+  const pillClass = (stage) => {
+    const s = (stage||"").toLowerCase();
+    if(s === "won" || s === "completed") return "ok";
+    if(s === "lost" || s === "cancelled" || s === "canceled") return "danger";
+    if(s === "quoted" || s === "negotiation" || s === "in progress" || s === "pending") return "warn";
+    return "neutral";
+  };
+
+  // --- Sidebar navigation (full-page routing)
+  const mapTab = (tab) => {
+    if(tab === "crm") return "crm.html";
+    if(tab === "schedule") return "schedule.html";
+    if(tab === "estimator") return "estimates.html";
+    if(tab === "dashboard") return "index.html?view=dashboard";
+    if(tab === "inventory") return "index.html?view=inventory";
+    if(tab === "production") return "index.html?view=production";
+    if(tab === "shipping") return "index.html?view=shipping";
+    if(tab === "reports") return "index.html?view=reports";
+    if(tab === "projects") return "index.html?view=projects";
+    if(tab === "transactions") return "index.html?view=transactions";
+    return "index.html";
+  };
+  document.getElementById("tabs")?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab");
+    if(!btn) return;
+    const tab = btn.getAttribute("data-tab");
+    if(!tab) return;
+    window.location.href = mapTab(tab);
+  });
+
+  // Mobile sidebar toggle
+  const shell = document.querySelector(".appShell");
+  document.getElementById("btnSidebarToggle")?.addEventListener("click", () => shell?.classList.toggle("sidebarOpen"));
+  document.addEventListener("click", (e) => {
+    if(!shell?.classList.contains("sidebarOpen")) return;
+    if(e.target.closest(".sidebar") || e.target.closest("#btnSidebarToggle")) return;
+    shell.classList.remove("sidebarOpen");
+  });
+
+  // Auth badge in footer
+  const hydrateUserFooter = () => {
+    const u = pb.authStore.model;
+    const email = u?.email || u?.username || "";
+    const name = u?.name || u?.fullName || email || "User";
+    const parts = (name || "U").trim().split(/\s+/).filter(Boolean);
+    const initials = (parts[0]?.[0] || "U") + (parts[1]?.[0] || "");
+    if($$("userInitials")) $$("userInitials").textContent = initials.toUpperCase();
+    if($$("userName")) $$("userName").textContent = name;
+    if($$("userRole")) $$("userRole").textContent = u?.role || (pb.authStore.isAdmin ? "Admin" : "User");
+    if($$("userBadge")) $$("userBadge").textContent = pb.authStore.isValid ? "Signed in" : "Not signed in";
+  };
+
+  // --- Data
+  let companies = [];
+  let opps = [];
+  let editId = null;
+
+  function setErr(msg) {
+    const box = $$("errBox");
+    if(!msg) { box.style.display="none"; box.textContent=""; return; }
+    box.style.display="block";
+    box.textContent = msg;
+  }
+
+  async function loadCompanies() {
+    try {
+      companies = await pb.collection("crm_companies").getFullList({ sort:"name" });
+    } catch(e) {
+      companies = [];
+    }
+    const sel = $$("estCompany");
+    sel.innerHTML = "";
+    sel.appendChild(new Option("— Select —",""));
+    companies.forEach(c => sel.appendChild(new Option(c.name || c.id, c.id)));
+  }
+
+  async function loadOpps() {
+    // Prefer expand company for card rendering
+    try {
+      opps = await pb.collection("crm_opportunities").getFullList({ sort:"-updated", expand:"company,primaryContact" });
+    } catch(e) {
+      opps = [];
+    }
+  }
+
+  function getField(o, keys) {
+    for(const k of keys) {
+      if(o && Object.prototype.hasOwnProperty.call(o,k)) return o[k];
+    }
+    return undefined;
+  }
+
+  function toNum(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function matchesSearch(o, q) {
+    if(!q) return true;
+    const s = q.toLowerCase();
+    const name = (o.name || o.title || "").toLowerCase();
+    const stage = (o.stage || o.status || "").toLowerCase();
+    const comp = (o.expand?.company?.name || "").toLowerCase();
+    return name.includes(s) || stage.includes(s) || comp.includes(s);
+  }
+
+  function estimateCode(o) {
+    const year = (o.created || o.created_at || "").slice(0,4) || new Date().getFullYear();
+    const tail = (o.id || "").slice(-5).toUpperCase();
+    return `EST-${year}-${tail || "00000"}`;
+  }
+
+  function pickDue(o) {
+    return getField(o, ["bidDate","dueDate","expectedCloseDate","deliveryDate","date"]);
+  }
+
+  function pickValue(o) {
+    const v = getField(o, ["estimatedValue","value","amount","totalValue"]);
+    return v;
+  }
+
+  function pickStage(o) {
+    return getField(o, ["stage","status"]) || "—";
+  }
+
+  function kpiRender(kpis) {
+    const row = $$("kpiRow");
+    row.innerHTML = kpis.map(k => `
+      <div class="pf-kpiCard">
+        <div class="pf-kpiMeta">
+          <div class="pf-kpiK">${k.label}</div>
+          <div class="pf-kpiV">${k.value}</div>
+          <div class="pf-kpiS">${k.sub || ""}</div>
+        </div>
+        <div class="pf-kpiIcon">${k.icon || "▦"}</div>
+      </div>
+    `).join("");
+  }
+
+  function render() {
+    const q = ($$("q").value || "").trim();
+    const filtered = opps.filter(o => matchesSearch(o, q));
+
+    // Open quotes (Quoted / Negotiation)
+    const open = filtered.filter(o => {
+      const st = (pickStage(o) || "").toLowerCase();
+      return st === "quoted" || st === "negotiation";
+    });
+
+    const won = filtered.filter(o => (pickStage(o)||"").toLowerCase() === "won");
+    const lost = filtered.filter(o => (pickStage(o)||"").toLowerCase() === "lost");
+
+    const openCount = open.length;
+    const pipe = open.reduce((sum,o)=> sum + toNum(pickValue(o)), 0);
+    const denom = won.length + lost.length;
+    const winRate = denom ? Math.round((won.length/denom)*100) : 0;
+    const cycle = won.length ? Math.round(won.reduce((s,o)=> {
+      const a = new Date(o.created || o.created_at || Date.now());
+      const b = new Date(o.updated || o.updated_at || Date.now());
+      return s + Math.max(0, daysBetween(a,b));
+    },0) / won.length) : 0;
+
+    kpiRender([
+      { label:"Open Quotes", value: openCount.toLocaleString(), sub: openCount ? "awaiting response" : "—", icon:"📄" },
+      { label:"Pipeline Value", value: money(pipe), sub: openCount ? `${openCount} active` : "—", icon:"💲" },
+      { label:"Win Rate", value: (denom? winRate+"%":"—"), sub: denom? `${won.length} won / ${lost.length} lost` : "No history", icon:"✅" },
+      { label:"Avg. Cycle Time", value: (won.length? cycle+" days":"—"), sub: won.length? "won quotes" : "—", icon:"⏱" },
+    ]);
+
+    $$("summaryHint").textContent = `${open.length} open quote${open.length===1?"":"s"} • ${filtered.length} total record${filtered.length===1?"":"s"}`;
+
+    const list = $$("estList");
+    if(!open.length) {
+      list.innerHTML = `<div class="pf-empty">No open quotes found. Click <b>New Estimate</b> to create one.</div>`;
+      return;
+    }
+
+    list.innerHTML = open.map(o => {
+      const comp = o.expand?.company?.name || "";
+      const st = pickStage(o);
+      const val = money(pickValue(o));
+      const due = fmtDate(pickDue(o));
+      const created = fmtDate(o.created || o.created_at);
+      const ver = "v1.0";
+      return `
+        <div class="pf-estCard" data-id="${o.id}">
+          <div class="pf-estIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Z"/></svg>
+          </div>
+          <div class="pf-estMain">
+            <div class="pf-estTop">
+              <div class="pf-estId">${estimateCode(o)}</div>
+              <div class="pf-estVer">• ${ver}</div>
+              <span class="pill ${pillClass(st)}">${st}</span>
+            </div>
+            <div class="pf-estTitle">${o.name || o.title || "Untitled Estimate"}</div>
+            <div class="pf-estSub">${comp || "—"}</div>
+
+            <div class="pf-estStats">
+              <div>
+                <div class="pf-statLabel">$ Value</div>
+                <div class="pf-statValue">${val}</div>
+              </div>
+              <div>
+                <div class="pf-statLabel">Due Date</div>
+                <div class="pf-statValue">${due}</div>
+              </div>
+              <div>
+                <div class="pf-statLabel">Line Items</div>
+                <div class="pf-statValue">—</div>
+              </div>
+            </div>
+
+            <div class="pf-estBottom">
+              <div class="pf-estCreated">Created ${created}</div>
+              <div class="pf-estActions">
+                <button class="btn" type="button" data-act="edit">Edit</button>
+                <button class="btn primary" type="button" data-act="send">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function openModal(mode, o=null) {
+    setErr("");
+    $$("estModal").classList.add("open");
+    $$("estModal").setAttribute("aria-hidden","false");
+    if(mode === "edit" && o) {
+      editId = o.id;
+      $$("estModalTitle").textContent = "Edit Estimate";
+      $$("btnEstDelete").style.display = "inline-flex";
+      $$("estName").value = o.name || o.title || "";
+      $$("estCompany").value = o.company || o.companyId || (Array.isArray(o.company)? o.company[0] : "") || "";
+      $$("estValue").value = (pickValue(o) ?? "");
+      $$("estDue").value = (pickDue(o) || "").slice(0,10);
+      $$("estStage").value = pickStage(o) || "Quoted";
+      $$("estNotes").value = o.notes || "";
+    } else {
+      editId = null;
+      $$("estModalTitle").textContent = "New Estimate";
+      $$("btnEstDelete").style.display = "none";
+      $$("estName").value = "";
+      $$("estCompany").value = "";
+      $$("estValue").value = "";
+      $$("estDue").value = "";
+      $$("estStage").value = "Quoted";
+      $$("estNotes").value = "";
+    }
+  }
+
+  function closeModal() {
+    $$("estModal").classList.remove("open");
+    $$("estModal").setAttribute("aria-hidden","true");
+  }
+
+  async function safeUpsert(data) {
+    // Try (stage + estimatedValue + bidDate) then fallback variants
+    const attempts = [];
+    // Most likely
+    attempts.push({ ...data });
+    // value field fallback
+    if("estimatedValue" in data) {
+      const d = { ...data };
+      d.value = d.estimatedValue;
+      delete d.estimatedValue;
+      attempts.push(d);
+    }
+    // due date fallback keys
+    if("bidDate" in data) {
+      for(const k of ["dueDate","expectedCloseDate","date"]) {
+        const d = { ...data };
+        d[k] = d.bidDate;
+        delete d.bidDate;
+        attempts.push(d);
+      }
+    }
+    // stage fallback
+    if("stage" in data) {
+      const d = { ...data };
+      d.status = d.stage;
+      delete d.stage;
+      attempts.push(d);
+    }
+
+    let lastErr = null;
+    for(const d of attempts) {
+      try {
+        if(editId) {
+          return await pb.collection("crm_opportunities").update(editId, d);
+        } else {
+          return await pb.collection("crm_opportunities").create(d);
+        }
+      } catch(e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("Unable to save");
+  }
+
+  async function saveEstimate() {
+    setErr("");
+    const name = $$("estName").value.trim();
+    const company = $$("estCompany").value || null;
+    const val = $$("estValue").value;
+    const due = $$("estDue").value || "";
+    const stage = $$("estStage").value || "Quoted";
+    const notes = $$("estNotes").value.trim();
+
+    if(!name) return setErr("Estimate name is required.");
+    if(!company) return setErr("Company is required.");
+
+    const payload = {
+      name,
+      company,
+      stage,
+      estimatedValue: val ? Number(val) : 0,
+      bidDate: due ? due : null,
+      notes,
+    };
+
+    try {
+      await safeUpsert(payload);
+      closeModal();
+      await refresh();
+    } catch(e) {
+      const msg = e?.data?.message || e?.message || "Save failed.";
+      setErr(msg);
+      console.error(e);
+    }
+  }
+
+  async function deleteEstimate() {
+    if(!editId) return;
+    if(!confirm("Delete this estimate?")) return;
+    try {
+      await pb.collection("crm_opportunities").delete(editId);
+      closeModal();
+      await refresh();
+    } catch(e) {
+      setErr(e?.data?.message || e?.message || "Delete failed.");
+    }
+  }
+
+  function printEstimate(o) {
+    const comp = o.expand?.company?.name || "";
+    const st = pickStage(o);
+    const val = money(pickValue(o));
+    const due = fmtDate(pickDue(o));
+    const code = estimateCode(o);
+    const html = `
+      <html><head><title>${code}</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1"/>
+        <style>
+          body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:24px;color:#0f172a}
+          .card{border:1px solid #e2e8f0;border-radius:14px;padding:16px;max-width:720px}
+          h1{margin:0 0 6px 0;font-size:20px}
+          .muted{color:#64748b;font-size:12px}
+          .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+          .k{font-size:12px;color:#64748b}
+          .v{font-weight:700}
+          @media print{button{display:none}}
+        </style>
+      </head><body>
+        <div class="card">
+          <h1>${o.name || "Estimate"}</h1>
+          <div class="muted">${code} • ${comp} • ${st}</div>
+          <div class="grid">
+            <div><div class="k">Value</div><div class="v">${val}</div></div>
+            <div><div class="k">Due Date</div><div class="v">${due}</div></div>
+          </div>
+          <div style="margin-top:16px" class="muted">Generated from Fisher Estimates module.</div>
+          <div style="margin-top:16px"><button onclick="window.print()">Print / Save PDF</button></div>
+        </div>
+      </body></html>
+    `;
+    const w = window.open("", "_blank", "noopener");
+    if(!w) return;
+    w.document.open(); w.document.write(html); w.document.close();
+  }
+
+  async function refresh() {
+    $$("modePill").textContent = pb.authStore.isValid ? "Live • PocketBase" : "Not signed in";
+    hydrateUserFooter();
+    await loadCompanies();
+    await loadOpps();
+    render();
+  }
+
+  // --- Events
+  $$("q").addEventListener("input", render);
+  $$("btnNewEst").addEventListener("click", () => openModal("new"));
+  $$("btnNewEstTop").addEventListener("click", () => openModal("new"));
+  $$("btnRefresh").addEventListener("click", refresh);
+  $$("btnFilter").addEventListener("click", () => alert("Filter panel coming next (stage, due date, rep)."));
+  $$("btnOpenFisher").addEventListener("click", () => window.location.href = "Fisher_Stack_with_back.html?legacy=1&back=estimates.html&v=" + Date.now());
+  $$("btnOpenFisher2").addEventListener("click", () => window.location.href = "Fisher_Stack_with_back.html?legacy=1&back=estimates.html&v=" + Date.now());
+  $$("btnOpenFisherTop").addEventListener("click", () => window.location.href = "Fisher_Stack_with_back.html?legacy=1&back=estimates.html&v=" + Date.now());
+
+  $$("btnEstClose").addEventListener("click", closeModal);
+  $$("btnEstCancel").addEventListener("click", closeModal);
+  $$("btnEstSave").addEventListener("click", saveEstimate);
+  $$("btnEstDelete").addEventListener("click", deleteEstimate);
+  $$("estModal").addEventListener("click", (e) => { if(e.target === $$("estModal")) closeModal(); });
+
+  $$("estList").addEventListener("click", (e) => {
+    const card = e.target.closest(".pf-estCard");
+    if(!card) return;
+    const id = card.getAttribute("data-id");
+    const o = opps.find(x => x.id === id);
+    const act = e.target.getAttribute("data-act");
+    if(act === "send") {
+      e.preventDefault(); e.stopPropagation();
+      if(o) printEstimate(o);
+      return;
+    }
+    if(act === "edit" || card) {
+      e.preventDefault(); e.stopPropagation();
+      if(o) openModal("edit", o);
+    }
+  });
+
+  // Require auth for PocketBase writes; if not signed in, send to index login
+  if(!pb.authStore.isValid) {
+    $$("modePill").textContent = "Not signed in";
+    // best-effort: let the user see UI, but prompt on create/save
+  }
+
+  refresh().catch(console.error);
+
+})();
+</script>
+</body>
+</html>
