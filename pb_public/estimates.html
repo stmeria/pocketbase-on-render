@@ -15,9 +15,97 @@
     .pf-estStats .pf-statValue{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .pf-miniHint{font-size:12px;color:var(--muted);font-weight:650}
     .pf-empty{padding:16px;color:var(--muted);font-weight:650}
+
+    /* Invoice-style quote cards */
+    .pf-estList{display:flex;flex-direction:column;gap:10px}
+    .pf-estCard{display:grid;grid-template-columns:44px 1fr 320px;gap:12px;align-items:stretch;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--card);cursor:pointer;transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease}
+    .pf-estCard:hover{transform:translateY(-1px);box-shadow:0 12px 34px rgba(16,24,40,.08);border-color:rgba(59,130,246,.25)}
+    .pf-estIcon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(59,130,246,.10);color:#2563eb;flex:0 0 auto}
+    .pf-invQuote{font-weight:950;color:var(--text);display:flex;gap:8px;align-items:center}
+    .pf-invProject{font-weight:950;margin-top:2px;line-height:1.2}
+    .pf-invMeta{margin-top:4px;color:var(--muted);font-weight:700;font-size:13px}
+    .pf-invRight{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+    .pf-invAmount{font-weight:950;font-size:18px;white-space:nowrap}
+    .pf-invValid{color:var(--muted);font-weight:750;font-size:13px;text-align:right}
+    .pf-invActions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+    .pf-stageSelect{padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-weight:900;color:var(--text);outline:none}
+    .pf-stageSelect:focus{box-shadow:0 0 0 4px rgba(59,130,246,.15);border-color:rgba(59,130,246,.55)}
+    .btn.small{padding:8px 10px;border-radius:12px;font-size:12px}
+    @media (max-width: 980px){
+      .pf-estCard{grid-template-columns:44px 1fr}
+      .pf-invRight{align-items:flex-start}
+      .pf-invValid{text-align:left}
+      .pf-invActions{justify-content:flex-start}
+    }
+    @media (max-width: 520px){
+      .pf-estCard{grid-template-columns:1fr}
+      .pf-estIcon{display:none}
+    }
     .modal .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media (max-width:720px){.modal .grid2{grid-template-columns:1fr}}
+  
+    /* Modal fallback (in case theme CSS is missing/older) */
+    .modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.55);z-index:2000}
+    .modal-backdrop.open{display:flex}
+    .modal{background:#fff;border-radius:18px;box-shadow:0 25px 80px rgba(0,0,0,.25);width:min(980px,100%);max-height:90vh;overflow:auto}
+    .modalWide{width:min(1080px,100%)}
+
+  
+    /* Line item mode segmented control (Estimates) */
+    .pf-seg{display:inline-flex; border:1px solid var(--border,#e5e7eb); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.6)}
+    .pf-segBtn{padding:8px 10px; border:0; background:transparent; cursor:pointer; font-weight:800; color:var(--text,#111827); font-size:13px}
+    .pf-segBtn.active{background:var(--brand,#2563eb); color:#fff}
+    .pf-segBtn:focus{outline:2px solid rgba(37,99,235,.35); outline-offset:0}
+    @media (max-width:720px){
+      .pf-seg{width:100%}
+      .pf-segBtn{flex:1}
+      .pf-inlineRow{gap:8px}
+    }
+
+    /* Filter popover */
+    .pf-popMenu{
+      position:fixed;
+      min-width:220px;
+      background:var(--card,#fff);
+      border:1px solid var(--line,#e5e7eb);
+      border-radius:14px;
+      padding:8px;
+      box-shadow:0 18px 55px rgba(16,24,40,.18);
+      z-index:2600;
+      display:none;
+    }
+    .pf-popMenu .pf-popTitle{padding:8px 10px;color:var(--muted,#6b7280);font-weight:800;font-size:12px}
+    .pf-popMenu button{
+      width:100%;
+      text-align:left;
+      padding:10px 10px;
+      border-radius:12px;
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      font-weight:900;
+      color:var(--text,#111827);
+    }
+    .pf-popMenu button:hover{background:rgba(59,130,246,.10)}
+    .pf-popMenu button.active{background:rgba(59,130,246,.16)}
+</style>
+
+  <style>
+    .modalWide{max-width:1060px}
+    .pf-inlineRow{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+    .pf-inlineRow .pf-input{flex:1;min-width:220px}
+    .pf-inlineRow #liQty,.pf-inlineRow #liWeight,.pf-inlineRow #liPrice{flex:0 0 auto}
+    .pf-totals{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--panel)}
+    .pf-totals .row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-weight:700}
+    .pf-totals .row .k{color:var(--muted);font-weight:750}
+    .pf-totals .row.total{border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-size:16px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    @media (max-width: 720px){
+      .modalWide{max-width:96vw}
+      .pf-inlineRow .pf-input{min-width:160px}
+    }
   </style>
+
 </head>
 <body>
 <header class="pf-topbar">
@@ -32,7 +120,7 @@
 
   <div class="pf-search" role="search">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 4a6 6 0 1 1-4.472 10.03l-3.28 3.28a1 1 0 0 1-1.415-1.415l3.28-3.28A6 6 0 0 1 10 4Zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
-    <input id="q" type="search" placeholder="Search estimates…" autocomplete="off"/>
+    <input id="topSearch" type="search" placeholder="Search estimates…" autocomplete="off"/>
   </div>
 
   <div class="pf-topbar-actions">
@@ -78,14 +166,12 @@
     <button type="button" class="tab active" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
     <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
-    <button type="button" class="tab" data-tab="reports"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19V5a2 2 0 0 1 2-2h12v2H6v14h14v2H6a2 2 0 0 1-2-2Zm5-2V9h2v8H9Zm4 0V7h2v10h-2Zm4 0v-5h2v5h-2Z"/></svg><span class="navLabel">Reports</span></button>
 
     <div class="pf-more">
       <details>
         <summary>More</summary>
         <div class="pf-moreItems">
           <button type="button" class="tab" data-tab="schedule"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2Zm15 8H4v11h18V10Z"/></svg><span class="navLabel">Schedule</span></button>
-          <button type="button" class="tab" data-tab="projects"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v2H3V6Zm0 6h22v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8Z"/></svg><span class="navLabel">Projects</span></button>
           <button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
         </div>
       </details>
@@ -113,8 +199,9 @@
             <div class="pf-sub">Open quotes, pipeline value, and proposal activity</div>
           </div>
           <div class="pf-headRight">
-            <button class="btn ghost" type="button" id="btnFilter">Filter</button>
+            <button class="btn ghost" type="button" id="btnFilter">Filter: All</button>
             <button class="btn ghost" type="button" id="btnOpenFisher">Open Fisher Stack</button>
+            <button class="btn ghost" type="button" id="btnOpenCulvertEstimator">Precast Box Culvert Estimator</button>
             <button class="btn primary" type="button" id="btnNewEst">+ New Estimate</button>
           </div>
         </div>
@@ -125,7 +212,7 @@
           <div class="pf-cardTop">
             <div>
               <div class="pf-cardTitle">Quotes</div>
-              <div class="pf-cardSub">Pulled from <span class="mono">crm_opportunities</span> (stage = Quoted/Negotiation)</div>
+              <div class="pf-cardSub">Pulled from <span class="mono">crm_opportunities</span> (stages: Quoted, Negotiation, Won, Lost — Won is read-only)</div>
             </div>
             <div class="pf-miniHint" id="summaryHint"></div>
           </div>
@@ -141,14 +228,27 @@
               <div class="pf-cardSub">Quick calculators and stack designer</div>
             </div>
           </div>
-          <div class="pf-cardBody" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between">
-            <div style="min-width:240px">
-              <div style="font-weight:900;color:var(--text)">Fisher Stack Designer</div>
-              <div class="pf-miniHint">Open the stack designer tool in a new page (keeps printing/export intact).</div>
+          <div class="pf-cardBody" style="display:flex;flex-direction:column;gap:12px">
+            <div class="pf-toolRow" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+              <div style="min-width:240px">
+                <div style="font-weight:900;color:var(--text)">Fisher Stack Designer</div>
+                <div class="pf-miniHint">Open the stack designer tool in a new page (keeps printing/export intact).</div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn ghost" type="button" id="btnOpenFisher2">Open Fisher Stack</button>
+                <a class="btn" href="Fisher_Stack_with_back.html?back=estimates.html" style="text-decoration:none">Open (with Back)</a>
+              </div>
             </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn ghost" type="button" id="btnOpenFisher2">Open Fisher Stack</button>
-              <a class="btn" href="Fisher_Stack_with_back.html?legacy=1&back=estimates.html" style="text-decoration:none">Open (with Back)</a>
+
+            <div class="pf-toolRow" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+              <div style="min-width:240px">
+                <div style="font-weight:900;color:var(--text)">Precast Box Culvert Estimator</div>
+                <div class="pf-miniHint">Weight · CG · skew plan · reinforcement lookup (load your licensed C1577 CSV).</div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <a class="btn ghost" href="precast_culvert.html?back=estimates.html" style="text-decoration:none">Open Culvert Tool</a>
+                <a class="btn" href="precast_culvert.html?back=estimates.html" target="_blank" rel="noopener" style="text-decoration:none">Open in New Tab</a>
+              </div>
             </div>
           </div>
         </div>
@@ -158,59 +258,134 @@
 </div>
 
 <!-- New/Edit Estimate Modal -->
-<div class="modal-backdrop" id="estModal" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="estModalTitle">
-    <header>
-      <h3 id="estModalTitle">New Estimate</h3>
-      <button class="iconBtn" id="btnEstClose" type="button" aria-label="Close">✕</button>
-    </header>
-    <div class="body">
-      <div class="grid2">
+
+  <!-- Quote / Estimate Builder Modal -->
+  <div class="modal-backdrop" id="quoteModal" aria-hidden="true" style="display:none">
+    <div class="modal modalWide" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle">
+      <header>
         <div>
-          <label>Estimate Name</label>
-          <input id="estName" type="text" placeholder="e.g., Riverside Complex Phase 2">
+          <div class="muted" style="font-size:12px">Estimates / Quotes</div>
+          <h3 id="quoteModalTitle" style="margin:2px 0 0 0">New Quote</h3>
         </div>
-        <div>
-          <label>Company</label>
-          <select id="estCompany"></select>
+        <button class="iconBtn" id="btnQuoteClose" type="button" aria-label="Close">✕</button>
+      </header>
+
+      <div class="body">
+        <div class="grid2">
+          <div>
+            <label>Quote Number</label>
+            <input id="qNumber" type="text" placeholder="Auto-generated (e.g., 26-001)" readonly>
+          </div>
+          <div>
+            <label>Quote Date</label>
+            <input id="qDate" type="date">
+          </div>
+
+          <div>
+            <label>Project Name</label>
+            <input id="qProject" type="text" placeholder="e.g., Riverside Complex Phase 2">
+          </div>
+          <div>
+            <label>Project Location</label>
+            <input id="qLocation" type="text" placeholder="City, State (or site address)">
+          </div>
+
+          <div>
+            <label>Valid Until</label>
+            <input id="qValid" type="date" disabled>
+            <div class="pf-miniHint">Automatically set to 30 days after Quote Date</div>
+          </div>
+          <div>
+            <label>Company</label>
+            <select id="qCompany"></select>
+          </div>
         </div>
-        <div>
-          <label>Value</label>
-          <input id="estValue" type="number" step="0.01" placeholder="0.00">
+
+        <div class="pf-card" style="margin-top:14px">
+          <div class="pf-cardTop">
+            <div>
+              <div class="pf-cardTitle">Line Items</div>
+              <div class="pf-cardSub">Select items from inventory (SKU, Item, Qty, Price)</div>
+            </div>
+          </div>
+          <div class="pf-cardBody">
+            <div class="pf-inlineRow" style="flex-wrap:wrap; gap:10px" autocomplete="off">
+  <div class="pf-seg" role="tablist" aria-label="Line item mode">
+    <button type="button" class="pf-segBtn active" id="liModeInv">From Inventory</button>
+    <button type="button" class="pf-segBtn" id="liModeCustom">Custom Item</button>
+  </div>
+
+  <input id="invSearch" class="pf-input pf-liInv" type="text" placeholder="Search inventory by SKU or name..." autocomplete="off" style="min-width:260px">
+  <select id="invPick" class="pf-input pf-liInv" style="min-width:260px"></select>
+
+  <input id="cusSku" class="pf-input pf-liCustom" type="text" placeholder="SKU (optional)" style="width:160px; display:none">
+  <input id="cusName" class="pf-input pf-liCustom" type="text" placeholder="Custom item description" style="min-width:260px; display:none">
+
+  <input id="liQty" class="pf-input" type="number" min="0" step="1" placeholder="Qty" style="width:110px">
+  <input id="liWeight" class="pf-input" type="number" min="0" step="0.01" placeholder="Unit Wt (lb)" style="width:160px">
+  <input id="liPrice" class="pf-input" type="number" min="0" step="0.01" placeholder="Unit Price" style="width:150px">
+  <button class="btn primary" id="btnAddLine" type="button">Add</button>
+</div>
+
+            <div class="pf-tableWrap" style="margin-top:12px">
+              <table class="pf-table">
+                <thead>
+                  <tr>
+                    <th style="width:160px">SKU</th>
+                    <th>Item</th>
+                    <th style="width:110px;text-align:right">Qty</th>
+                    <th style="width:140px;text-align:right">Unit Wt</th>
+                    <th style="width:150px;text-align:right">Line Wt</th>
+                    <th style="width:150px;text-align:right">Price</th>
+                    <th style="width:160px;text-align:right">Line Total</th>
+                    <th style="width:70px"></th>
+                  </tr>
+                </thead>
+                <tbody id="lineTbody"></tbody>
+              </table>
+            </div>
+
+            <div class="pf-empty" id="lineEmpty" style="display:none">No line items yet. Use the controls above to add items from inventory or add a custom item.</div>
+          </div>
         </div>
-        <div>
-          <label>Due Date</label>
-          <input id="estDue" type="date">
+
+        <div class="grid2" style="margin-top:14px">
+          <div>
+            <label>Delivery to Site</label>
+            <input id="qDelivery" type="number" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div>
+            <label>Tax %</label>
+            <input id="qTaxRate" type="number" min="0" step="0.01" placeholder="0">
+          </div>
         </div>
-        <div>
-          <label>Stage</label>
-          <select id="estStage">
-            <option>Lead</option>
-            <option>Qualified</option>
-            <option selected>Quoted</option>
-            <option>Negotiation</option>
-            <option>Won</option>
-            <option>Lost</option>
-          </select>
+
+        <div class="pf-totals" style="margin-top:12px">
+          <div class="row"><div class="k">Subtotal</div><div class="v" id="qSubtotal">$0.00</div></div>
+          <div class="row"><div class="k">Total Weight</div><div class="v" id="qWeightOut">0 lb</div></div>
+          <div class="row"><div class="k">Delivery</div><div class="v" id="qDeliveryOut">$0.00</div></div>
+          <div class="row"><div class="k">Tax</div><div class="v" id="qTaxOut">$0.00</div></div>
+          <div class="row total"><div class="k">Total</div><div class="v" id="qTotal">$0.00</div></div>
         </div>
-        <div>
+
+        <div style="margin-top:14px">
           <label>Notes</label>
-          <input id="estNotes" type="text" placeholder="Optional">
+          <textarea id="qNotes" rows="3" placeholder="Optional notes for this quote..."></textarea>
         </div>
+
+        <div class="card" id="errBox" style="display:none;margin-top:12px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#7f1d1d"></div>
       </div>
-      <div class="small" style="margin-top:10px;color:var(--muted)">
-        This module stores estimates in <span class="mono">crm_opportunities</span>. If your field names differ, the page uses safe fallbacks.
+
+      <div class="foot">
+        <button class="btn ghost" type="button" id="btnQuoteDelete" style="display:none">Delete</button>
+        <span style="flex:1"></span>
+        <button class="btn" type="button" id="btnQuotePrint">Print Quote (PDF)</button>
+        <button class="btn" type="button" id="btnQuoteCancel">Cancel</button>
+        <button class="btn primary" type="button" id="btnQuoteSave">Save</button>
       </div>
-      <div class="card" id="errBox" style="display:none;margin-top:12px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#7f1d1d"></div>
-    </div>
-    <div class="foot">
-      <button class="btn ghost" type="button" id="btnEstDelete" style="display:none">Delete</button>
-      <span style="flex:1"></span>
-      <button class="btn" type="button" id="btnEstCancel">Cancel</button>
-      <button class="btn primary" type="button" id="btnEstSave">Save</button>
     </div>
   </div>
-</div>
+
 
 <script>
 (() => {
@@ -219,39 +394,78 @@
   pb.autoCancellation(false);
 
   const $$ = (id) => document.getElementById(id);
-  const money = (n) => {
-    const x = Number(n);
-    if(!Number.isFinite(x)) return "—";
-    return x.toLocaleString(undefined, { style:"currency", currency:"USD", maximumFractionDigits:0 });
-  };
-  const fmtDate = (iso) => {
-    if(!iso) return "—";
-    const d = new Date(iso);
-    if(String(d) === "Invalid Date") return "—";
-    return d.toLocaleDateString(undefined, {year:"numeric", month:"short", day:"numeric"});
-  };
-  const daysBetween = (a,b) => Math.round((b-a)/(1000*60*60*24));
 
-  const pillClass = (stage) => {
-    const s = (stage||"").toLowerCase();
-    if(s === "won" || s === "completed") return "ok";
-    if(s === "lost" || s === "cancelled" || s === "canceled") return "danger";
-    if(s === "quoted" || s === "negotiation" || s === "in progress" || s === "pending") return "warn";
-    return "neutral";
-  };
+  // --------------------------
+  // Topbar auth/connection indicator
+  // --------------------------
+  function initialsFromName(name){
+    const s = String(name||"").trim();
+    if(!s) return "U";
+    const parts = s.split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] || "";
+    const second = parts[1]?.[0] || "";
+    return (first + second).toUpperCase() || "U";
+  }
 
-  // --- Sidebar navigation (full-page routing)
+  function setModePill(text, cls){
+    const el = $$("modePill");
+    if(!el) return;
+    el.textContent = text;
+    // Keep base badge styling; optionally add state class
+    el.classList.remove("good","warn","bad","info");
+    if(cls) el.classList.add(cls);
+  }
+
+  function updateAuthUI(){
+    const isValid = !!pb?.authStore?.isValid;
+    if(isValid){
+      setModePill("Online", "good");
+      const u = pb.authStore.record || {};
+      const name = u.name || u.fullName || u.username || u.email || "Signed in";
+      const role = u.role || u.Role || (u.isAdmin ? "Admin" : "User");
+
+      const elName = $$("userName");
+      if(elName) elName.textContent = name;
+      const elRole = $$("userRole");
+      if(elRole) elRole.textContent = role;
+      const elBadge = $$("userBadge");
+      if(elBadge) elBadge.textContent = "Signed in";
+      const elInit = $$("userInitials");
+      if(elInit) elInit.textContent = initialsFromName(name);
+
+      const lo = $$("btnLogout");
+      if(lo) lo.style.display = "";
+    } else {
+      setModePill("Offline", "warn");
+      const elBadge = $$("userBadge");
+      if(elBadge) elBadge.textContent = "Not signed in";
+      const lo = $$("btnLogout");
+      if(lo) lo.style.display = "none";
+    }
+  }
+
+  // Update indicator immediately and whenever auth changes
+  try{
+    pb.authStore.onChange(() => updateAuthUI(), true);
+  }catch(_e){
+    // Older PocketBase builds: fall back to one-time update
+    updateAuthUI();
+  }
+
+  // --------------------------
+  // Navigation (sidebar tabs)
+  // --------------------------
   const mapTab = (tab) => {
-    if(tab === "crm") return "crm.html";
-    if(tab === "schedule") return "schedule.html";
-    if(tab === "estimator") return "estimates.html";
     if(tab === "dashboard") return "index.html?view=dashboard";
     if(tab === "inventory") return "index.html?view=inventory";
     if(tab === "production") return "index.html?view=production";
     if(tab === "shipping") return "index.html?view=shipping";
     if(tab === "reports") return "index.html?view=reports";
+    if(tab === "crm") return "crm.html";
+    if(tab === "schedule") return "schedule.html";
     if(tab === "projects") return "index.html?view=projects";
     if(tab === "transactions") return "index.html?view=transactions";
+    if(tab === "estimator") return "estimates.html";
     return "index.html";
   };
   document.getElementById("tabs")?.addEventListener("click", (e) => {
@@ -271,400 +485,1992 @@
     shell.classList.remove("sidebarOpen");
   });
 
-  // Auth badge in footer
-  const hydrateUserFooter = () => {
-    const u = pb.authStore.model;
-    const email = u?.email || u?.username || "";
-    const name = u?.name || u?.fullName || email || "User";
-    const parts = (name || "U").trim().split(/\s+/).filter(Boolean);
-    const initials = (parts[0]?.[0] || "U") + (parts[1]?.[0] || "");
-    if($$("userInitials")) $$("userInitials").textContent = initials.toUpperCase();
-    if($$("userName")) $$("userName").textContent = name;
-    if($$("userRole")) $$("userRole").textContent = u?.role || (pb.authStore.isAdmin ? "Admin" : "User");
-    if($$("userBadge")) $$("userBadge").textContent = pb.authStore.isValid ? "Signed in" : "Not signed in";
+  // --------------------------
+  // Helpers
+  // --------------------------
+  const money = (n) => {
+    const x = Number(n || 0);
+    return x.toLocaleString(undefined, { style:"currency", currency:"USD", minimumFractionDigits:2, maximumFractionDigits:2 });
   };
 
-  // --- Data
-  let companies = [];
-  let opps = [];
-  let editId = null;
+  const fmtLbs = (lbs) => {
+    const x = Number(lbs || 0);
+    if(!Number.isFinite(x) || x <= 0) return "0 lb";
+    const lbStr = x.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const tons = x / 2000;
+    const tonStr = tons.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${lbStr} lb (${tonStr} tons)`;
+  };
+  const fmtLbsShort = (lbs) => {
+    const x = Number(lbs || 0);
+    if(!Number.isFinite(x) || x <= 0) return "0";
+    return x.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  };
+  const fmtDate = (iso) => {
+    if(!iso) return "—";
+    const d = new Date(iso);
+    if(Number.isNaN(+d)) return "—";
+    return d.toLocaleDateString();
+  };
+  const toISODate = (d) => {
+    if(!d) return "";
+    const x = new Date(d);
+    if(Number.isNaN(+x)) return "";
+    const yyyy = x.getFullYear();
+    const mm = String(x.getMonth()+1).padStart(2,"0");
+    const dd = String(x.getDate()).padStart(2,"0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+  const addDays = (isoDate, days) => {
+    if(!isoDate) return "";
+    const d = new Date(isoDate + "T00:00:00");
+    if(Number.isNaN(+d)) return "";
+    d.setDate(d.getDate() + days);
+    return toISODate(d);
+  };
 
-  function setErr(msg) {
+  function setErr(msg="") {
     const box = $$("errBox");
-    if(!msg) { box.style.display="none"; box.textContent=""; return; }
-    box.style.display="block";
+    if(!box) return;
+    if(!msg){ box.style.display = "none"; box.textContent = ""; return; }
+    box.style.display = "block";
     box.textContent = msg;
   }
 
-  async function loadCompanies() {
-    try {
-      companies = await pb.collection("crm_companies").getFullList({ sort:"name" });
-    } catch(e) {
-      companies = [];
+  function escapePB(s){
+    return String(s||"").replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+  }
+
+  // --------------------------
+  // Auth gate
+  // --------------------------
+  const ensureAuth = async () => {
+    if(pb.authStore.isValid) return true;
+    // If you prefer direct login here, you can add it — for now route to index
+    window.location.href = "index.html";
+    return false;
+  };
+
+  // --------------------------
+  // Quote JSON marker inside notes (works even with unchanged PB schema)
+  // --------------------------
+  const MARK = "QUOTE_JSON:";
+  function splitNotes(rawNotes=""){
+    const i = rawNotes.lastIndexOf(MARK);
+    if(i === -1) return { userNotes: rawNotes.trim(), quote: null };
+    const userNotes = rawNotes.slice(0, i).trim();
+    const jsonPart = rawNotes.slice(i + MARK.length).trim();
+    try{
+      return { userNotes, quote: JSON.parse(jsonPart) };
+    } catch {
+      return { userNotes, quote: null };
     }
-    const sel = $$("estCompany");
-    sel.innerHTML = "";
-    sel.appendChild(new Option("— Select —",""));
-    companies.forEach(c => sel.appendChild(new Option(c.name || c.id, c.id)));
+  }
+  function buildNotes(userNotes, quoteObj){
+    const base = (userNotes || "").trim();
+    const payload = JSON.stringify(quoteObj);
+    return (base ? base + "\\n\\n---\\n" : "") + MARK + payload;
   }
 
-  async function loadOpps() {
-    // Prefer expand company for card rendering
-    try {
-      opps = await pb.collection("crm_opportunities").getFullList({ sort:"-updated", expand:"company,primaryContact" });
-    } catch(e) {
-      opps = [];
+  function parseMaybeJSON(v){
+    if(v == null) return null;
+    if(typeof v === "string"){
+      const s = v.trim();
+      if(!s) return null;
+      try{ return JSON.parse(s); } catch { return null; }
     }
-  }
-
-  function getField(o, keys) {
-    for(const k of keys) {
-      if(o && Object.prototype.hasOwnProperty.call(o,k)) return o[k];
-    }
-    return undefined;
-  }
-
-  function toNum(v) {
-    const n = Number(v);
-    return Number.isFinite(n) ? n : 0;
-  }
-
-  function matchesSearch(o, q) {
-    if(!q) return true;
-    const s = q.toLowerCase();
-    const name = (o.name || o.title || "").toLowerCase();
-    const stage = (o.stage || o.status || "").toLowerCase();
-    const comp = (o.expand?.company?.name || "").toLowerCase();
-    return name.includes(s) || stage.includes(s) || comp.includes(s);
-  }
-
-  function estimateCode(o) {
-    const year = (o.created || o.created_at || "").slice(0,4) || new Date().getFullYear();
-    const tail = (o.id || "").slice(-5).toUpperCase();
-    return `EST-${year}-${tail || "00000"}`;
-  }
-
-  function pickDue(o) {
-    return getField(o, ["bidDate","dueDate","expectedCloseDate","deliveryDate","date"]);
-  }
-
-  function pickValue(o) {
-    const v = getField(o, ["estimatedValue","value","amount","totalValue"]);
     return v;
   }
 
-  function pickStage(o) {
-    return getField(o, ["stage","status"]) || "—";
+  function normalizeQuoteFromOpp(opp){
+    // Prefer structured PB fields; fallback to legacy JSON stored in notes
+    const legacy = splitNotes(opp?.notes || "").quote || null;
+
+    const itemsRaw = parseMaybeJSON(opp?.quoteItems ?? opp?.lineItems ?? opp?.itemsJson ?? null);
+    const items = Array.isArray(itemsRaw) ? itemsRaw
+      : Array.isArray(legacy?.items) ? legacy.items
+      : [];
+
+    const q = {
+      quoteNumber: (opp?.quoteNumber ?? legacy?.quoteNumber ?? "").toString(),
+      quoteDate: (opp?.quoteDate ?? legacy?.quoteDate ?? opp?.bidDate ?? "") || "",
+      projectName: (opp?.projectName ?? legacy?.projectName ?? opp?.name ?? "") || "",
+      projectLocation: (opp?.projectLocation ?? legacy?.projectLocation ?? "") || "",
+      validUntil: (opp?.validUntil ?? legacy?.validUntil ?? "") || "",
+      items,
+      deliveryPrice: Number(opp?.deliveryPrice ?? legacy?.deliveryPrice ?? 0) || 0,
+      taxRate: Number(opp?.taxRate ?? legacy?.taxRate ?? 0) || 0,
+      taxAmount: Number(opp?.taxAmount ?? legacy?.taxAmount ?? 0) || 0,
+      subtotal: Number(opp?.subtotal ?? legacy?.subtotal ?? 0) || 0,
+      total: Number(opp?.total ?? legacy?.total ?? 0) || 0,
+      updatedAt: legacy?.updatedAt || opp?.updated || opp?.created || ""
+    };
+
+    // If subtotal/total not stored, compute from line items
+    if(!q.subtotal){
+      q.subtotal = (q.items || []).reduce((sum, li) => sum + (Number(li?.qty||0) * Number(li?.price||0)), 0);
+    }
+    const base = q.subtotal + q.deliveryPrice;
+    const computedTax = base * (q.taxRate/100);
+    if(!q.taxAmount) q.taxAmount = computedTax;
+    if(!q.total) q.total = base + q.taxAmount;
+
+    // Ensure quote number exists
+    if(!q.quoteNumber){
+      q.quoteNumber = (legacy?.quoteNumber && String(legacy.quoteNumber).trim())
+        ? String(legacy.quoteNumber).trim()
+        : ("EST-" + String(opp?.id||"").slice(-6).toUpperCase());
+    }
+    // Ensure validUntil exists if quoteDate exists
+    if(!q.validUntil && q.quoteDate){
+      q.validUntil = addDays(q.quoteDate, 30);
+    }
+    return q;
   }
 
-  function kpiRender(kpis) {
-    const row = $$("kpiRow");
-    row.innerHTML = kpis.map(k => `
-      <div class="pf-kpiCard">
-        <div class="pf-kpiMeta">
-          <div class="pf-kpiK">${k.label}</div>
-          <div class="pf-kpiV">${k.value}</div>
-          <div class="pf-kpiS">${k.sub || ""}</div>
-        </div>
-        <div class="pf-kpiIcon">${k.icon || "▦"}</div>
-      </div>
-    `).join("");
+
+  // --------------------------
+  // Inventory helpers
+  // --------------------------
+  const getSku = (it) => it?.sku ?? it?.SKU ?? it?.Sku ?? "";
+  const getName = (it) => it?.name ?? it?.Name ?? it?.item ?? it?.Item ?? "";
+  const getUnitPrice = (it) => Number(it?.unitcost ?? it?.unitCost ?? it?.price ?? it?.unitPrice ?? 0) || 0;
+const getUnitWeight = (it) => {
+    const v = it?.unitWeight ?? it?.unitweight ?? it?.weight ?? it?.Weight ?? it?.wt ?? it?.WT ?? it?.unit_wt ?? it?.unitWt ?? 0;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  
+  let invMap = new Map();
+  async function loadInventoryOptions(query=""){
+    const pick = $$("invPick");
+    if(!pick) return;
+    pick.innerHTML = `<option value="">Select an inventory item…</option>`;
+    invMap = new Map();
+    try{
+      const opts = { perPage: 50, page: 1, sort: "name" };
+      if(query && query.trim()){
+        const q = escapePB(query.trim());
+        // Try common fields (sku/name)
+        opts.filter = `(sku ~ "${q}" || name ~ "${q}" || SKU ~ "${q}" || Name ~ "${q}")`;
+      }
+      const res = await pb.collection("items").getList(opts.page, opts.perPage, opts);
+      const items = res?.items || [];
+      items.forEach(it => {
+        const id = it.id;
+        invMap.set(id, it);
+        const label = `${getSku(it) ? getSku(it) + " — " : ""}${getName(it) || "(Unnamed Item)"}`;
+        const o = document.createElement("option");
+        o.value = id;
+        o.textContent = label;
+        pick.appendChild(o);
+      });
+    } catch(e){
+      console.warn("Unable to load inventory items.", e);
+      const o = document.createElement("option");
+      o.value = "";
+      o.textContent = "Unable to load inventory list";
+      pick.appendChild(o);
+    }
   }
 
-  function render() {
-    const q = ($$("q").value || "").trim();
-    const filtered = opps.filter(o => matchesSearch(o, q));
+  // --------------------------
+  // Modal state
+  // --------------------------
+  let editId = null;
+  let lineItems = []; // {source:'inventory'|'custom', itemId?, sku, name, qty, price}
+  let currentCompanyName = "";
+  let lineMode = "inv"; // 'inv' or 'custom'
+  function applyLineMode(mode){
+    lineMode = (mode === "custom") ? "custom" : "inv";
+    const invEls = document.querySelectorAll(".pf-liInv");
+    const cusEls = document.querySelectorAll(".pf-liCustom");
+    invEls.forEach(el => { el.style.display = (lineMode === "inv") ? "" : "none"; });
+    cusEls.forEach(el => { el.style.display = (lineMode === "custom") ? "" : "none"; });
+    $$("liModeInv")?.classList.toggle("active", lineMode === "inv");
+    $$("liModeCustom")?.classList.toggle("active", lineMode === "custom");
+  }
 
-    // Open quotes (Quoted / Negotiation)
-    const open = filtered.filter(o => {
-      const st = (pickStage(o) || "").toLowerCase();
-      return st === "quoted" || st === "negotiation";
+
+  
+  // --------------------------
+  // Modal read-only (Won quotes)
+  // --------------------------
+  let modalReadOnly = false;
+
+  function applyModalReadOnly(){
+    const qm = $$("quoteModal");
+    if(!qm) return;
+
+    qm.classList.toggle("isReadOnly", !!modalReadOnly);
+
+    // Quote number is always readonly (auto-generated)
+    const qn = $$("qNumber");
+    if(qn) qn.readOnly = true;
+
+    // Disable main form fields
+    const ids = ["qDate","qProject","qLocation","qCompany","qNotes","qDelivery","qTaxRate","invSearch","invPick","liQty","liWeight","liPrice","cusSku","cusName","liModeInv","liModeCustom","btnAddLine"];
+    ids.forEach(id => {
+      const el = $$(id);
+      if(!el) return;
+      el.disabled = !!modalReadOnly;
     });
 
-    const won = filtered.filter(o => (pickStage(o)||"").toLowerCase() === "won");
-    const lost = filtered.filter(o => (pickStage(o)||"").toLowerCase() === "lost");
+    // Footer buttons
+    const save = $$("btnQuoteSave");
+    if(save) save.style.display = modalReadOnly ? "none" : "inline-flex";
 
-    const openCount = open.length;
-    const pipe = open.reduce((sum,o)=> sum + toNum(pickValue(o)), 0);
-    const denom = won.length + lost.length;
-    const winRate = denom ? Math.round((won.length/denom)*100) : 0;
-    const cycle = won.length ? Math.round(won.reduce((s,o)=> {
-      const a = new Date(o.created || o.created_at || Date.now());
-      const b = new Date(o.updated || o.updated_at || Date.now());
-      return s + Math.max(0, daysBetween(a,b));
-    },0) / won.length) : 0;
+    const del = $$("btnQuoteDelete");
+    if(del) del.style.display = (modalReadOnly || !editId) ? "none" : "inline-flex";
 
-    kpiRender([
-      { label:"Open Quotes", value: openCount.toLocaleString(), sub: openCount ? "awaiting response" : "—", icon:"📄" },
-      { label:"Pipeline Value", value: money(pipe), sub: openCount ? `${openCount} active` : "—", icon:"💲" },
-      { label:"Win Rate", value: (denom? winRate+"%":"—"), sub: denom? `${won.length} won / ${lost.length} lost` : "No history", icon:"✅" },
-      { label:"Avg. Cycle Time", value: (won.length? cycle+" days":"—"), sub: won.length? "won quotes" : "—", icon:"⏱" },
-    ]);
+    // Line table edits + remove buttons
+    qm.querySelectorAll("input.liQty, input.liWt, input.liPrice").forEach(el => el.disabled = !!modalReadOnly);
+    qm.querySelectorAll("button.liRemove").forEach(btn => btn.style.display = modalReadOnly ? "none" : "inline-flex");
+  }
 
-    $$("summaryHint").textContent = `${open.length} open quote${open.length===1?"":"s"} • ${filtered.length} total record${filtered.length===1?"":"s"}`;
 
-    const list = $$("estList");
-    if(!open.length) {
-      list.innerHTML = `<div class="pf-empty">No open quotes found. Click <b>New Estimate</b> to create one.</div>`;
-      return;
+  function openModal(mode, record=null){
+    setErr("");
+    reservedQuoteNumber = null;
+    applyLineMode("inv");
+    const qm = $$("quoteModal");
+    if(qm){ qm.style.display = "flex"; qm.classList.add("open"); qm.setAttribute("aria-hidden","false"); }
+    else { return; }
+
+    // Line item mode toggle (inventory vs custom)
+    if(!window.__liModeBound){
+      $$("liModeInv")?.addEventListener("click", () => applyLineMode("inv"));
+      $$("liModeCustom")?.addEventListener("click", () => applyLineMode("custom"));
+      window.__liModeBound = true;
     }
 
-    list.innerHTML = open.map(o => {
-      const comp = o.expand?.company?.name || "";
-      const st = pickStage(o);
-      const val = money(pickValue(o));
-      const due = fmtDate(pickDue(o));
-      const created = fmtDate(o.created || o.created_at);
-      const ver = "v1.0";
+    if(mode === "edit" && record){
+      editId = record.id;
+      const _stSel = stageForSelect(pickStage(record));
+      modalReadOnly = (_stSel === "Won");
+      $$("quoteModalTitle").textContent = modalReadOnly ? "View Quote" : "Edit Quote";
+      $$("btnQuoteDelete").style.display = "inline-flex";
+
+      const { userNotes } = splitNotes(record.notes || "");
+      const q = normalizeQuoteFromOpp(record) || {};
+      $$("qNumber").value = q.quoteNumber || "";
+      $$("qDate").value = toISODate(q.quoteDate) || toISODate(record.bidDate || record.created);
+      $$("qProject").value = q.projectName || record.name || "";
+      $$("qLocation").value = q.projectLocation || "";
+      $$("qValid").value = toISODate(q.validUntil) || addDays($$("qDate").value, 30);
+      $$("qCompany").value = record.company || record.companyId || (Array.isArray(record.company)? record.company[0] : "") || "";
+      $$("qNotes").value = userNotes || "";
+
+      lineItems = Array.isArray(q.items) ? q.items.map(x => ({
+        source: (x.source || ((x.itemId || x.id) ? "inventory" : "custom")),
+        itemId: x.itemId || x.id || "",
+        sku: x.sku || "",
+        name: x.name || x.item || "",
+        qty: Number(x.qty || 0),
+        unitWeight: Number(x.unitWeight ?? x.weight ?? x.unitWt ?? 0) || 0,
+        price: Number(x.price || 0)
+      })) : [];
+
+      $$("qDelivery").value = (q.deliveryPrice ?? 0);
+      $$("qTaxRate").value = (q.taxRate ?? 0);
+
+    } else {
+      editId = null;
+      modalReadOnly = false;
+      $$("quoteModalTitle").textContent = "New Quote";
+      $$("btnQuoteDelete").style.display = "none";
+
+      $$("qNumber").value = reservedQuoteNumber || "";
+      const today = toISODate(new Date());
+      $$("qDate").value = today;
+      $$("qProject").value = "";
+      $$("qLocation").value = "";
+      $$("qValid").value = addDays(today, 30);
+      $$("qCompany").value = "";
+      $$("qNotes").value = "";
+      $$("qDelivery").value = "";
+      $$("qTaxRate").value = "";
+
+      lineItems = [];
+    }
+
+    renderLines();
+    computeTotals();
+    // fresh inventory list
+    loadInventoryOptions($$("invSearch").value || "");
+  }
+
+  function closeModal(){
+    const qm = $$("quoteModal");
+    if(!qm) return;
+    qm.classList.remove("open");
+    qm.setAttribute("aria-hidden","true");
+    qm.style.display = "none";
+  }
+
+  // --------------------------
+  // Lines rendering & totals
+  // --------------------------
+  function renderLines(){
+    const tb = $$("lineTbody");
+    const empty = $$("lineEmpty");
+    if(!tb) return;
+    if(lineItems.length === 0){
+      tb.innerHTML = "";
+      if(empty) empty.style.display = "block";
+      return;
+    }
+    if(empty) empty.style.display = "none";
+
+    tb.innerHTML = lineItems.map((li, idx) => {
+      const lineTotal = (Number(li.qty||0) * Number(li.price||0));
       return `
-        <div class="pf-estCard" data-id="${o.id}">
-          <div class="pf-estIcon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 1.5V8h4.5L14 3.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Z"/></svg>
-          </div>
-          <div class="pf-estMain">
-            <div class="pf-estTop">
-              <div class="pf-estId">${estimateCode(o)}</div>
-              <div class="pf-estVer">• ${ver}</div>
-              <span class="pill ${pillClass(st)}">${st}</span>
-            </div>
-            <div class="pf-estTitle">${o.name || o.title || "Untitled Estimate"}</div>
-            <div class="pf-estSub">${comp || "—"}</div>
-
-            <div class="pf-estStats">
-              <div>
-                <div class="pf-statLabel">$ Value</div>
-                <div class="pf-statValue">${val}</div>
-              </div>
-              <div>
-                <div class="pf-statLabel">Due Date</div>
-                <div class="pf-statValue">${due}</div>
-              </div>
-              <div>
-                <div class="pf-statLabel">Line Items</div>
-                <div class="pf-statValue">—</div>
-              </div>
-            </div>
-
-            <div class="pf-estBottom">
-              <div class="pf-estCreated">Created ${created}</div>
-              <div class="pf-estActions">
-                <button class="btn" type="button" data-act="edit">Edit</button>
-                <button class="btn primary" type="button" data-act="send">Send</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <tr data-idx="${idx}">
+          <td class="mono">${li.sku || "—"}</td>
+          <td>${li.name || "—"}${(li.source==="custom")?` <span style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(245,158,11,.14);color:#92400e">Custom</span>`:""}</td>
+          <td style="text-align:right">
+            <input class="pf-input liQty" type="number" min="0" step="1" value="${Number(li.qty||0)}" style="text-align:right">
+          </td>
+                    <td style="text-align:right">
+            <input class="pf-input liWt" type="number" min="0" step="0.01" value="${Number(li.unitWeight ?? li.weight ?? 0)}" style="text-align:right">
+          </td>
+          <td style="text-align:right;font-weight:750">${fmtLbsShort(Number(li.qty||0) * Number(li.unitWeight ?? li.weight ?? 0))} lb</td>
+          <td style="text-align:right">
+            <input class="pf-input liPrice" type="number" min="0" step="0.01" value="${Number(li.price||0)}" style="text-align:right">
+          </td>
+          <td style="text-align:right;font-weight:750">${money(lineTotal)}</td>
+          <td style="text-align:right">
+            <button class="btn ghost tiny liRemove" type="button">✕</button>
+          </td>
+        </tr>
       `;
     }).join("");
   }
 
-  function openModal(mode, o=null) {
-    setErr("");
-    $$("estModal").classList.add("open");
-    $$("estModal").setAttribute("aria-hidden","false");
-    if(mode === "edit" && o) {
-      editId = o.id;
-      $$("estModalTitle").textContent = "Edit Estimate";
-      $$("btnEstDelete").style.display = "inline-flex";
-      $$("estName").value = o.name || o.title || "";
-      $$("estCompany").value = o.company || o.companyId || (Array.isArray(o.company)? o.company[0] : "") || "";
-      $$("estValue").value = (pickValue(o) ?? "");
-      $$("estDue").value = (pickDue(o) || "").slice(0,10);
-      $$("estStage").value = pickStage(o) || "Quoted";
-      $$("estNotes").value = o.notes || "";
-    } else {
-      editId = null;
-      $$("estModalTitle").textContent = "New Estimate";
-      $$("btnEstDelete").style.display = "none";
-      $$("estName").value = "";
-      $$("estCompany").value = "";
-      $$("estValue").value = "";
-      $$("estDue").value = "";
-      $$("estStage").value = "Quoted";
-      $$("estNotes").value = "";
-    }
+  function computeTotals(){
+    const subtotal = lineItems.reduce((sum, li) => sum + (Number(li.qty||0) * Number(li.price||0)), 0);
+    const weight = lineItems.reduce((sum, li) => sum + (Number(li.qty||0) * Number(li.unitWeight ?? li.weight ?? 0)), 0);
+    const delivery = Number($$("qDelivery").value || 0) || 0;
+    const taxRate = Number($$("qTaxRate").value || 0) || 0;
+    const tax = (subtotal + delivery) * (taxRate/100);
+    const total = subtotal + delivery + tax;
+
+    $$("qSubtotal").textContent = money(subtotal);
+    const wEl = $$("qWeightOut");
+    if(wEl) wEl.textContent = fmtLbs(weight);
+    $$("qDeliveryOut").textContent = money(delivery);
+    $$("qTaxOut").textContent = money(tax);
+    $$("qTotal").textContent = money(total);
+
+    return { subtotal, delivery, taxRate, tax, total, weight };
   }
 
-  function closeModal() {
-    $$("estModal").classList.remove("open");
-    $$("estModal").setAttribute("aria-hidden","true");
-  }
-
-  async function safeUpsert(data) {
-    // Try (stage + estimatedValue + bidDate) then fallback variants
+  // --------------------------
+  // Save / delete
+  // --------------------------
+  async function safeSaveOpportunity(data, legacyData=null){
+    // Prefer saving structured quote fields (quoteNumber, quoteItems, totals, etc).
+    // Fallback: embed JSON in notes if schema doesn't have those fields yet.
     const attempts = [];
-    // Most likely
     attempts.push({ ...data });
-    // value field fallback
-    if("estimatedValue" in data) {
+
+    // PocketBase schema variations: estimatedValue vs value
+    if("estimatedValue" in data){
       const d = { ...data };
       d.value = d.estimatedValue;
       delete d.estimatedValue;
       attempts.push(d);
     }
-    // due date fallback keys
-    if("bidDate" in data) {
-      for(const k of ["dueDate","expectedCloseDate","date"]) {
+
+    // Try without optional date fields
+    for(const key of ["bidDate","quoteDate","validUntil"]){
+      if(key in data){
         const d = { ...data };
-        d[k] = d.bidDate;
-        delete d.bidDate;
+        delete d[key];
         attempts.push(d);
       }
     }
-    // stage fallback
-    if("stage" in data) {
+
+    // Try without quoteItems (if json field not present)
+    if("quoteItems" in data){
       const d = { ...data };
-      d.status = d.stage;
-      delete d.stage;
+      delete d.quoteItems;
       attempts.push(d);
     }
 
-    let lastErr = null;
-    for(const d of attempts) {
-      try {
-        if(editId) {
-          return await pb.collection("crm_opportunities").update(editId, d);
-        } else {
-          return await pb.collection("crm_opportunities").create(d);
-        }
-      } catch(e) {
-        lastErr = e;
+    // Fallback: store full quote JSON in notes
+    if(legacyData){
+      attempts.push({ ...legacyData });
+      if("estimatedValue" in legacyData){
+        const d = { ...legacyData };
+        d.value = d.estimatedValue;
+        delete d.estimatedValue;
+        attempts.push(d);
       }
+    }
+
+    // Minimal
+    attempts.push({ name: data.name, company: data.company, stage: data.stage, notes: (legacyData?.notes ?? data.notes ?? "") });
+
+    let lastErr = null;
+    for(const a of attempts){
+      try{
+        if(editId) return await pb.collection("crm_opportunities").update(editId, a);
+        return await pb.collection("crm_opportunities").create(a);
+      }catch(e){ lastErr = e; }
     }
     throw lastErr || new Error("Unable to save");
   }
 
-  async function saveEstimate() {
-    setErr("");
-    const name = $$("estName").value.trim();
-    const company = $$("estCompany").value || null;
-    const val = $$("estValue").value;
-    const due = $$("estDue").value || "";
-    const stage = $$("estStage").value || "Quoted";
-    const notes = $$("estNotes").value.trim();
+  function gatherQuote(){
+    let quoteNumber = $$("qNumber").value.trim();
+    if(!quoteNumber && reservedQuoteNumber) quoteNumber = reservedQuoteNumber;
+    if(!quoteNumber) throw new Error("Quote number is required.");
+    const quoteDate = $$("qDate").value || "";
+    const projectName = $$("qProject").value.trim();
+    const projectLocation = $$("qLocation").value.trim();
+    const validUntil = $$("qValid").value || addDays(quoteDate, 30);
+    const companyId = $$("qCompany").value || "";
+    const notes = $$("qNotes").value || "";
+    const totals = computeTotals();
 
-    if(!name) return setErr("Estimate name is required.");
-    if(!company) return setErr("Company is required.");
+    if(!projectName) throw new Error("Project name is required.");
+    if(!companyId) throw new Error("Company is required.");
+    if(lineItems.length === 0) throw new Error("Add at least one line item.");
+    // sanitize line items
+    const items = lineItems.map(li => ({
+      source: (li.source || (li.itemId ? "inventory" : "custom")),
+      itemId: li.itemId || "",
+      sku: li.sku || "",
+      name: li.name || "",
+      qty: Number(li.qty||0),
+      unitWeight: Number(li.unitWeight ?? li.weight ?? 0) || 0,
+      price: Number(li.price||0)
+    })).filter(x => x.qty > 0);
 
-    const payload = {
-      name,
-      company,
-      stage,
-      estimatedValue: val ? Number(val) : 0,
-      bidDate: due ? due : null,
-      notes,
+    if(items.length === 0) throw new Error("Line items must have Qty > 0.");
+
+    const quoteObj = {
+      quoteNumber,
+      quoteDate,
+      projectName,
+      projectLocation,
+      validUntil,
+      items,
+      deliveryPrice: totals.delivery,
+      taxRate: totals.taxRate,
+      taxAmount: totals.tax,
+      subtotal: totals.subtotal,
+      total: totals.total,
+      totalWeight: totals.weight,
+      updatedAt: new Date().toISOString()
     };
 
-    try {
-      await safeUpsert(payload);
+    return { quoteObj, notes, companyId, totals };
+  }
+
+  async function saveQuote(){
+    if(modalReadOnly) return toast("This quote is read-only.", "info");
+    setErr("");
+    try{
+      const { quoteObj, notes, companyId, totals } = gatherQuote();
+      const userNotes = (notes || "").trim();
+
+      // Structured fields (recommended PB schema)
+      const full = {
+        name: quoteObj.projectName,
+        company: companyId,
+        stage: "Quoted",
+        estimatedValue: totals.total,
+        bidDate: quoteObj.quoteDate ? quoteObj.quoteDate : null,
+
+        quoteNumber: quoteObj.quoteNumber || "",
+        quoteDate: quoteObj.quoteDate ? quoteObj.quoteDate : null,
+        validUntil: quoteObj.validUntil ? quoteObj.validUntil : null,
+        projectName: quoteObj.projectName || "",
+        projectLocation: quoteObj.projectLocation || "",
+
+        deliveryPrice: totals.delivery,
+        taxRate: totals.taxRate,
+        taxAmount: totals.tax,
+        subtotal: totals.subtotal,
+        total: totals.total,
+
+        quoteItems: quoteObj.items,   // JSON field recommended
+        notes: userNotes              // user notes only
+      };
+
+      // Legacy fallback: store quote JSON in notes if PB schema doesn't have the fields yet
+      const legacy = { ...full, notes: buildNotes(userNotes, quoteObj) };
+
+      await safeSaveOpportunity(full, legacy);
       closeModal();
       await refresh();
-    } catch(e) {
-      const msg = e?.data?.message || e?.message || "Save failed.";
-      setErr(msg);
+    }catch(e){
+      setErr(e?.data?.message || e?.message || "Save failed.");
       console.error(e);
     }
   }
 
-  async function deleteEstimate() {
+  async function deleteQuote(){
     if(!editId) return;
-    if(!confirm("Delete this estimate?")) return;
-    try {
+    if(!confirm("Delete this quote? This cannot be undone.")) return;
+    setErr("");
+    try{
       await pb.collection("crm_opportunities").delete(editId);
       closeModal();
       await refresh();
-    } catch(e) {
+    }catch(e){
       setErr(e?.data?.message || e?.message || "Delete failed.");
+      console.error(e);
     }
   }
 
-  function printEstimate(o) {
-    const comp = o.expand?.company?.name || "";
-    const st = pickStage(o);
-    const val = money(pickValue(o));
-    const due = fmtDate(pickDue(o));
-    const code = estimateCode(o);
-    const html = `
-      <html><head><title>${code}</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1"/>
-        <style>
-          body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:24px;color:#0f172a}
-          .card{border:1px solid #e2e8f0;border-radius:14px;padding:16px;max-width:720px}
-          h1{margin:0 0 6px 0;font-size:20px}
-          .muted{color:#64748b;font-size:12px}
-          .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-          .k{font-size:12px;color:#64748b}
-          .v{font-weight:700}
-          @media print{button{display:none}}
-        </style>
-      </head><body>
-        <div class="card">
-          <h1>${o.name || "Estimate"}</h1>
-          <div class="muted">${code} • ${comp} • ${st}</div>
-          <div class="grid">
-            <div><div class="k">Value</div><div class="v">${val}</div></div>
-            <div><div class="k">Due Date</div><div class="v">${due}</div></div>
-          </div>
-          <div style="margin-top:16px" class="muted">Generated from Fisher Estimates module.</div>
-          <div style="margin-top:16px"><button onclick="window.print()">Print / Save PDF</button></div>
-        </div>
-      </body></html>
-    `;
-    const w = window.open("", "_blank", "noopener");
-    if(!w) return;
-    w.document.open(); w.document.write(html); w.document.close();
+  // --------------------------
+  // Print (PDF via browser)
+  // --------------------------
+  function buildPrintHtml(companyName, quoteObj){
+    const totalWeight = Number(quoteObj.totalWeight ?? 0) || (quoteObj.items || []).reduce((sum, it) => sum + (Number(it.qty||0) * Number(it.unitWeight ?? it.weight ?? 0)), 0);
+    const rows = (quoteObj.items||[]).map(li => {
+      const lt = Number(li.qty||0) * Number(li.price||0);
+      return `
+        <tr>
+          <td>${(li.sku||"—")}</td>
+          <td>${(li.name||"—")}</td>
+          <td style="text-align:right">${Number(li.qty||0)}</td>
+          <td style="text-align:right">${money(li.price||0)}</td>
+          <td style="text-align:right">${money(lt)}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Quote ${quoteObj.quoteNumber || ""}</title>
+<style>
+  body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#0f172a; margin:0; padding:24px;}
+  .head{display:flex; align-items:center; gap:14px; border-bottom:2px solid #e2e8f0; padding-bottom:14px; margin-bottom:18px;}
+  .logo{width:54px; height:54px; object-fit:contain;}
+  h1{font-size:18px; margin:0;}
+  .muted{color:#475569; font-size:12px;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0 18px;}
+  .box{border:1px solid #e2e8f0; border-radius:12px; padding:12px;}
+  .k{font-size:11px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+  .v{font-size:13px; margin-top:4px; font-weight:650;}
+  table{width:100%; border-collapse:collapse; margin-top:10px;}
+  th,td{border-bottom:1px solid #e2e8f0; padding:10px 8px; font-size:12px; vertical-align:top;}
+  th{background:#f8fafc; text-align:left; font-size:11px; color:#334155; text-transform:uppercase; letter-spacing:.04em;}
+  .totals{margin-top:14px; display:flex; justify-content:flex-end;}
+  .totals .tbox{min-width:280px; border:1px solid #e2e8f0; border-radius:12px; padding:12px;}
+  .row{display:flex; justify-content:space-between; padding:6px 0; font-size:12px;}
+  .row.total{border-top:2px solid #e2e8f0; margin-top:8px; padding-top:10px; font-weight:800; font-size:13px;}
+  @page { size: letter; margin: 0.6in; }
+  @media print{ body{padding:0} }
+</style>
+</head>
+<body>
+  <div class="head">
+    <img class="logo" src="Fisher_no.png" alt="Fisher"/>
+    <div>
+      <h1>Fisher Precast Management System — Quote</h1>
+      <div class="muted">Generated from Estimates module</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="box">
+      <div class="k">Quote</div>
+      <div class="v"># ${(quoteObj.quoteNumber||"—")}</div>
+      <div class="muted" style="margin-top:6px">Date: ${fmtDate(quoteObj.quoteDate)}</div>
+      <div class="muted">Valid Until: ${fmtDate(quoteObj.validUntil)}</div>
+    </div>
+    <div class="box">
+      <div class="k">Customer</div>
+      <div class="v">${companyName || "—"}</div>
+      <div class="muted" style="margin-top:6px">Project: ${(quoteObj.projectName||"—")}</div>
+      <div class="muted">Location: ${(quoteObj.projectLocation||"—")}</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="k">Quote Items</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:120px">SKU</th>
+          <th>Item</th>
+          <th style="width:70px;text-align:right">Qty</th>
+          <th style="width:110px;text-align:right">Price</th>
+          <th style="width:120px;text-align:right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="tbox">
+        <div class="row"><div>Subtotal</div><div>${money(quoteObj.subtotal||0)}</div></div>
+        <div class="row"><div>Total Weight</div><div>${fmtLbs(totalWeight)}</div></div>
+        <div class="row"><div>Delivery</div><div>${money(quoteObj.deliveryPrice||0)}</div></div>
+        <div class="row"><div>Tax</div><div>${money(quoteObj.taxAmount||0)}</div></div>
+        <div class="row total"><div>Total</div><div>${money(quoteObj.total||0)}</div></div>
+      </div>
+    </div>
+
+    ${(quoteObj.notes ? `<div class="muted" style="margin-top:14px"><b>Notes:</b> ${String(quoteObj.notes).replaceAll("<","&lt;")}</div>` : "")}
+  </div>
+
+  <script>
+    window.addEventListener("load", () => setTimeout(() => window.print(), 150));
+  <\/script>
+</body>
+</html>`;
   }
 
-  async function refresh() {
-    $$("modePill").textContent = pb.authStore.isValid ? "Live • PocketBase" : "Not signed in";
-    hydrateUserFooter();
-    await loadCompanies();
-    await loadOpps();
-    render();
+  async function printCurrentQuote(fromRecord=null){
+    setErr("");
+    try{
+      let quoteObj, companyName;
+      if(fromRecord){
+        const { userNotes } = splitNotes(fromRecord.notes || "");
+        quoteObj = normalizeQuoteFromOpp(fromRecord) || { projectName: fromRecord.name || "" };
+        quoteObj.notes = userNotes || "";
+        companyName = fromRecord.expand?.company?.name || "";
+      } else {
+        const gathered = gatherQuote();
+        quoteObj = gathered.quoteObj;
+        // put user notes into quoteObj for printing
+        quoteObj.notes = gathered.notes;
+        companyName = $$("qCompany").selectedOptions?.[0]?.textContent || "";
+      }
+      const html = buildPrintHtml(companyName, quoteObj);
+      const w = window.open("", "_blank");
+      if(!w) return setErr("Popup blocked. Allow popups to print.");
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+    } catch(e){
+      setErr(e?.message || "Unable to print.");
+      console.error(e);
+    }
   }
 
-  // --- Events
-  $$("q").addEventListener("input", render);
-  $$("btnNewEst").addEventListener("click", () => openModal("new"));
-  $$("btnNewEstTop").addEventListener("click", () => openModal("new"));
-  $$("btnRefresh").addEventListener("click", refresh);
-  $$("btnFilter").addEventListener("click", () => alert("Filter panel coming next (stage, due date, rep)."));
-  $$("btnOpenFisher").addEventListener("click", () => window.location.href = "Fisher_Stack_with_back.html?legacy=1&back=estimates.html&v=" + Date.now());
-  $$("btnOpenFisher2").addEventListener("click", () => window.location.href = "Fisher_Stack_with_back.html?legacy=1&back=estimates.html&v=" + Date.now());
-  $$("btnOpenFisherTop").addEventListener("click", () => window.location.href = "Fisher_Stack_with_back.html?legacy=1&back=estimates.html&v=" + Date.now());
+  // --------------------------
+  // Data loading & list rendering
+  // --------------------------
+  let all = [];
+  let stageFilter = "all"; // all | quoted | negotiation | won | lost
+  function pickStage(o){
+    return o.stage || o.Stage || o.status || "Quoted";
+  }
+  function stageForSelect(st){
+    const s = String(st || "").trim().toLowerCase();
+    if(s.startsWith("neg")) return "Negotiation";
+    if(s.startsWith("won")) return "Won";
+    if(s.startsWith("lost")) return "Lost";
+    return "Quoted";
+  }
 
-  $$("btnEstClose").addEventListener("click", closeModal);
-  $$("btnEstCancel").addEventListener("click", closeModal);
-  $$("btnEstSave").addEventListener("click", saveEstimate);
-  $$("btnEstDelete").addEventListener("click", deleteEstimate);
-  $$("estModal").addEventListener("click", (e) => { if(e.target === $$("estModal")) closeModal(); });
+  function stageKey(raw){
+    return stageForSelect(raw).toLowerCase(); // quoted | negotiation | won | lost
+  }
+  function stageLabel(key){
+    switch(String(key||"all").toLowerCase()){
+      case "quoted": return "Quoted";
+      case "negotiation": return "Negotiation";
+      case "won": return "Won";
+      case "lost": return "Lost";
+      default: return "All";
+    }
+  }
 
-  $$("estList").addEventListener("click", (e) => {
-    const card = e.target.closest(".pf-estCard");
-    if(!card) return;
-    const id = card.getAttribute("data-id");
-    const o = opps.find(x => x.id === id);
-    const act = e.target.getAttribute("data-act");
-    if(act === "send") {
-      e.preventDefault(); e.stopPropagation();
-      if(o) printEstimate(o);
+  function pickValue(o){
+    return Number(o.estimatedValue ?? o.value ?? o.Value ?? 0) || 0;
+  }
+  function estimateCode(o){
+    const qn = (o?.quoteNumber && String(o.quoteNumber).trim()) ? String(o.quoteNumber).trim() : "";
+    if(qn) return qn;
+    const legacy = splitNotes(o?.notes || "").quote;
+    return (legacy?.quoteNumber && String(legacy.quoteNumber).trim())
+      ? String(legacy.quoteNumber).trim()
+      : ("EST-" + String(o?.id||"").slice(-6).toUpperCase());
+  }
+
+
+  function pillClass(st){
+    st = (st||"").toLowerCase();
+    if(st.includes("won")) return "good";
+    if(st.includes("lost")) return "bad";
+    if(st.includes("negoti")) return "warn";
+    return "info";
+  }
+
+  
+  function isOpenStageLower(st){
+    return st === "quoted" || st === "quote" || st === "negotiation" || st === "negotiations";
+  }
+  function isClosedStageLower(st){
+    return st === "won" || st === "lost";
+  }
+
+  function renderList(){
+    const list = $$("estList");
+    const hint = $$("summaryHint");
+    if(!list) return;
+
+    const q = ($$("topSearch")?.value || "").trim().toLowerCase();
+
+    const matchQuery = (o) => {
+      const quote = normalizeQuoteFromOpp(o);
+      const fields = [
+        o.name, o.title,
+        o.expand?.company?.name,
+        quote?.quoteNumber,
+        quote?.projectName,
+        quote?.projectLocation
+      ].filter(Boolean).join(" ").toLowerCase();
+      return !q || fields.includes(q);
+    };
+
+    const stageFilteredAll = all.filter(o => (stageFilter === "all") || (stageKey(pickStage(o)) === stageFilter));
+
+    const openAll = stageFilteredAll.filter(o => isOpenStageLower(stageKey(pickStage(o))));
+    const closedAll = stageFilteredAll.filter(o => isClosedStageLower(stageKey(pickStage(o))));
+
+    const open = openAll.filter(matchQuery);
+    const closed = closedAll.filter(matchQuery);
+
+    const totalOpen = openAll.length;
+    const totalClosed = closedAll.length;
+
+    const openVal = openAll.reduce((s,o)=> {
+      const quote = normalizeQuoteFromOpp(o);
+      return s + (Number(quote?.total ?? pickValue(o) ?? 0) || 0);
+    }, 0);
+
+    if(hint) hint.textContent = `${stageLabel(stageFilter)} • ${totalOpen} open • ${totalClosed} closed • ${money(openVal)} pipeline`;
+
+    if(open.length === 0 && closed.length === 0){
+      list.innerHTML = `<div class="pf-empty">No quotes found for <b>${stageLabel(stageFilter)}</b>. Click <b>New Estimate</b> to create one.</div>`;
       return;
     }
-    if(act === "edit" || card) {
-      e.preventDefault(); e.stopPropagation();
-      if(o) openModal("edit", o);
+
+    const renderSection = (title, arr) => {
+      if(arr.length === 0) return "";
+      const cards = arr.map(o => {
+        const comp = o.expand?.company?.name || "";
+        const stRaw = pickStage(o);
+        const st = stageForSelect(stRaw);
+        const isClosed = (st === "Won" || st === "Lost");
+        const quote = normalizeQuoteFromOpp(o);
+        const val = money(Number(quote?.total ?? pickValue(o) ?? 0) || 0);
+        const qNum = estimateCode(o);
+        const qDate = fmtDate(quote?.quoteDate || o.bidDate || o.created);
+        const valid = fmtDate(quote?.validUntil);
+        const loc = quote?.projectLocation || "—";
+        const proj = quote?.projectName || o.name || "Untitled Quote";
+
+        const opt = (v) => `<option value="${v}" ${v === st ? "selected" : ""}>${v}</option>`;
+        const disabled = isClosed ? "disabled" : "";
+
+        return `
+          <div class="pf-estCard" data-id="${o.id}">
+            <div class="pf-estIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm1 2.5L19.5 9H15V4.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Z"/></svg>
+            </div>
+
+            <div class="pf-invMain">
+              <div class="pf-invQuote">
+                <span class="mono">${qNum}</span>
+                <span class="pf-miniHint">•</span>
+                <span class="pf-miniHint">${qDate}</span>
+                <span class="pf-miniHint">•</span>
+                <span class="badge ${pillClass(stRaw)}">${st}</span>
+              </div>
+              <div class="pf-invProject">${proj}</div>
+              <div class="pf-invMeta">${comp || "—"} • ${loc}</div>
+            </div>
+
+            <div class="pf-invRight">
+              <div class="pf-invAmount">${val}</div>
+              <div class="pf-invValid">Valid until <b>${valid}</b></div>
+              <div class="pf-invActions">
+                <select class="pf-stageSelect" data-act="stage" data-prev="${st}" aria-label="Status" ${disabled}>
+                  ${opt("Quoted")}${opt("Negotiation")}${opt("Won")}${opt("Lost")}
+                </select>
+                <button class="btn ghost small" type="button" data-act="print">PDF</button>
+                <button class="btn small" type="button" data-act="edit">${isClosed ? "View" : "Open"}</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div style="margin:10px 0 6px 0;font-weight:900;color:var(--text)">${title}</div>
+        ${cards}
+      `;
+    };
+
+    list.innerHTML =
+      renderSection("Open Quotes", open) +
+      renderSection("Closed (Won / Lost)", closed);
+  }
+
+
+
+  async function refresh(){
+    const ok = await ensureAuth();
+    if(!ok) return;
+    try{
+      // Grab recent opportunities; keep stages for list filtering client-side
+      const res = await pb.collection("crm_opportunities").getList(1, 200, {
+        sort: "-created",
+        expand: "company"
+      });
+      all = res?.items || [];
+      renderList();
+      // load companies for modal
+      await loadCompanies();
+    }catch(e){
+      console.error(e);
+      setErr(e?.data?.message || e?.message || "Failed to load estimates.");
+    }
+  }
+
+  async function loadCompanies(){
+    const sel = $$("qCompany");
+    if(!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = `<option value="">Select company…</option>`;
+    try{
+      const res = await pb.collection("crm_companies").getList(1, 200, { sort: "name" });
+      (res?.items || []).forEach(c => {
+        const o = document.createElement("option");
+        o.value = c.id;
+        o.textContent = c.name || c.Name || "(Unnamed)";
+        sel.appendChild(o);
+      });
+      if(prev) sel.value = prev;
+    }catch(e){
+      console.warn(e);
+      const o = document.createElement("option");
+      o.value = "";
+      o.textContent = "Unable to load companies";
+      sel.appendChild(o);
+    }
+  }
+
+  // --------------------------
+  
+  // --------------------------
+  // Quote numbering (YY-###)
+  // --------------------------
+  // Recommended PocketBase collection:
+  //   quote_counters: { year (text, unique), nextSeq (number) }
+  // This reserves a quote number immediately when the user clicks "New Estimate".
+  let reservedQuoteNumber = null;
+
+  function formatQuoteNumber(yearFull, seq){
+    const yy = String(yearFull).slice(-2);
+    const pad = seq >= 1000 ? 4 : 3;
+    return `${yy}-${String(seq).padStart(pad, "0")}`;
+  }
+
+  async function reserveQuoteNumber(){
+    const yearFull = new Date().getFullYear();
+    const yy = String(yearFull).slice(-2);
+
+    // 1) Try counter collection first
+    try{
+      const seq = await reserveQuoteSeqViaCounter(yearFull);
+      return formatQuoteNumber(yearFull, seq);
+    }catch(_e){
+      // 2) Fallback: scan existing quotes and pick next number
+      const seq = await reserveQuoteSeqFallback(yy);
+      return formatQuoteNumber(yearFull, seq);
+    }
+  }
+
+  async function reserveQuoteSeqViaCounter(yearFull){
+    const col = "quote_counters";
+    const year = String(yearFull);
+
+    for(let attempt=0; attempt<4; attempt++){
+      // Find existing counter for the year
+      const found = await pb.collection(col).getList(1, 1, { filter: `year="${year}"` });
+      const rec = found?.items?.[0] || null;
+
+      if(!rec){
+        // Create seed: nextSeq=2 (we're reserving 1 now)
+        try{
+          await pb.collection(col).create({ year, nextSeq: 2 });
+          return 1;
+        }catch(_e){
+          // Race: someone else created it first, retry
+          continue;
+        }
+      }
+
+      const next = Number(rec.nextSeq ?? rec.next ?? 1) || 1;
+      try{
+        await pb.collection(col).update(rec.id, { nextSeq: next + 1 });
+        return next;
+      }catch(_e){
+        // Race / temporary failure, retry
+        continue;
+      }
+    }
+
+    throw new Error("Unable to reserve quote number (counter busy).");
+  }
+
+  async function reserveQuoteSeqFallback(yy){
+    // Scan existing opportunities for quoteNumber like "26-001"
+    // NOTE: This is less safe under concurrency, so make quoteNumber UNIQUE in PB.
+    let maxSeq = 0;
+
+    const tryFields = ["quoteNumber", "QuoteNumber"];
+    for(const f of tryFields){
+      try{
+        const res = await pb.collection("crm_opportunities").getList(1, 1, {
+          filter: `${f} ~ "${yy}-"`,
+          sort: `-${f}`,
+        });
+        const it = res?.items?.[0];
+        const val = it ? (it[f] || "") : "";
+        const m = String(val || "").match(/^(\d{2})-(\d+)$/);
+        if(m && m[1] === yy){
+          maxSeq = Math.max(maxSeq, parseInt(m[2], 10) || 0);
+        }
+      }catch(_e){
+        // ignore
+      }
+    }
+
+    return maxSeq + 1;
+  }
+
+  async function startNewQuote(){
+    setErr("");
+    reservedQuoteNumber = null;
+
+    // Open modal immediately for fast UX
+    openModal("new");
+
+    const btns = [$$("btnNewEstTop"), $$("btnNewEst")].filter(Boolean);
+    btns.forEach(b => b.disabled = true);
+
+    try{
+      const qn = await reserveQuoteNumber();
+      reservedQuoteNumber = qn;
+      if($$("qNumber")) $$("qNumber").value = qn;
+
+      // Try to save a draft quote immediately so it exists in PocketBase right away.
+      // If this fails due to required fields (e.g., company), the quote will be created when the user clicks Save.
+      const today = $$("qDate")?.value || toISODate(new Date());
+      const valid = $$("qValid")?.value || addDays(today, 30);
+
+      const draft = {
+        stage: "Quoted",
+        name: `Quote ${qn}`,
+        quoteNumber: qn,
+        quoteDate: today,
+        validUntil: valid,
+        projectName: "",
+        projectLocation: "",
+        quoteItems: [],
+        subtotal: 0,
+        deliveryPrice: 0,
+        taxRate: 0,
+        taxAmount: 0,
+        total: 0,
+        estimatedValue: 0,
+        bidDate: today,
+        notes: ""
+      };
+
+      try{
+        const created = await pb.collection("crm_opportunities").create(draft);
+        editId = created?.id || null;
+        if(editId){
+          $$("quoteModalTitle").textContent = "Edit Quote";
+        }
+      }catch(e){
+        console.warn("Draft create failed; will create on Save.", e);
+        toast(`Quote # ${qn} reserved. Fill details and click Save to create the quote.`, "info");
+      }
+    }catch(e){
+      console.error(e);
+      setErr(e?.data?.message || e?.message || "Unable to generate a quote number.");
+      // allow manual entry if needed
+      const qnInput = $$("qNumber");
+      if(qnInput){
+        qnInput.removeAttribute("readonly");
+        qnInput.placeholder = "Enter quote # (e.g., 26-001)";
+      }
+    }finally{
+      btns.forEach(b => b.disabled = false);
+    }
+  }
+
+
+  // Start a new quote using a provided Quote/Estimate number (does NOT hit quote_counters).
+  async function startNewQuoteWithNumber(qn){
+    setErr("");
+    reservedQuoteNumber = null;
+
+    // Open modal immediately for fast UX
+    openModal("new");
+
+    const btns = [$$("btnNewEstTop"), $$("btnNewEst")].filter(Boolean);
+    btns.forEach(b => b.disabled = true);
+
+    try{
+      const fixed = String(qn || "").trim();
+      if(!fixed) throw new Error("Missing quote number.");
+
+      reservedQuoteNumber = fixed;
+      if($$("qNumber")) $$("qNumber").value = fixed;
+
+      // Try to save a draft quote immediately so it exists in PocketBase right away.
+      const today = $$("qDate")?.value || toISODate(new Date());
+      const valid = $$("qValid")?.value || addDays(today, 30);
+
+      const draft = {
+        stage: "Quoted",
+        name: `Quote ${fixed}`,
+        quoteNumber: fixed,
+        quoteDate: today,
+        validUntil: valid,
+        projectName: "",
+        projectLocation: "",
+        quoteItems: [],
+        subtotal: 0,
+        deliveryPrice: 0,
+        taxRate: 0,
+        taxAmount: 0,
+        total: 0,
+        totalWeight: 0,
+        estimatedValue: 0,
+        bidDate: today,
+        notes: ""
+      };
+
+      try{
+        const created = await pb.collection("crm_opportunities").create(draft);
+        editId = created?.id || null;
+        if(editId){
+          $$("quoteModalTitle").textContent = "Edit Quote";
+        }
+      }catch(e){
+        // If the quote already exists (unique constraint), open it instead.
+        const msg = (e?.data?.message || e?.message || "").toLowerCase();
+        if(msg.includes("unique") || msg.includes("exists") || msg.includes("already")){
+          try{
+            const qEsc = escapePB(fixed);
+            const res = await pb.collection("crm_opportunities").getList(1, 1, {
+              filter: `(quoteNumber = "${qEsc}" || QuoteNumber = "${qEsc}")`,
+              sort: "-created",
+            });
+            const rec = res?.items?.[0];
+            if(rec){
+              openModal("edit", rec);
+              toast(`Opened existing quote # ${fixed}.`, "info");
+            } else {
+              toast(`Quote # ${fixed} already exists. Use Search to open it.`, "info");
+            }
+          }catch(_e2){
+            toast(`Quote # ${fixed} already exists. Use Search to open it.`, "info");
+          }
+        } else {
+          console.warn("Draft create failed; will create on Save.", e);
+          toast(`Quote # ${fixed} set. Fill details and click Save to create the quote.`, "info");
+        }
+      }
+    }catch(e){
+      console.error(e);
+      setErr(e?.data?.message || e?.message || "Unable to start a new quote.");
+      // allow manual entry if needed
+      const qnInput = $$("qNumber");
+      if(qnInput){
+        qnInput.removeAttribute("readonly");
+        qnInput.placeholder = "Enter quote # (e.g., 26-001)";
+      }
+    }finally{
+      btns.forEach(b => b.disabled = false);
+    }
+  }
+
+  function currentPageName(){
+    const p = (window.location.pathname || "").split("/").pop();
+    return (p && p.trim()) ? p.trim() : "estimates.html";
+  }
+  function openFisherStack(){
+    const back = encodeURIComponent(currentPageName());
+    window.location.href = `Fisher_Stack_with_back.html?back=${back}&v=${Date.now()}`;
+  }
+  function openCulvertEstimator(){
+    const back = encodeURIComponent(currentPageName());
+    window.location.href = `precast_culvert.html?back=${back}&v=${Date.now()}`;
+  }
+
+  // Events
+  // --------------------------
+  $$("btnNewEstTop")?.addEventListener("click", () => startNewQuote());
+  $$("btnNewEst")?.addEventListener("click", () => startNewQuote());
+  $$("btnOpenFisherTop")?.addEventListener("click", openFisherStack);
+  $$("btnOpenFisher")?.addEventListener("click", openFisherStack);
+  $$("btnOpenFisher2")?.addEventListener("click", openFisherStack);
+  $$("btnOpenCulvertEstimator")?.addEventListener("click", openCulvertEstimator);
+  $$("btnRefresh")?.addEventListener("click", refresh);
+
+  $$("btnQuoteClose")?.addEventListener("click", closeModal);
+  $$("btnQuoteCancel")?.addEventListener("click", closeModal);
+  $$("quoteModal")?.addEventListener("click", (e) => { if(e.target === $$("quoteModal")) closeModal(); });
+
+  $$("btnQuoteSave")?.addEventListener("click", saveQuote);
+  $$("btnQuoteDelete")?.addEventListener("click", deleteQuote);
+  $$("btnQuotePrint")?.addEventListener("click", () => printCurrentQuote(null));
+
+  $$("qDate")?.addEventListener("change", () => {
+    const d = $$("qDate").value;
+    $$("qValid").value = addDays(d, 30);
+  });
+
+  // Inventory search/pick
+  $$("invSearch")?.addEventListener("input", (e) => {
+    const q = e.target.value || "";
+    // Debounce a little
+    clearTimeout(window.__invT);
+    window.__invT = setTimeout(() => loadInventoryOptions(q), 250);
+  });
+  $$("invPick")?.addEventListener("change", () => {
+    const id = $$("invPick").value;
+    const it = invMap.get(id);
+    if(!it) return;
+    const price = getUnitPrice(it);
+    if($$("liPrice").value === "" || Number($$("liPrice").value||0) === 0) $$("liPrice").value = price ? String(price) : "";
+    const wt = getUnitWeight(it);
+    if($$("liWeight").value === "" || Number($$("liWeight").value||0) === 0) $$("liWeight").value = wt ? String(wt) : "";
+  });
+
+  $$("btnAddLine")?.addEventListener("click", () => {
+    if(modalReadOnly) return toast("This quote is read-only.", "info");
+    setErr("");
+    const qty = Number($$("liQty").value || 0);
+    const price = Number($$("liPrice").value || 0);
+    const unitWeight = Number($$("liWeight").value || 0) || 0;
+    if(!(qty > 0)) return setErr("Qty must be greater than 0.");
+    if(!(price >= 0)) return setErr("Price must be 0 or more.");
+
+    if(lineMode === "custom"){
+      const name = ($$("cusName").value || "").trim();
+      const sku = ($$("cusSku").value || "").trim();
+      if(!name) return setErr("Enter a custom item description.");
+      lineItems.push({
+        source: "custom",
+        itemId: "",
+        sku,
+        name,
+        qty,
+        unitWeight,
+        price
+      });
+      $$("cusSku").value = "";
+      $$("cusName").value = "";
+    } else {
+      const id = $$("invPick").value;
+      const it = invMap.get(id);
+      if(!it) return setErr("Select an inventory item.");
+      lineItems.push({
+        source: "inventory",
+        itemId: it.id,
+        sku: getSku(it),
+        name: getName(it),
+        qty,
+        unitWeight: (unitWeight || getUnitWeight(it)),
+        price
+      });
+      $$("invPick").value = "";
+    }
+
+    // reset
+    $$("liQty").value = "";
+    $$("liWeight").value = "";
+    $$("liPrice").value = "";
+    renderLines();
+    computeTotals();
+  });
+
+// Line edits
+  $$("lineTbody")?.addEventListener("input", (e) => {
+    if(modalReadOnly) return;
+    const tr = e.target.closest("tr[data-idx]");
+    if(!tr) return;
+    const idx = Number(tr.getAttribute("data-idx"));
+    const li = lineItems[idx];
+    if(!li) return;
+
+    if(e.target.classList.contains("liQty")){
+      li.qty = Number(e.target.value || 0);
+    } else if(e.target.classList.contains("liWt")){
+      li.unitWeight = Number(e.target.value || 0) || 0;
+    } else if(e.target.classList.contains("liPrice")){
+      li.price = Number(e.target.value || 0);
+    }
+    computeTotals();
+  });
+
+  $$("lineTbody")?.addEventListener("click", (e) => {
+    if(modalReadOnly) return;
+    const tr = e.target.closest("tr[data-idx]");
+    if(!tr) return;
+    if(!e.target.closest(".liRemove")) return;
+    const idx = Number(tr.getAttribute("data-idx"));
+    lineItems.splice(idx, 1);
+    renderLines();
+    computeTotals();
+  });
+
+  $$("qDelivery")?.addEventListener("input", computeTotals);
+  $$("qTaxRate")?.addEventListener("input", computeTotals);
+  $$("topSearch")?.addEventListener("input", renderList);
+
+
+  // Stage filter popover
+  let filterMenuEl = null;
+  function ensureFilterMenu(){
+    if(filterMenuEl) return filterMenuEl;
+    filterMenuEl = document.createElement("div");
+    filterMenuEl.id = "pfFilterMenu";
+    filterMenuEl.className = "pf-popMenu";
+    filterMenuEl.innerHTML = `
+      <div class="pf-popTitle">Filter by stage</div>
+      <button type="button" data-k="all">All</button>
+      <button type="button" data-k="quoted">Quoted</button>
+      <button type="button" data-k="negotiation">Negotiation</button>
+      <button type="button" data-k="won">Won</button>
+      <button type="button" data-k="lost">Lost</button>
+    `;
+    document.body.appendChild(filterMenuEl);
+
+    filterMenuEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-k]");
+      if(!btn) return;
+      setStageFilter(btn.getAttribute("data-k"));
+    });
+
+    return filterMenuEl;
+  }
+
+  function closeFilterMenu(){
+    if(!filterMenuEl) return;
+    filterMenuEl.style.display = "none";
+  }
+
+  function openFilterMenu(){
+    const btn = $$("btnFilter");
+    if(!btn) return;
+    const menu = ensureFilterMenu();
+
+    // Update active state
+    menu.querySelectorAll("button[data-k]").forEach(b => {
+      b.classList.toggle("active", b.getAttribute("data-k") === stageFilter);
+    });
+
+    const r = btn.getBoundingClientRect();
+    const top = Math.min(window.innerHeight - 10, r.bottom + 8);
+    const left = Math.max(10, Math.min(window.innerWidth - 10 - 230, r.right - 230));
+    menu.style.top = top + "px";
+    menu.style.left = left + "px";
+    menu.style.display = "block";
+  }
+
+  function toggleFilterMenu(){
+    const menu = ensureFilterMenu();
+    if(menu.style.display === "block") closeFilterMenu();
+    else openFilterMenu();
+  }
+
+  function setStageFilter(k){
+    stageFilter = String(k || "all").toLowerCase();
+    const btn = $$("btnFilter");
+    if(btn) btn.textContent = `Filter: ${stageLabel(stageFilter)}`;
+    closeFilterMenu();
+    renderList();
+  }
+
+  $$("btnFilter")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleFilterMenu(); });
+  document.addEventListener("click", (e) => {
+    if(!filterMenuEl) return;
+    const inBtn = e.target.closest("#btnFilter");
+    const inMenu = e.target.closest("#pfFilterMenu");
+    if(inBtn || inMenu) return;
+    closeFilterMenu();
+  });
+  window.addEventListener("resize", closeFilterMenu);
+
+  
+  // --------------------------
+  // Quote → Production (on Won)
+  // --------------------------
+  let __toastT = null;
+  function escapeHTML(s){
+  return String(s ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+// Toast with optional action button: toast("Saved", "good", {label:"Open", href:"index.html"})
+function toast(msg, type="info", action=null){
+  let el = document.getElementById("pfToast");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "pfToast";
+    el.style.position = "fixed";
+    el.style.left = "50%";
+    el.style.bottom = "18px";
+    el.style.transform = "translateX(-50%)";
+    el.style.zIndex = "3000";
+    el.style.padding = "12px 14px";
+    el.style.borderRadius = "14px";
+    el.style.boxShadow = "0 20px 60px rgba(0,0,0,.22)";
+    el.style.fontWeight = "850";
+    el.style.maxWidth = "min(820px, calc(100vw - 24px))";
+    el.style.whiteSpace = "normal";
+    el.style.display = "none";
+    el.style.backdropFilter = "blur(6px)";
+    document.body.appendChild(el);
+  }
+  const colors = {
+    info: ["rgba(59,130,246,.12)","#0f172a","rgba(59,130,246,.35)"],
+    good: ["rgba(16,185,129,.14)","#0f172a","rgba(16,185,129,.35)"],
+    warn: ["rgba(245,158,11,.16)","#0f172a","rgba(245,158,11,.35)"],
+    bad:  ["rgba(239,68,68,.14)","#0f172a","rgba(239,68,68,.35)"]
+  };
+  const [bg, fg, bd] = colors[type] || colors.info;
+  el.style.background = bg;
+  el.style.color = fg;
+  el.style.border = `1px solid ${bd}`;
+
+  // Build content
+  if(action && action.label && action.href){
+    const id = "pfToastActionBtn";
+    el.innerHTML = `
+      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+        <div style="font-weight:850;line-height:1.25">${escapeHTML(msg)}</div>
+        <button id="${id}" type="button"
+          style="appearance:none;border:1px solid ${bd};background:rgba(255,255,255,.8);color:#0f172a;
+                 padding:9px 12px;border-radius:12px;font-weight:950;cursor:pointer;white-space:nowrap">
+          ${escapeHTML(action.label)}
+        </button>
+      </div>`;
+    // Bind click (re-bind each time)
+    setTimeout(() => {
+      const b = document.getElementById(id);
+      if(b){
+        b.onclick = () => { window.location.href = action.href; };
+      }
+    }, 0);
+  } else {
+    el.textContent = msg;
+  }
+
+  el.style.display = "block";
+  clearTimeout(__toastT);
+  __toastT = setTimeout(() => { el.style.display = "none"; }, action ? 9000 : 3800);
+}
+
+  function sanitizeSku(s){
+    return String(s||"").trim()
+      .replace(/[^A-Za-z0-9_-]+/g,"-")
+      .replace(/-+/g,"-")
+      .replace(/^-|-$/g,"") || "Q";
+  }
+
+  async function createWOItemFromLine({opId, opp, quote, quoteNumber, idx, li, src, companyName, woKey=null, statusOverride=null, qtyOverride=null, skuSuffix="", noteExtra=""}){
+    const key = `${opId}:${idx}`;
+    const woKeyFinal = (woKey || key);
+    const base = sanitizeSku(quoteNumber);
+    const seq = String(idx).padStart(2,"0");
+    const baseSku = `WO-${base}-${seq}${skuSuffix ? ("-" + skuSuffix) : ""}`;
+    const userId = pb.authStore?.record?.id || null;
+
+    const data = {
+      sku: baseSku,
+      name: (src?.name || li?.name || "Quoted Item").toString(),
+      Type: "Finished Piece",
+      project: (quote?.projectName || opp?.name || "").toString(),
+      pieceMark: (src?.sku || li?.sku || "").toString(), // show original SKU as Piece Mark
+      category: (src?.category || "").toString(),
+      Status: (statusOverride || "In Production"),
+      location: (quote?.projectLocation || "").toString(),
+      bin: (quoteNumber || "").toString(),
+      vendor: (companyName || "").toString(),
+      dimensions: (src?.dimensions ?? src?.Dimensions ?? "").toString(),
+      weight: (src?.weight ?? src?.Weight ?? null),
+      qty: (qtyOverride != null ? Number(qtyOverride||0) : (Number(li?.qty || 0) || 0)),
+      uom: (src?.uom || "ea").toString(),
+      unitcost: Number(src?.unitcost ?? src?.unitCost ?? 0) || 0,
+      reorderpoint: 0,
+      CastDate: null,
+      pournumber: "",
+      notes: [
+        `Created from WON Quote ${quoteNumber || ""}`.trim(),
+        `QuoteOppId=${opId}`,
+        `WOKey=${woKeyFinal}`,
+        `SourceSKU=${(li?.sku || src?.sku || "").toString()}`,
+        `QuotedUnitPrice=${Number(li?.price || 0) || 0}`,
+        `QuoteDate=${quote?.quoteDate || ""}`,
+        `ValidUntil=${quote?.validUntil || ""}`
+        , (noteExtra || "")
+      ].filter(Boolean).join("\n"),
+      createdBy: userId,
+      updatedBy: userId
+    };
+
+    // Retry if SKU conflicts (unique constraint)
+    let attempt = 0;
+    while(true){
+      try{
+        return await pb.collection("items").create(data);
+      }catch(e){
+        const msg = (e?.data?.message || e?.message || "").toLowerCase();
+        if((msg.includes("unique") || msg.includes("exists") || msg.includes("already")) && attempt < 4){
+          attempt++;
+          data.sku = `${baseSku}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+          continue;
+        }
+        throw e;
+      }
+    }
+  }
+
+  async function convertWonToProduction(opId){
+    const opp = await pb.collection("crm_opportunities").getOne(opId, { expand: "company" });
+    const companyName = opp?.expand?.company?.name || "";
+    const quote = normalizeQuoteFromOpp(opp);
+
+    if(!quote || !Array.isArray(quote.items) || quote.items.length === 0){
+      throw new Error("This quote doesn't contain item details. Open it and click Save again.");
+    }
+
+    const quoteNumber = (quote.quoteNumber && String(quote.quoteNumber).trim())
+      ? String(quote.quoteNumber).trim()
+      : estimateCode(opp);
+
+    // Pull any previously created WO items for this quote (idempotent conversions).
+    let existingItems = [];
+    try{
+      const res = await pb.collection("items").getList(1, 200, {
+        filter: `notes ~ "${escapePB("QuoteOppId=" + opId)}"`,
+        sort: "-created"
+      });
+      existingItems = res?.items || [];
+    }catch(_e){
+      existingItems = [];
+    }
+
+    const existingByKey = new Map(); // woKey -> item record
+    for(const it of existingItems){
+      const m = String(it?.notes || "").match(/WOKey=([^\n\r]+)/);
+      if(m && m[1]) existingByKey.set(m[1].trim(), it);
+    }
+
+    const usedKeys = new Set(existingByKey.keys());
+    const createdIds = [];
+    const invRestores = []; // {id, field, prev}
+
+    function nextFreeKey(base){
+      if(!usedKeys.has(base)) return base;
+      let n = 2;
+      while(usedKeys.has(`${base}${n}`)) n++;
+      return `${base}${n}`;
+    }
+
+    async function setInventoryQty(itemId, nextQty){
+      // Prefer 'qty' but tolerate 'Qty'
+      try{
+        await pb.collection("items").update(itemId, { qty: nextQty });
+        return "qty";
+      }catch(e1){
+        try{
+          await pb.collection("items").update(itemId, { Qty: nextQty });
+          return "Qty";
+        }catch(_e2){
+          throw new Error("Unable to update inventory quantity (check PocketBase rules/fields).");
+        }
+      }
+    }
+
+    async function decInventoryQty(itemRec, amount){
+      const cur = Number(itemRec?.qty ?? itemRec?.Qty ?? 0) || 0;
+      const nextQty = Math.max(0, cur - amount);
+      const field = await setInventoryQty(itemRec.id, nextQty);
+      invRestores.push({ id: itemRec.id, field, prev: cur });
+      return { cur, nextQty };
+    }
+
+    let createdCount = 0;
+
+    try{
+      for(let i=0;i<quote.items.length;i++){
+        const li = quote.items[i];
+        const idx = i + 1;
+
+        const reqQty = Number(li?.qty || 0) || 0;
+        if(!(reqQty > 0)) continue;
+
+        const lineBase = `${opId}:${idx}`;
+
+        // Custom lines → always produce, never touch inventory
+        if(li.source === "custom" || !li.itemId){
+          const prodKeyBase = `${lineBase}:prod`;
+          const prodKey = nextFreeKey(prodKeyBase);
+          if(existingByKey.has(prodKey)) continue;
+
+          const created = await createWOItemFromLine({
+            opId, opp, quote, quoteNumber, idx, li, src: null, companyName,
+            woKey: prodKey,
+            statusOverride: "In Production",
+            qtyOverride: reqQty,
+            skuSuffix: "P",
+            noteExtra: `
+LineSource=custom`
+          });
+
+          createdIds.push(created?.id);
+          usedKeys.add(prodKey);
+          existingByKey.set(prodKey, created);
+          createdCount++;
+          continue;
+        }
+
+        // Inventory-backed line
+        let src = null;
+        try{ src = await pb.collection("items").getOne(li.itemId); }catch(_e){ src = null; }
+
+        // Determine how much of this line already has WO records
+        const allocBase = `${lineBase}:alloc`;
+        const prodBase  = `${lineBase}:prod`;
+
+        // Sum existing allocations/production for this line (alloc, alloc2..., prod, prod2...)
+        let alreadyAlloc = 0;
+        let alreadyProd  = 0;
+        for(const [k, rec] of existingByKey.entries()){
+          if(k.startsWith(allocBase)){
+            alreadyAlloc += Number(rec?.qty ?? rec?.Qty ?? 0) || 0;
+          }else if(k.startsWith(prodBase)){
+            alreadyProd  += Number(rec?.qty ?? rec?.Qty ?? 0) || 0;
+          }
+        }
+
+        const remainingNeed = Math.max(0, reqQty - alreadyAlloc - alreadyProd);
+        if(remainingNeed <= 0) continue;
+
+        const available = Number(src?.qty ?? src?.Qty ?? 0) || 0;
+        const pull = Math.min(available, remainingNeed);
+        const toProduce = Math.max(0, remainingNeed - pull);
+
+        // Allocate from stock → create Allocated work order and decrement inventory
+        if(pull > 0){
+          const allocKey = nextFreeKey(allocBase);
+          // Only decrement if we haven't created this allocation key already
+          if(!existingByKey.has(allocKey)){
+            await decInventoryQty(src, pull);
+
+            const suffixNum = allocKey === allocBase ? "" : allocKey.replace(allocBase,"");
+            const created = await createWOItemFromLine({
+              opId, opp, quote, quoteNumber, idx, li, src, companyName,
+              woKey: allocKey,
+              statusOverride: "Allocated",
+              qtyOverride: pull,
+              skuSuffix: `A${suffixNum}`.replace(/^A$/,"A"),
+              noteExtra: `
+LineSource=inventory
+AllocatedFromStock=${pull}`
+            });
+
+            createdIds.push(created?.id);
+            usedKeys.add(allocKey);
+            existingByKey.set(allocKey, created);
+            createdCount++;
+          }
+        }
+
+        // Produce remaining qty (if any)
+        if(toProduce > 0){
+          const prodKey = nextFreeKey(prodBase);
+          if(!existingByKey.has(prodKey)){
+            const suffixNum = prodKey === prodBase ? "" : prodKey.replace(prodBase,"");
+            const created = await createWOItemFromLine({
+              opId, opp, quote, quoteNumber, idx, li, src, companyName,
+              woKey: prodKey,
+              statusOverride: "In Production",
+              qtyOverride: toProduce,
+              skuSuffix: `P${suffixNum}`.replace(/^P$/,"P"),
+              noteExtra: `
+LineSource=inventory
+AllocatedFromStock=${pull}
+BackorderedQty=${toProduce}`
+            });
+
+            createdIds.push(created?.id);
+            usedKeys.add(prodKey);
+            existingByKey.set(prodKey, created);
+            createdCount++;
+          }
+        }
+      }
+    }catch(err){
+      // Best-effort rollback so "Won" doesn't partially convert
+      // 1) Restore inventory quantities
+      for(let i=invRestores.length-1;i>=0;i--){
+        const r = invRestores[i];
+        try{ await pb.collection("items").update(r.id, { [r.field]: r.prev }); }catch(_e){}
+      }
+      // 2) Delete created WO items
+      for(let i=createdIds.length-1;i>=0;i--){
+        const id = createdIds[i];
+        if(!id) continue;
+        try{ await pb.collection("items").delete(id); }catch(_e){}
+      }
+      throw err;
+    }
+
+    return { createdCount, quoteNumber, project: quote.projectName || opp.name || "" };
+  }
+
+// Stage dropdown (updates crm_opportunities.stage)
+  $$("estList")?.addEventListener("change", async (e) => {
+    const sel = e.target.closest("select.pf-stageSelect");
+    if(!sel) return;
+    e.stopPropagation();
+
+    const card = sel.closest(".pf-estCard");
+    if(!card) return;
+    const id = card.getAttribute("data-id");
+    const rec = all.find(x => x.id === id);
+
+    const next = sel.value;
+    const prev = sel.getAttribute("data-prev") || (rec ? stageForSelect(pickStage(rec)) : "Quoted");
+    if(next === prev) return;
+
+    sel.disabled = true;
+    setErr("");
+    try{
+      await pb.collection("crm_opportunities").update(id, { stage: next });
+
+      // If the quote becomes WON, create Production work order pieces from its line items.
+      if(next === "Won"){
+        try{
+          const r = await convertWonToProduction(id);
+          const href = `index.html?view=production&project=${encodeURIComponent(r.project||"")}&quote=${encodeURIComponent(r.quoteNumber||"")}&v=${Date.now()}`;
+          try{ localStorage.setItem("pf_production_project", r.project||""); }catch(_e){}
+          if(r.createdCount > 0){
+            toast(`Quote ${r.quoteNumber} moved to Production (${r.createdCount} work order line(s)).`, "good", {label:"Open in Production", href});
+          } else {
+            toast(`Production work order already exists for ${r.quoteNumber}.`, "info", {label:"Open in Production", href});
+          }
+        } catch(convErr){
+          console.error(convErr);
+          toast(`Couldn't create Production work order. ${convErr?.data?.message || convErr?.message || convErr}`, "bad");
+
+          // Revert the stage so "Won" always implies production was created.
+          try{ await pb.collection("crm_opportunities").update(id, { stage: prev }); }
+          catch(_e){ try{ await pb.collection("crm_opportunities").update(id, { Stage: prev }); }catch(_e2){} }
+
+          if(rec) rec.stage = prev;
+          sel.value = prev;
+          sel.setAttribute("data-prev", prev);
+          renderList();
+          return;
+        }
+      }
+
+      if(rec) rec.stage = next;
+      sel.setAttribute("data-prev", next);
+      renderList(); // refresh sections
+    } catch(err){
+      // Fallback if field is named differently
+      try{
+        await pb.collection("crm_opportunities").update(id, { Stage: next });
+
+        // If the quote becomes WON, create Production work order pieces from its line items.
+        if(next === "Won"){
+          try{
+            const r = await convertWonToProduction(id);
+            if(r.createdCount > 0){
+              const href = `index.html?view=production&project=${encodeURIComponent(r.project||"")}&quote=${encodeURIComponent(r.quoteNumber||"")}&v=${Date.now()}`;
+              try{ localStorage.setItem("pf_production_project", r.project||""); }catch(_e){}
+              toast(`Quote ${r.quoteNumber} moved to Production (${r.createdCount} work order line(s)).`, "good", {label:"Open in Production", href});
+            } else {
+              const href = `index.html?view=production&project=${encodeURIComponent(r.project||"")}&quote=${encodeURIComponent(r.quoteNumber||"")}&v=${Date.now()}`;
+              try{ localStorage.setItem("pf_production_project", r.project||""); }catch(_e){}
+              toast(`Production work order already exists for ${r.quoteNumber}.`, "info", {label:"Open in Production", href});
+            }
+          } catch(convErr){
+            console.error(convErr);
+            toast(`Couldn't create Production work order. ${convErr?.data?.message || convErr?.message || convErr}`, "bad");
+
+            // Revert the stage so "Won" always implies production was created.
+            try{ await pb.collection("crm_opportunities").update(id, { Stage: prev }); }
+            catch(_e){ try{ await pb.collection("crm_opportunities").update(id, { stage: prev }); }catch(_e2){} }
+
+            if(rec) rec.Stage = prev;
+            sel.value = prev;
+            sel.setAttribute("data-prev", prev);
+            renderList();
+            return;
+          }
+        }
+
+        if(rec) rec.Stage = next;
+        sel.setAttribute("data-prev", next);
+        renderList();
+      } catch(err2){
+        console.error(err2);
+        setErr(err2?.data?.message || err2?.message || "Unable to update status.");
+        sel.value = prev;
+      }
+    } finally {
+      sel.disabled = false;
     }
   });
 
-  // Require auth for PocketBase writes; if not signed in, send to index login
-  if(!pb.authStore.isValid) {
-    $$("modePill").textContent = "Not signed in";
-    // best-effort: let the user see UI, but prompt on create/save
+// Click on card actions
+  $$("estList")?.addEventListener("click", (e) => {
+    if(e.target.closest("select.pf-stageSelect")) return;
+    const card = e.target.closest(".pf-estCard");
+    if(!card) return;
+    const id = card.getAttribute("data-id");
+    const rec = all.find(x => x.id === id);
+    const actBtn = e.target.closest("button[data-act]");
+    const act = actBtn?.getAttribute("data-act");
+    if(act === "edit" && rec){
+      openModal("edit", rec);
+    } else if(act === "print" && rec){
+      printCurrentQuote(rec);
+    } else if(rec){
+      // default: edit
+      openModal("edit", rec);
+    }
+  });
+
+  // logout (optional)
+  const logoutBtn = $$("btnLogout");
+  if(logoutBtn){
+    logoutBtn.style.display = pb.authStore.isValid ? "inline-flex" : "none";
+    logoutBtn.addEventListener("click", () => {
+      pb.authStore.clear();
+      window.location.href = "index.html";
+    });
   }
 
-  refresh().catch(console.error);
+  
+  function detectRebarSizeFromItem(it){
+    const hay = `${getSku(it)} ${getName(it)} ${(it?.pieceMark||"")} ${(it?.category||"")}`.toLowerCase();
+    let m = hay.match(/#\s*(\d{1,2})\b/);
+    if(m) return parseInt(m[1], 10);
+    m = hay.match(/\bno\.?\s*(\d{1,2})\b/);
+    if(m) return parseInt(m[1], 10);
+    m = hay.match(/\brebar\s*(\d{1,2})\b/);
+    if(m) return parseInt(m[1], 10);
+    return null;
+  }
+
+  async function loadRebarInventoryItems(){
+    const all = [];
+    let page = 1;
+    const perPage = 200;
+    const filter = `(Type = "Rebar/Steel" || Type = "Rebar" || Type ~ "Rebar")`;
+    while(true){
+      const res = await pb.collection("items").getList(page, perPage, { filter, sort: "name" });
+      const items = res?.items || [];
+      all.push(...items);
+      if(items.length < perPage) break;
+      page++;
+      if(page > 10) break; // safety
+    }
+    return all;
+  }
+
+  function qtyAndUnitWeightForUom(uom, totalWeightLb, totalLengthFt, totalBars){
+    const u = String(uom || "").toLowerCase().trim();
+    const wt = Number(totalWeightLb || 0) || 0;
+    const ln = Number(totalLengthFt || 0) || 0;
+    const bars = Number(totalBars || 0) || 0;
+
+    if(u.includes("ea") || u === "each"){
+      const qty = bars || 0;
+      const unitWeight = (qty > 0) ? (wt / qty) : 0;
+      return { qty, unitWeight };
+    }
+    if(u.includes("ft")){
+      const qty = ln || 0;
+      const unitWeight = (qty > 0) ? (wt / qty) : 0;
+      return { qty, unitWeight };
+    }
+    if(u.includes("ton")){
+      const qty = wt / 2000;
+      return { qty, unitWeight: 2000 };
+    }
+    if(u.includes("lb")){
+      return { qty: wt, unitWeight: 1 };
+    }
+    // Default to pounds
+    return { qty: wt, unitWeight: 1 };
+  }
+
+  async function maybeImportFromCulvert(){
+    const KEY = "pf_culvert_quote_import_v1";
+    let raw = null;
+    try{ raw = localStorage.getItem(KEY); }catch(_e){ raw = null; }
+    if(!raw) return;
+
+    let payload = null;
+    try{
+      payload = JSON.parse(raw);
+    }catch(_e){
+      // Bad payload: clear it so we don't loop
+      try{ localStorage.removeItem(KEY); }catch(_e2){}
+      return;
+    }
+
+    if(payload?.type !== "culvert_piece_marks") return;
+
+    // If not authenticated, keep payload for after login.
+    if(!pb.authStore.isValid) return;
+
+    try{
+      const incomingQN = String(payload?.quoteNumber || payload?.estimateNumber || "").trim();
+
+      if(incomingQN){
+        await startNewQuoteWithNumber(incomingQN);
+      } else {
+        await startNewQuote();
+      }
+
+      // Default UI to inventory mode (we're about to add both inventory + custom lines)
+      applyLineMode("inv");
+
+      // Start from a clean lines array for NEW quotes.
+      // If startNewQuoteWithNumber opened an existing quote, keep its current lines and append.
+      if(!editId){
+        lineItems = [];
+      }
+
+      // 1) Piece marks (custom lines)
+      const pm = Array.isArray(payload.items) ? payload.items : [];
+      pm.forEach(it => {
+        const mark = String(it?.pieceMark ?? it?.mark ?? "").trim();
+        const qty = Number(it?.qty ?? it?.quantity ?? 0) || 0;
+        const unitWeight = Number(it?.unitWeightLb ?? it?.unitWeight ?? it?.weight ?? 0) || 0;
+        const unitPrice = Number(it?.unitPrice ?? it?.price ?? 0) || 0;
+        if(!mark || !(qty > 0)) return;
+
+        lineItems.push({
+          source: "custom",
+          itemId: "",
+          sku: mark,
+          name: `Piece mark ${mark}`,
+          qty,
+          unitWeight,
+          price: unitPrice
+        });
+      });
+
+      // 2) Rebar by bar size (inventory if available)
+      const rebar = Array.isArray(payload.rebarBySize) ? payload.rebarBySize : [];
+      if(rebar.length){
+        let invItems = [];
+        try{
+          invItems = await loadRebarInventoryItems();
+        }catch(e){
+          console.warn("Unable to load Rebar/Steel inventory list.", e);
+          invItems = [];
+        }
+
+        const sizeMap = new Map();
+        invItems.forEach(it => {
+          const s = detectRebarSizeFromItem(it);
+          if(!s || sizeMap.has(s)) return;
+          sizeMap.set(s, it);
+        });
+
+        rebar.forEach(r => {
+          const size = Number(r?.size ?? r?.barSize ?? r?.no ?? 0) || 0;
+          const totalWeightLb = Number(r?.totalWeightLb ?? r?.weightLb ?? 0) || 0;
+          const totalLengthFt = Number(r?.totalLengthFt ?? r?.lengthFt ?? 0) || 0;
+          const totalBars = Number(r?.totalBars ?? r?.bars ?? 0) || 0;
+          if(!size) return;
+
+          const inv = sizeMap.get(size);
+          if(inv){
+            const uom = inv?.uom || "lb";
+            const { qty, unitWeight } = qtyAndUnitWeightForUom(uom, totalWeightLb, totalLengthFt, totalBars);
+            const qtyFinal = (String(uom||"").toLowerCase().includes("ton"))
+              ? (Math.round(qty * 1000) / 1000)
+              : (String(uom||"").toLowerCase().includes("ft"))
+                ? (Math.round(qty * 1000) / 1000)
+                : (Math.round(qty));
+
+            const unitWeightFinal = isFinite(unitWeight) ? (Math.round(unitWeight * 1000) / 1000) : 0;
+
+            lineItems.push({
+              source: "inventory",
+              itemId: inv.id,
+              sku: getSku(inv),
+              name: getName(inv),
+              qty: qtyFinal,
+              unitWeight: unitWeightFinal,
+              price: getUnitPrice(inv)
+            });
+          } else {
+            // No inventory match -> fallback custom line (qty in pounds)
+            lineItems.push({
+              source: "custom",
+              itemId: "",
+              sku: `REBAR-#${size}`,
+              name: `Rebar #${size}`,
+              qty: Math.round(totalWeightLb),
+              unitWeight: 1,
+              price: 0
+            });
+          }
+        });
+      }
+
+      renderLines();
+      computeTotals();
+
+      try{ localStorage.removeItem(KEY); }catch(_e){}
+      toast("Culvert items (piece marks + rebar) imported into a new estimate.", "good");
+    }catch(e){
+      console.error(e);
+      // Keep payload so the user can refresh and try again
+      toast("Unable to import culvert items. (Estimate not created.)", "bad");
+    }
+  }
+
+  // Initial
+
+  refresh()
+    .then(() => maybeImportFromCulvert())
+    .catch((_e) => maybeImportFromCulvert());
 
 })();
 </script>
+
 </body>
 </html>

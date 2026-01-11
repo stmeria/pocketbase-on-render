@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Precast Box Culvert Estimator</title>
+<style>
+  :root{
+    --bg:#f3f4f6;
+    --card:#ffffff;
+    --card2:#f9fafb;
+    --ink:#111827;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --accent:#2563eb;
+    --accent2:#1d4ed8;
+    --warn:#f59e0b;
+    --danger:#ef4444;
+    --ok:#16a34a;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 6px 20px rgba(0,0,0,.04);
+  }
+
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+  *{box-sizing:border-box}
+
+  header{
+    padding:16px 20px;
+    border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:20;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(180%) blur(10px);
+    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+  }
+  header h1{margin:0;font-size:20px;letter-spacing:-0.01em}
+  header p{margin:6px 0 0;color:var(--muted);max-width:80ch}
+
+  .backBtn{
+    display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+    text-decoration:none;
+    background:#fff; color:var(--ink);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:800;
+    box-shadow:var(--shadow);
+  }
+  .backBtn:hover{background:var(--card2)}
+
+  .wrap{
+    max-width:1400px;
+    margin:0 auto;
+    padding:18px;
+    display:grid;
+    grid-template-columns:440px 1fr;
+    gap:18px;
+    align-items:start;
+  }
+  .card.full{grid-column:1/-1}
+  .footer.full{grid-column:1/-1}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .card h2{
+    margin:0;
+    padding:12px 14px;
+    border-bottom:1px solid var(--border);
+    background:var(--card2);
+    font-size:15px;
+  }
+  .card .body{padding:14px}
+
+  /* Nested cards inside the results panel */
+  .card .card{
+    border-radius:14px;
+    box-shadow:none;
+  }
+  .card .card h2{
+    background:#fff;
+    font-size:14px;
+  }
+
+  h3{
+    margin:8px 0 10px;
+    font-size:14px;
+    color:#111827;
+    letter-spacing:0.01em;
+    text-transform:none;
+  }
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+  label{display:block;font-weight:650;margin-bottom:6px;color:#111827}
+
+  input,select,button{
+    width:100%;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:11px 12px;
+    font-size:15px;
+    height:44px;
+  }
+  input::placeholder{color:#9ca3af}
+  input:focus, select:focus{
+    outline:none;
+    border-color:#93c5fd;
+    box-shadow:0 0 0 4px rgba(59,130,246,.15);
+  }
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+
+  .btn{
+    cursor:pointer;
+    background:var(--accent);
+    color:#fff;
+    border:1px solid transparent;
+    font-weight:800;
+  }
+  .btn:hover{background:var(--accent2)}
+  .btn.sec{
+    background:#fff;
+    color:var(--ink);
+    border:1px solid var(--border);
+    font-weight:800;
+  }
+  .btn.sec:hover{background:var(--card2)}
+  .btn.warn{background:var(--warn);color:#111827}
+  .btn.warn:hover{filter:brightness(0.98)}
+  .btn.danger{background:var(--danger);color:#fff}
+
+  .muted{color:var(--muted);font-size:13px}
+  .note{
+    padding:10px 12px;
+    border:1px dashed #c7d2fe;
+    border-radius:14px;
+    background:#eef2ff;
+    color:#1f2937;
+    margin-bottom:12px;
+  }
+
+  .out{
+    font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:12px;
+    white-space:pre-wrap;
+    min-height:104px;
+  }
+
+  svg{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:14px;
+    width:100%;
+    height:420px;
+  }
+
+  .flex{display:flex;gap:10px;flex-wrap:wrap}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{border-bottom:1px solid var(--border);padding:10px 10px;text-align:left;vertical-align:middle}
+  th{position:sticky;top:0;background:#fff;z-index:2}
+
+  /* Bar schedule table */
+  #sched_table{min-width:980px}
+  #sched_table th{white-space:nowrap}
+  #sched_table input, #sched_table select{
+    height:40px;
+    padding:9px 10px;
+    font-size:14px;
+    border-radius:10px;
+  }
+  #sched_table .btnX{
+    background:#fff;
+    color:#111827;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:8px 10px;
+    cursor:pointer;
+    font-weight:800;
+  }
+  #sched_table .btnX:hover{background:var(--card2)}
+
+  #piece_mark_table th{white-space:nowrap}
+  #piece_mark_table td{white-space:nowrap}
+  #piece_mark_table .sub{display:block;color:var(--muted);font-size:12px;margin-top:2px;white-space:normal}
+
+  .tag{display:inline-block; padding:3px 8px;border-radius:999px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:12px;font-weight:700}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 2px}
+  .legend span{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+  .chip{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.08)}
+  .sep{height:1px;background:var(--border);margin:12px 0}
+  .footer{padding:12px 14px;color:var(--muted);font-size:12px;background:var(--card2);border-top:1px solid var(--border)}
+  .warning{color:#b45309;font-weight:800}
+  .ok{color:var(--ok)}
+  .error{color:#b91c1c;font-weight:800}
+
+  input[readonly]{
+    background:var(--card2);
+    color:var(--ink);
+  }
+  #pb_status{min-height:18px}
+
+
+  @media (max-width: 980px){
+    header{position:static;backdrop-filter:none}
+    .wrap{grid-template-columns:1fr}
+    svg{height:360px}
+    #sched_table{min-width:860px}
+  }
+
+  /* Open existing estimate modal */
+  .modalOverlay{
+    position:fixed; inset:0;
+    background:rgba(17,24,39,.40);
+    display:none; align-items:center; justify-content:center;
+    padding:18px;
+    z-index:60;
+  }
+  .modalOverlay.show{display:flex}
+  .modal{
+    width:100%;
+    max-width:560px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .modalHead{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    padding:14px 16px;
+    border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,.95);
+  }
+  .modalTitle{font-weight:900; letter-spacing:-0.01em}
+  .modalBody{padding:14px 16px}
+  .iconBtn{
+    width:auto;
+    background:transparent;
+    border:1px solid transparent;
+    color:var(--muted);
+    border-radius:12px;
+    padding:6px 10px;
+    cursor:pointer;
+    font-weight:900;
+  }
+  .iconBtn:hover{background:var(--card2); color:var(--ink); border-color:var(--border)}
+
+</style>
+
+<script src="/vendor/pocketbase.umd.js"></script>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Precast Box Culvert Estimator</h1>
+</div>
+  <a class="backBtn" id="btnBack" href="estimates.html">← Back</a>
+</header>
+
+<div class="wrap">
+  <!-- Inputs -->
+  <div class="card">
+    <h2>Inputs (US units)</h2>
+    <div class="body">
+
+      <div style="margin-bottom:12px">
+        <label>Estimate number</label>
+        <input id="estimate_no" type="text" readonly placeholder="Auto-generated">
+        <div id="pb_status" class="muted" style="margin-top:6px"></div>
+        <div class="flex" style="margin-top:10px">
+          <button id="btnOpenEstimate" class="btn sec" type="button" style="flex:1">Open existing estimate…</button>
+        </div>
+
+        <div id="openEstModal" class="modalOverlay" aria-hidden="true">
+          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="openEstTitle">
+            <div class="modalHead">
+              <div>
+                <div id="openEstTitle" class="modalTitle">Open existing estimate</div>
+                <div class="muted" style="margin-top:4px">Enter an Estimate # to load saved inputs from PocketBase.</div>
+              </div>
+              <button class="iconBtn" id="openEstClose" type="button" aria-label="Close">✕</button>
+            </div>
+            <div class="modalBody">
+              <div class="grid">
+                <div style="grid-column:1/-1">
+                  <label>Recent estimates</label>
+                  <select id="open_est_select">
+                    <option value="">Select…</option>
+                  </select>
+                  <div class="muted" style="margin-top:6px">Tip: you can also type an estimate number directly below.</div>
+                </div>
+              </div>
+
+              <div class="grid" style="margin-top:10px">
+                <div style="grid-column:1/-1">
+                  <label>Estimate number</label>
+                  <input id="open_est_input" type="text" placeholder="e.g. 26-001">
+                </div>
+              </div>
+
+              <div class="flex" style="margin-top:12px">
+                <button id="open_est_load" class="btn" type="button" style="flex:1">Open</button>
+                <button id="open_est_cancel" class="btn sec" type="button" style="flex:1">Cancel</button>
+              </div>
+              <div id="open_est_status" class="muted" style="margin-top:10px"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+<div class="grid">
+        <div>
+          <label>Inside span S<sub>i</sub> (ft)</label>
+          <input id="in_span" type="number" min="0.1" step="0.01" value="6">
+        </div>
+        <div>
+          <label>Inside rise R<sub>i</sub> (ft)</label>
+          <input id="in_rise" type="number" min="0.1" step="0.01" value="4">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Wall thickness t<sub>w</sub> (in)</label>
+          <input id="t_wall" type="number" min="1" step="0.1" value="8">
+        </div>
+        <div>
+          <label>Top slab thickness t<sub>t</sub> (in)</label>
+          <input id="t_top" type="number" min="1" step="0.1" value="8">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Bottom slab thickness t<sub>b</sub> (in)</label>
+          <input id="t_bot" type="number" min="1" step="0.1" value="8">
+        </div>
+        <div>
+          <label>Lay length L<sub>lay</sub> (ft)</label>
+          <input id="lay_len" type="number" min="1" step="0.1" value="6">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Haunch horizontal (in)</label>
+          <input id="h_h" type="number" min="0" step="0.1" value="3">
+        </div>
+        <div>
+          <label>Haunch vertical (in)</label>
+          <input id="h_v" type="number" min="0" step="0.1" value="3">
+        </div>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Upstream skew θ<sub>u</sub> (deg)</label>
+          <input id="skew_u" type="number" step="0.1" value="0">
+        </div>
+        <div>
+          <label>Downstream skew θ<sub>d</sub> (deg)</label>
+          <input id="skew_d" type="number" step="0.1" value="30">
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div>
+          <label>Number of lays N</label>
+          <input id="n_lays" type="number" min="1" step="1" value="4">
+        </div>
+        <div>
+          <label>Concrete unit weight (pcf)</label>
+          <input id="gamma" type="number" min="1" step="1" value="150">
+        </div>
+        <div>
+          <label>Concrete price ($/yd³)</label>
+          <input id="conc_price" type="number" min="0" step="1" value="200">
+        </div>
+      </div>
+
+      
+
+      <div class="flex" style="margin-top:10px">
+        <button id="btnSegCalc" class="btn sec" type="button">Calculate number of segments</button>
+      </div>
+
+      <div id="segModal" class="modalOverlay" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="segTitle">
+          <div class="modalHead">
+            <div>
+              <div id="segTitle" class="modalTitle">Calculate number of segments</div>
+              <div class="muted" style="margin-top:4px">Enter total culvert length, joint thickness, and maximum allowed piece weight. The tool finds the smallest number of lays that meets the weight limit and fills <strong>Lay length</strong> + <strong>Number of lays</strong>.</div>
+            </div>
+            <button class="iconBtn" id="segClose" type="button" aria-label="Close">✕</button>
+          </div>
+          <div class="modalBody">
+            <div class="grid">
+              <div>
+                <label>Total culvert length (ft)</label>
+                <input id="seg_total_len" type="number" min="0" step="0.1" placeholder="e.g. 40">
+              </div>
+              <div>
+                <label>Joint between pieces (in)</label>
+                <input id="seg_joint_in" type="number" min="0" step="0.1" value="2">
+              </div>
+            </div>
+
+            <div class="grid" style="margin-top:10px">
+              <div>
+                <label>Maximum piece weight (lb)</label>
+                <input id="seg_max_wt" type="number" min="0" step="10" placeholder="e.g. 20000">
+                <div class="muted" style="margin-top:6px">Uses total piece weight (concrete + schedule steel if your bar schedule is filled).</div>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button id="segCompute" class="btn" type="button">Compute</button>
+              </div>
+            </div>
+
+            <div id="seg_result" class="muted" style="margin-top:10px"></div>
+
+            <div class="flex" style="margin-top:12px">
+              <button id="segApply" class="btn" type="button" style="flex:1" disabled>Use these values</button>
+              <button id="segCancel" class="btn sec" type="button" style="flex:1">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<div class="grid">
+        <div>
+          <label>Fill height H<sub>fill</sub> (ft)</label>
+          <input id="fill" type="number" min="0" step="0.1" value="2">
+        </div>
+        <div>
+          <label>Density of soil (pcf) <span class="muted">(optional)</span></label>
+          <input id="soil_gamma" type="number" min="0" step="1" placeholder="e.g. 120">
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <h3>Rebar detailing</h3>
+      <div class="grid">
+        <div>
+          <label>Clear cover (in)</label>
+          <input id="cover" type="number" min="0.5" step="0.1" value="1.5">
+        </div>
+        <div>
+          <label>Main bar diameter (in)</label>
+          <input id="bar_dia" type="number" min="0.25" step="0.125" value="0.625">
+        </div>
+      </div>
+      <div class="sep"></div>
+
+      <div class="grid">
+        <button id="calc" class="btn">Calculate</button>
+        <button id="reset" class="btn sec" type="button">Reset</button>
+      </div>
+
+      <button id="btnSendToQuote" class="btn warn" type="button" style="margin-top:10px;width:100%">Send to Quote</button>
+    </div>
+  </div>
+
+  <!-- Outputs and graphics -->
+  <div class="card">
+    <h2>Results & Visuals</h2>
+    <div class="body">
+      <div class="grid">
+        <div class="card">
+          <h2>Section (SVG)</h2>
+          <div class="body">
+            <svg id="svg_section" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Plan (SVG)</h2>
+          <div class="body">
+            <svg id="svg_plan" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Piece marks</h2>
+        <div class="body">
+          <div style="max-height:320px; overflow:auto; border:1px solid var(--border); border-radius:14px; background:#fff">
+            <table id="piece_mark_table">
+              <thead>
+                <tr>
+                  <th style="min-width:180px">Piece mark</th>
+                  <th style="min-width:70px">Qty</th>
+                  <th>Concrete volume (yd³)</th>
+                  <th>Total steel (lb)</th>
+                  <th>Piece weight (lb)</th>
+                  <th>Concrete price ($)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="muted" id="piece_mark_note" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Steel takeoff by bar size</h2>
+        <div class="body">
+          <div style="max-height:240px; overflow:auto; border:1px solid var(--border); border-radius:14px; background:#fff">
+            <table id="bar_weight_table">
+              <thead>
+                <tr>
+                  <th style="min-width:120px">Bar size</th>
+                  <th>Total weight (lb)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="muted" id="bar_weight_note" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+
+      <div class="sep"></div>
+
+      <div>
+          <h3>Export</h3>
+          <div class="grid">
+<button class="btn sec" id="export_dxf" type="button">Download DXF (Section & Plan)</button>
+          </div>
+          <div class="row">
+            <button class="btn warn" id="export_report" type="button">Open Printable Report (HTML → PDF)</button>
+</div>
+          <p class="muted">For PDF: use your browser’s <em>Print → Save as PDF</em>.</p>
+        </div>
+ </div>
+  </div>
+
+  <div class="card full">
+    <h2>Reinforcement</h2>
+    <div class="body">
+
+          <div class="row">
+            <div style="grid-column:1/-1">
+              <label>Longitudinal length basis</label>
+              <select id="sched_len_basis">
+                <option value="run">Whole run (N lays, both end skews)</option>
+                <option value="piece_rect">Single lay (rectangular)</option>
+                <option value="piece_up">Single lay (upstream skew)</option>
+                <option value="piece_dn">Single lay (downstream skew)</option>
+                <option value="piece_both">Single lay (both ends skew)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="sched_wrap">
+            <div class="note">
+              Enter your <strong>reinforcing bar schedule</strong> (like your drawing table). The calculator will estimate
+              bar lengths from the current geometry, cover, bar size, and skew (for longitudinal bars).<br>
+              <span class="muted">Tip: if your detailing includes hooks/bends or splice lengths, use the “Override L” column.</span>
+            </div>
+
+            <div class="row">
+              <button class="btn sec" id="sched_load_demo" type="button">Load sample schedule</button>
+              <button class="btn sec" id="sched_add_row" type="button">Add row</button>
+            </div>
+
+            <div style="max-height:520px; min-height:340px; overflow:auto; border:1px solid var(--border); border-radius:14px; background:#fff">
+              <table id="sched_table">
+                <thead>
+                  <tr>
+                    <th>Location</th>
+                    <th>Mark</th>
+                    <th>Qty</th>
+                    <th>Size</th>
+                    <th>Spacing</th>
+                    <th>Override L (ft)</th>
+                    <th>Auto L (ft)</th>
+                    <th>Total L (ft)</th>
+                    <th>Wt/bar (lb)</th>
+                    <th>Total Wt (lb)</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody></tbody></table>
+            </div>
+
+            <div class="sep"></div>
+
+            <h3>Bar size totals</h3>
+            <div style="max-height:240px; overflow:auto; border:1px solid var(--border); border-radius:14px; background:#fff">
+              <table id="bar_summary_table">
+                <thead>
+                  <tr>
+                    <th style="min-width:120px">Bar size</th>
+                    <th>Total qty</th>
+                    <th>Total length (ft)</th>
+                    <th>Total weight (lb)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="muted" id="bar_summary_note" style="margin-top:8px"></div>
+
+            <div class="out" id="sched_out"></div>
+            <p class="muted">Auto length assumptions: straight bars to rebar centerlines (offset = cover + bar dia/2).
+            Corner bars are approximated as L-bars using slab+wall thickness (override if needed).</p>
+          </div>
+        
+    </div>
+  </div>
+
+  <div class="card full">
+    <h2>Geometry &amp; Weights</h2>
+    <div class="body">
+      <div class="out" id="geom_out"></div>
+    </div>
+  </div>
+
+  <div class="footer full">
+        <span class="warning">Disclaimer:</span> This tool provides approximate geometry/volume/weight based on the inputs you supply.
+        Confirm with project specs and a licensed Professional Engineer.
+      
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+
+  // Back link (supports ?back=estimates.html or any relative page)
+  const BACK_PAGE = (() => {
+    try{
+      const params = new URLSearchParams(location.search);
+      return params.get('back') || 'estimates.html';
+    }catch(_){
+      return 'estimates.html';
+    }
+  })();
+  try{
+    const btn = document.getElementById('btnBack');
+    if(btn) btn.setAttribute('href', BACK_PAGE);
+  }catch(_){ /* no-op */ }
+
+
+  // ========= PocketBase (estimate numbering + autosave) =========
+  const pb = (window.PocketBase) ? new PocketBase(window.location.origin) : null;
+  try{ pb?.autoCancellation(false); }catch(_e){}
+
+  const PB_CULVERT_COL = "culvert_estimates"; // Create this collection in PocketBase (estimateNumber:text + data:json)
+  const PB_COUNTER_COL = "quote_counters";   // Shared with Estimates page for sequential numbering
+  let pbCulvertRecId = null;
+  let estimateNumber = "";
+
+  const pbStatusEl = $("pb_status");
+  function setPbStatus(msg="", kind="muted"){
+    if(!pbStatusEl) return;
+    pbStatusEl.textContent = msg || "";
+    pbStatusEl.classList.remove("ok","error");
+    if(kind === "ok") pbStatusEl.classList.add("ok");
+    if(kind === "error") pbStatusEl.classList.add("error");
+  }
+
+  function pbErrText(e){
+    try{
+      const status = e?.status ?? e?.response?.status;
+      let msg = "";
+      if(e?.data?.message) msg = String(e.data.message);
+      else if(e?.message) msg = String(e.message);
+      else msg = String(e || "");
+      // PocketBase validation errors: e.data.data.<field>.message
+      const data = e?.data?.data;
+      if(data && typeof data === "object"){
+        const keys = Object.keys(data);
+        if(keys.length){
+          const k = keys[0];
+          const v = data[k];
+          const fieldMsg = (v && typeof v === "object" && v.message) ? v.message : "";
+          if(fieldMsg){
+            msg = msg ? `${msg} (${k}: ${fieldMsg})` : `${k}: ${fieldMsg}`;
+          }
+        }
+      }
+      msg = (msg || "").trim();
+      if(status != null && String(status).length) return `${status} ${msg || ""}`.trim();
+      return msg || "Unknown error";
+    }catch(_e){
+      return "Unknown error";
+    }
+  }
+
+  function escPB(s){
+    return String(s||"").replaceAll("\\", "\\\\").replaceAll('"','\\"');
+  }
+  function formatQuoteNumber(year, seq){
+    const yy = String(year).slice(-2);
+    const s = String(seq).padStart(3, "0");
+    return `${yy}-${s}`;
+  }
+
+  async function reserveEstimateNumberPB(){
+    if(!pb) throw new Error("PocketBase SDK not loaded.");
+    if(!pb.authStore?.isValid) throw new Error("Not authenticated.");
+    const year = new Date().getFullYear();
+
+    let counter = null;
+    try{
+      counter = await pb.collection(PB_COUNTER_COL).getFirstListItem(`year="${escPB(year)}"`);
+    }catch(_e){
+      counter = null;
+    }
+
+    let seq = 1;
+    if(counter){
+      seq = (Number(counter.lastSeq || 0) || 0) + 1;
+      await pb.collection(PB_COUNTER_COL).update(counter.id, { lastSeq: seq });
+    }else{
+      seq = 1;
+      await pb.collection(PB_COUNTER_COL).create({ year, lastSeq: seq });
+    }
+    return formatQuoteNumber(year, seq);
+  }
+
+  function reserveEstimateNumberLocal(){
+    const year = new Date().getFullYear();
+    const k = `pf_culvert_est_seq_${year}`;
+    let seq = 0;
+    try{ seq = parseInt(localStorage.getItem(k) || "0", 10) || 0; }catch(_e){}
+    seq += 1;
+    try{ localStorage.setItem(k, String(seq)); }catch(_e){}
+    return formatQuoteNumber(year, seq);
+  }
+
+  function snapshotInputs(){
+    const ids = [
+      "in_span","in_rise","t_wall","t_top","t_bot","lay_len","h_h","h_v",
+      "skew_u","skew_d","n_lays","gamma","conc_price","fill","soil_gamma",
+      "cover","bar_dia","sched_len_basis"
+    ];
+    const out = {};
+    ids.forEach(id=>{
+      const el = $(id);
+      if(!el) return;
+      const v = (el.type === "number") ? (parseFloat(el.value || "")) : el.value;
+      out[id] = (isFinite(v) ? v : (el.value ?? ""));
+    });
+    return out;
+  }
+
+  function snapshotSchedule(){
+    try{ return (typeof schedReadRows === "function") ? schedReadRows() : []; }catch(_e){ return []; }
+  }
+
+  function snapshotPieceMarks(){
+    try{
+      if(!window.__CULVERT_STATE__) return null;
+      if(typeof collectPieceMarkGroupsForQuote !== "function") return null;
+      return collectPieceMarkGroupsForQuote(window.__CULVERT_STATE__);
+    }catch(_e){ return null; }
+  }
+
+  function buildSavePayload(reason="autosave"){
+    const est = estimateNumber || ($("estimate_no")?.value || "").trim();
+    return {
+      estimateNumber: est,
+      savedAt: new Date().toISOString(),
+      reason,
+      inputs: snapshotInputs(),
+      schedule: snapshotSchedule(),
+      pieceMarks: snapshotPieceMarks()
+    };
+  }
+
+  async function upsertToPocketBase(payload){
+    const est = (payload?.estimateNumber || "").trim();
+    if(!est || est.toLowerCase().includes("reserving")) return;
+
+    // Always keep a local backup (works even if PB fails)
+    try{ localStorage.setItem(`pf_culvert_autosave_${est}`, JSON.stringify(payload)); }catch(_e){}
+
+    if(!pb || !pb.authStore?.isValid) return;
+
+    const data = { estimateNumber: est, data: payload };
+
+    try{
+      if(pbCulvertRecId){
+        await pb.collection(PB_CULVERT_COL).update(pbCulvertRecId, data);
+        setPbStatus("Autosaved to PocketBase.", "ok");
+        return;
+      }
+    }catch(_e){ /* fallthrough */ }
+
+    try{
+      const res = await pb.collection(PB_CULVERT_COL).getList(1, 1, { filter: `estimateNumber="${escPB(est)}"` });
+      const existing = res?.items?.[0] || null;
+      if(existing){
+        pbCulvertRecId = existing.id;
+        await pb.collection(PB_CULVERT_COL).update(pbCulvertRecId, data);
+      }else{
+        const created = await pb.collection(PB_CULVERT_COL).create(data);
+        pbCulvertRecId = created?.id || null;
+      }
+      setPbStatus("Autosaved to PocketBase.", "ok");
+    }catch(e){
+      console.warn("PocketBase save failed:", e);
+      const et = pbErrText(e);
+      const tip = (String(e?.status||"")==="403") ? " Check PocketBase API Rules for culvert_estimates (Create/Update).": "";
+      setPbStatus(`Autosave failed (${et}). Inputs are stored locally.${tip}`, "error");
+    }
+  }
+
+  let __saveTimer = null;
+  function scheduleSave(reason="autosave"){
+    clearTimeout(__saveTimer);
+    __saveTimer = setTimeout(()=>{ upsertToPocketBase(buildSavePayload(reason)); }, 650);
+  }
+
+  function applySavedData(saved){
+    const inputs = saved?.inputs || saved || {};
+    const ids = [
+      "in_span","in_rise","t_wall","t_top","t_bot","lay_len","h_h","h_v",
+      "skew_u","skew_d","n_lays","gamma","conc_price","fill","soil_gamma",
+      "cover","bar_dia","sched_len_basis"
+    ];
+    ids.forEach(id=>{
+      if(inputs[id] == null) return;
+      const el = $(id);
+      if(!el) return;
+      el.value = inputs[id];
+    });
+
+    // Schedule
+    if(Array.isArray(saved?.schedule) && typeof schedClear === "function" && typeof schedAddRow === "function"){
+      window.__CULVERT_SCHEDULE_LOADED__ = true;
+      schedClear();
+      saved.schedule.forEach(r=>{
+        schedAddRow({
+          location: r.loc ?? r.location ?? "",
+          mark: r.mark ?? "",
+          qty: r.qty ?? 0,
+          size: r.size ?? 4,
+          spacing: r.spacing ?? "",
+          override_len_ft: r.override_len_ft ?? r.override_len_ft ?? ""
+        });
+      });
+    }
+  }
+
+  async function loadEstimateFromPB(estNo){
+    if(!pb || !pb.authStore?.isValid) return false;
+    try{
+      const res = await pb.collection(PB_CULVERT_COL).getList(1, 1, { filter: `estimateNumber="${escPB(estNo)}"` });
+      const rec = res?.items?.[0] || null;
+      if(!rec) return false;
+      pbCulvertRecId = rec.id;
+      const saved = rec.data || rec.payload || null;
+      if(saved) applySavedData(saved);
+      return true;
+    }catch(e){
+      console.warn("Unable to load estimate from PB:", e);
+      return false;
+    }
+  }
+
+  async function initEstimateNumber(){
+    const el = $("estimate_no");
+    if(!el) return;
+    el.readOnly = true;
+
+    const params = new URLSearchParams(location.search);
+    const fromUrl = (params.get("est") || params.get("estimate") || params.get("quote") || "").trim();
+
+    if(fromUrl){
+      estimateNumber = fromUrl;
+      el.value = fromUrl;
+      setPbStatus("Loaded estimate # from URL.", "ok");
+      // Load saved data if available
+      const ok = await loadEstimateFromPB(fromUrl);
+      if(ok){
+        setPbStatus("Loaded inputs from PocketBase.", "ok");
+      }else{
+        setPbStatus("No saved data found for this estimate #.", "muted");
+      }
+      return;
+    }
+
+    el.value = "Reserving…";
+    try{
+      estimateNumber = await reserveEstimateNumberPB();
+      el.value = estimateNumber;
+      setPbStatus("Estimate # reserved. Autosave is enabled.", "ok");
+    }catch(e){
+      console.warn("PB reserve failed:", e);
+      estimateNumber = reserveEstimateNumberLocal();
+      el.value = estimateNumber;
+      setPbStatus(`Estimate # reserved locally. PocketBase numbering/autosave unavailable (${pbErrText(e)}).`, "error");
+    }
+
+    scheduleSave("init");
+  }
+
+
+  // ========= Helpers =========
+  const toNum = (id) => parseFloat($(id).value || '0');
+  const clamp = (v,a,b)=>Math.max(a,Math.min(v,b));
+  const rad = d => d * Math.PI / 180;
+  const fmt = (n, d=3)=> (isFinite(n)? Number(n).toLocaleString(undefined,{maximumFractionDigits:d}) : '—');
+  const in2ft = v_in => v_in/12;
+  const ft2in = v_ft => v_ft*12;
+
+  // ========= Rebar helpers (bar schedule mode) =========
+  const REBAR_PROPS = {
+    3:{dia_in:0.375, wt_lbft:0.376},
+    4:{dia_in:0.500, wt_lbft:0.668},
+    5:{dia_in:0.625, wt_lbft:1.043},
+    6:{dia_in:0.750, wt_lbft:1.502},
+    7:{dia_in:0.875, wt_lbft:2.044},
+    8:{dia_in:1.000, wt_lbft:2.670},
+    9:{dia_in:1.128, wt_lbft:3.400},
+    10:{dia_in:1.270, wt_lbft:4.303},
+    11:{dia_in:1.410, wt_lbft:5.313},
+  };
+  function rebarDiaIn(size){ return (REBAR_PROPS[size]?.dia_in) ?? toNum('bar_dia') ?? 0.625; }
+  function rebarWtLbFt(size){ return (REBAR_PROPS[size]?.wt_lbft) ?? 0; }
+
+  function parseFeetInchToFt(s){
+    // Accepts: 6", 8 in, 1'-0", 1' 0", 1.5', 12
+    if(!s) return NaN;
+    const  raw = String(s).trim();
+    if(!raw) return NaN;
+    // If contains "'" treat as ft-in
+    const m = raw.match(/(-?\d+(?:\.\d+)?)\s*'\s*(?:(-?\d+(?:\.\d+)?)\s*(?:\"|in)?)?/i);
+    if(m){
+      const ft = parseFloat(m[1]||'0');
+      const inch = parseFloat(m[2]||'0');
+      return ft + (inch/12);
+    }
+    // If contains inches mark
+    if(/\"|\bin\b/i.test(raw)){
+      const num = parseFloat(raw.replace(/[^0-9.+-]/g,''));
+      return isFinite(num) ? num/12 : NaN;
+    }
+    // If contains ft label
+    if(/\bft\b/i.test(raw)){
+      const num = parseFloat(raw.replace(/[^0-9.+-]/g,''));
+      return isFinite(num) ? num : NaN;
+    }
+    // Plain number: assume inches if <= 24, else assume feet
+    const num = parseFloat(raw.replace(/[^0-9.+-]/g,''));
+    if(!isFinite(num)) return NaN;
+    return (num <= 24) ? (num/12) : num;
+  }
+
+  const DEMO_SCHEDULE = [
+    {location:"Top Slab(Int)", mark:"A100 (AS2)", qty:16, size:6, spacing:'6"'},
+    {location:"Bot Slab(Int)", mark:"A200 (AS3)", qty:16, size:6, spacing:'6"'},
+    {location:"Top Slab(Ext)", mark:"AE300 (AS7)", qty:8,  size:4, spacing:"1'-0\""},
+    {location:"Bot Slab(Ext)", mark:"A400 (AS8)", qty:8,  size:4, spacing:"1'-0\""},
+    {location:"Corner(Top)",   mark:"AE1 (AS1)",  qty:20, size:5, spacing:'10"'},
+    {location:"Corner(Bot)",   mark:"A2 (AS1)",   qty:20, size:5, spacing:'10"'},
+    {location:"Wall(Int)",     mark:"B1 (AS4)",   qty:24, size:4, spacing:'8"'},
+    {location:"Longit. Top (Ext)", mark:"CE1 (AS6)", qty:11, size:4, spacing:"1'-0\""},
+    {location:"Longit. Top (Int)", mark:"C100 (AS5)", qty:16, size:5, spacing:'8"'},
+    {location:"Longit. Bot (Int)", mark:"C200",       qty:11, size:4, spacing:"1'-0\""},
+    {location:"Longit. Bot (Ext)", mark:"C1 (AS6)",   qty:11, size:4, spacing:"1'-0\""},
+    {location:"Longit. Wall (Ext)", mark:"C1 (AS6)",  qty:14, size:4, spacing:"1'-0\""},
+    {location:"Longit. Wall (Int)", mark:"C1 (AS6)",  qty:14, size:4, spacing:"1'-0\""},
+  ];
+
+  function getReinfMode(){
+    return 'schedule';
+  }
+  function getLongitBasis(d){
+    const basis = ($('sched_len_basis')?.value) || 'run';
+    let L = d.L_center_ft;
+    let mu = Math.tan(rad(d.skew_u));
+    let md = Math.tan(rad(d.skew_d));
+    if(basis==='piece_rect'){ L = d.L_lay_ft; mu = 0; md = 0; }
+    else if(basis==='piece_up'){ L = d.L_lay_ft; md = 0; }
+    else if(basis==='piece_dn'){ L = d.L_lay_ft; mu = 0; }
+    else if(basis==='piece_both'){ L = d.L_lay_ft; }
+    return {basis, L, mu, md, k: (mu+md)};
+  }
+
+  function autoBarLengthFtFor(locRaw, d, diaIn){
+    const cover = toNum('cover');
+    const offIn = cover + 0.5*diaIn;
+    const offFt = offIn/12;
+
+    const loc = String(locRaw||'').toLowerCase().replace(/\s+/g,' ').trim();
+    const basis = getLongitBasis(d);
+    const L = basis.L;
+    const k = basis.k;
+    const lenAtY = (y)=> L + k*y;
+
+    const Sft = d.S_i/12, Bft = d.B_out/12;
+    const Rft = d.R_i/12, Hft = d.H_out/12;
+
+    // Longitudinal bars (run along culvert length)
+    if(loc.includes('longit')){
+      if(loc.includes('wall')){
+        const isInt = loc.includes('int');
+        const yInner = Sft/2, yOuter = Bft/2;
+        const yL = isInt ? (-yInner - offFt) : (-yOuter + offFt);
+        const yR = isInt ? ( yInner + offFt) : ( yOuter - offFt);
+        const L1 = lenAtY(yL), L2 = lenAtY(yR);
+        return {lenFt:(L1+L2)/2, minFt:Math.min(L1,L2), maxFt:Math.max(L1,L2), note:'Longitudinal (wall)'};
+      }
+      // slab longitudinal (distributed across width, symmetric about centerline)
+      const isInt = loc.includes('int');
+      const widthFt = isInt ? Sft : Bft;
+      const yMin = -widthFt/2 + offFt;
+      const yMax =  widthFt/2 - offFt;
+      const Lmin = lenAtY(yMin), Lmax = lenAtY(yMax);
+      // For symmetric layouts, the average length is the centerline length (y=0)
+      return {lenFt:L, minFt:Math.min(Lmin,Lmax), maxFt:Math.max(Lmin,Lmax), note:'Longitudinal (slab)'};
+    }
+
+    // Transverse slab bars (span direction)
+    if(loc.includes('top slab')){
+      const wIn = loc.includes('int') ? d.S_i : d.B_out;
+      const lenFt = Math.max(0, (wIn - 2*offIn)/12);
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Transverse (slab)'};
+    }
+    if(loc.includes('bot slab') || loc.includes('bottom slab')){
+      const wIn = loc.includes('int') ? d.S_i : d.B_out;
+      const lenFt = Math.max(0, (wIn - 2*offIn)/12);
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Transverse (slab)'};
+    }
+
+    // Transverse wall bars (vertical)
+    if(loc.startsWith('wall') || loc.includes('wall(')){
+      const hIn = loc.includes('int') ? d.R_i : d.H_out;
+      const lenFt = Math.max(0, (hIn - 2*offIn)/12);
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Transverse (wall)'};
+    }
+
+    // Corner bars — approximate L-bar in section using slab+wall thicknesses
+    if(loc.includes('corner')){
+      const tSlab = loc.includes('top') ? d.t_top : d.t_bot;
+      const lenIn = Math.max(0, (tSlab + d.t_w - 2*offIn));
+      const lenFt = lenIn/12;
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Corner (approx L-bar)'};
+    }
+
+    return {lenFt:0, minFt:0, maxFt:0, note:'Unknown (override length)'};
+  }
+
+  function schedClear(){
+    const tb = $('sched_table')?.querySelector('tbody');
+    if(tb) tb.innerHTML = '';
+  }
+  function schedAddRow(r){
+    const tb = $('sched_table')?.querySelector('tbody');
+    if(!tb) return;
+
+    const tr = document.createElement('tr');
+
+    const makeTd = (child)=>{
+      const td = document.createElement('td');
+      if(child) td.appendChild(child);
+      return td;
+    };
+    const inp = (cls, val, type='text', step=null)=>{
+      const el = document.createElement('input');
+      el.type = type;
+      if(step!==null) el.step = step;
+      el.value = (val ?? '');
+      el.className = cls;
+      return el;
+    };
+    const selSize = (val)=>{
+      const s = document.createElement('select');
+      s.className = 'size';
+      [3,4,5,6,7,8,9,10,11].forEach(n=>{
+        const o = document.createElement('option');
+        o.value = String(n);
+        o.textContent = String(n);
+        if(String(val)===String(n)) o.selected=true;
+        s.appendChild(o);
+      });
+      return s;
+    };
+
+    tr.appendChild(makeTd(inp('loc', r?.location || '')));
+    tr.appendChild(makeTd(inp('mark', r?.mark || '')));
+    tr.appendChild(makeTd(inp('qty', r?.qty ?? 0, 'number', '1')));
+    tr.appendChild(makeTd(selSize(r?.size ?? 4)));
+    tr.appendChild(makeTd(inp('spacing', r?.spacing || '')));
+    tr.appendChild(makeTd(inp('ovr', r?.override_len_ft ?? '', 'number', '0.01')));
+
+    const tdAuto = document.createElement('td'); tdAuto.className = 'auto'; tdAuto.textContent = '—'; tr.appendChild(tdAuto);
+    const tdTotL = document.createElement('td'); tdTotL.className = 'totL'; tdTotL.textContent = '—'; tr.appendChild(tdTotL);
+    const tdW1 = document.createElement('td'); tdW1.className = 'w1'; tdW1.textContent = '—'; tr.appendChild(tdW1);
+    const tdWT = document.createElement('td'); tdWT.className = 'wt'; tdWT.textContent = '—'; tr.appendChild(tdWT);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '✕';
+    btn.className = 'btnX';
+    btn.title = 'Remove row';
+    btn.addEventListener('click', ()=>{
+      tr.remove();
+      // recompute without redrawing SVGs
+      try{ window.__CULVERT_STATE__ ? schedRecompute(window.__CULVERT_STATE__) : null; }catch(_){}
+      try{ scheduleSave('schedule'); }catch(_e){}
+    });
+    tr.appendChild(makeTd(btn));
+
+    // Any change triggers schedule recompute
+    tr.addEventListener('input', ()=>{
+      try{ window.__CULVERT_STATE__ ? schedRecompute(window.__CULVERT_STATE__) : null; }catch(_){}
+      try{ scheduleSave('schedule'); }catch(_e){}
+    });
+
+    tb.appendChild(tr);
+  }
+
+  function schedReadRows(){
+    const tb = $('sched_table')?.querySelector('tbody');
+    if(!tb) return [];
+    const rows = [];
+    for(const tr of tb.querySelectorAll('tr')){
+      const loc = tr.querySelector('.loc')?.value ?? '';
+      const mark = tr.querySelector('.mark')?.value ?? '';
+      const qty = parseFloat(tr.querySelector('.qty')?.value ?? '0') || 0;
+      const size = parseInt(tr.querySelector('.size')?.value ?? '0', 10) || 0;
+      const spacing = tr.querySelector('.spacing')?.value ?? '';
+      const ovr = parseFloat(tr.querySelector('.ovr')?.value ?? '') || 0;
+      rows.push({loc, mark, qty, size, spacing, override_len_ft: ovr});
+    }
+    return rows;
+  }
+
+  function schedCompute(d){
+    const rowsIn = schedReadRows();
+    const outRows = [];
+    let totalWt = 0, totalLen = 0;
+    const bySizeWt = {}; const bySizeLen = {}; const bySizeQty = {};
+    for(const r of rowsIn){
+      const dia = rebarDiaIn(r.size);
+      const wtpf = rebarWtLbFt(r.size);
+      const auto = autoBarLengthFtFor(r.loc, d, dia);
+      const useLen = (r.override_len_ft && r.override_len_ft>0) ? r.override_len_ft : auto.lenFt;
+      const qty = r.qty || 0;
+      const totL = qty * useLen;
+      const w1 = useLen * wtpf;
+      const wt = totL * wtpf;
+      totalWt += wt;
+      totalLen += totL;
+      bySizeWt[r.size] = (bySizeWt[r.size]||0) + wt;
+      bySizeLen[r.size] = (bySizeLen[r.size]||0) + totL;
+      bySizeQty[r.size] = (bySizeQty[r.size]||0) + qty;
+      outRows.push({
+        ...r,
+        dia_in: dia,
+        wt_lbft: wtpf,
+        auto_len_ft: auto.lenFt,
+        auto_min_ft: auto.minFt,
+        auto_max_ft: auto.maxFt,
+        used_len_ft: useLen,
+        tot_len_ft: totL,
+        wt_per_bar_lb: w1,
+        total_wt_lb: wt,
+        note: auto.note
+      });
+    }
+    return {rows: outRows, total_wt_lb: totalWt, total_len_ft: totalLen, by_size_wt: bySizeWt, by_size_len: bySizeLen, by_size_qty: bySizeQty, basis: getLongitBasis(d)};
+  }
+
+
+  function renderBarSummaryTable(sched){
+    const table = $('bar_summary_table');
+    if(!table) return;
+    const tb = table.querySelector('tbody');
+    if(!tb) return;
+    tb.innerHTML = '';
+
+    const sizes = Object.keys(sched.by_size_wt||{}).map(s=>parseInt(s,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
+    let totalWt = 0, totalLen = 0, totalQty = 0;
+
+    for(const s of sizes){
+      const wt = (sched.by_size_wt||{})[s] || 0;
+      const ln = (sched.by_size_len||{})[s] || 0;
+      const q  = (sched.by_size_qty||{})[s] || 0;
+      totalWt += wt; totalLen += ln; totalQty += q;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>#${s}</strong></td>
+        <td>${fmt(q,0)}</td>
+        <td>${fmt(ln,3)}</td>
+        <td>${fmt(wt,0)}</td>
+      `;
+      tb.appendChild(tr);
+    }
+
+    const note = $('bar_summary_note');
+    if(note){
+      if(!sizes.length){
+        note.textContent = "Add Bar Schedule rows to see totals by bar size.";
+      } else {
+        note.textContent = `Total: ${fmt(totalQty,0)} bars · ${fmt(totalLen,3)} ft · ${fmt(totalWt,0)} lb`;
+      }
+    }
+  }
+
+
+  function renderBarWeightTable(sched){
+    const table = $('bar_weight_table');
+    if(!table) return;
+    const tb = table.querySelector('tbody');
+    if(!tb) return;
+    tb.innerHTML = '';
+
+    const sizes = Object.keys(sched.by_size_wt||{}).map(s=>parseInt(s,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
+    let totalWt = 0;
+
+    for(const s of sizes){
+      const wt = (sched.by_size_wt||{})[s] || 0;
+      totalWt += wt;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><strong>#${s}</strong></td><td>${fmt(wt,0)}</td>`;
+      tb.appendChild(tr);
+    }
+
+    const note = $('bar_weight_note');
+    if(note){
+      if(!sizes.length){
+        note.textContent = "Add Bar Schedule rows to see total steel weight by bar size.";
+      } else {
+        note.textContent = `Total steel: ${fmt(totalWt,0)} lb`;
+      }
+    }
+  }
+
+
+  function schedRender(tableOnly, d, sched){
+    const tb = $('sched_table')?.querySelector('tbody');
+    if(tb){
+      const trs = [...tb.querySelectorAll('tr')];
+      for(let i=0;i<trs.length;i++){
+        const tr = trs[i];
+        const row = sched.rows[i];
+        if(!row) continue;
+        const autoCell = tr.querySelector('.auto');
+        const totLCell = tr.querySelector('.totL');
+        const w1Cell = tr.querySelector('.w1');
+        const wtCell = tr.querySelector('.wt');
+        if(autoCell) autoCell.textContent = fmt(row.auto_len_ft,3);
+        if(totLCell) totLCell.textContent = fmt(row.tot_len_ft,3);
+        if(w1Cell) w1Cell.textContent = fmt(row.wt_per_bar_lb,3);
+        if(wtCell) wtCell.textContent = fmt(row.total_wt_lb,0);
+      }
+    }
+    if(!tableOnly){
+      const box = $('sched_out');
+      if(box){
+        const sizeLines = Object.keys(sched.by_size_wt).sort((a,b)=>+a-(+b)).map(k=>`#${k}: ${fmt(sched.by_size_wt[k],0)} lb`).join('  |  ');
+        const b = sched.basis;
+        box.textContent =
+`Bar schedule totals:
+  Total length = ${fmt(sched.total_len_ft,3)} ft
+  Total weight = ${fmt(sched.total_wt_lb,0)} lb
+  By size: ${sizeLines || '—'}
+
+Longitudinal length basis: ${b.basis}  (L=${fmt(b.L,3)} ft, skew slopes k=tan(θu)+tan(θd)=${fmt(b.k,4)})
+Note: Longitudinal auto-lengths report min/max variation across width/walls internally; override if detailing differs.`;
+      }
+    }
+    renderBarSummaryTable(sched);
+    renderBarWeightTable(sched);
+  }
+
+  function schedRecompute(d){
+    const mode = getReinfMode();
+    if(mode !== 'schedule') return;
+    const sched = schedCompute(d);
+    d.RebarSchedule = sched;
+    schedRender(false, d, sched);
+    // Keep piece mark table (steel + total piece weight) in sync with schedule edits
+    try{ renderPieceMarksTable(d); }catch(_){}
+  }
+
+  
+  // ========= Piece mark table (below SVGs) =========
+  function pieceBasisFromKind(kind){
+    const k = String(kind||'').toLowerCase();
+    const up = k.includes('upstream');
+    const dn = k.includes('downstream');
+    if(up && dn) return 'piece_both';
+    if(up) return 'piece_up';
+    if(dn) return 'piece_dn';
+    return 'piece_rect';
+  }
+
+  function longitBasisFromName(d, basis){
+    // Mirrors getLongitBasis(), but allows us to compute per-piece steel for the piece table
+    let L = d.L_center_ft;
+    let mu = Math.tan(rad(d.skew_u));
+    let md = Math.tan(rad(d.skew_d));
+    if(basis==='piece_rect'){ L = d.L_lay_ft; mu = 0; md = 0; }
+    else if(basis==='piece_up'){ L = d.L_lay_ft; md = 0; }
+    else if(basis==='piece_dn'){ L = d.L_lay_ft; mu = 0; }
+    else if(basis==='piece_both'){ L = d.L_lay_ft; }
+    // basis === 'run' => keep full run
+    return {basis, L, mu, md, k:(mu+md)};
+  }
+
+  function autoBarLengthFtForBasis(locRaw, d, diaIn, basisObj){
+    const cover = toNum('cover');
+    const offIn = cover + 0.5*diaIn;
+    const offFt = offIn/12;
+
+    const loc = String(locRaw||'').toLowerCase().replace(/\s+/g,' ').trim();
+    const L = basisObj.L;
+    const k = basisObj.k;
+    const lenAtY = (y)=> L + k*y;
+
+    const Sft = d.S_i/12, Bft = d.B_out/12;
+
+    // Longitudinal bars (run along culvert length)
+    if(loc.includes('longit')){
+      if(loc.includes('wall')){
+        const isInt = loc.includes('int');
+        const yInner = Sft/2, yOuter = Bft/2;
+        const yL = isInt ? (-yInner - offFt) : (-yOuter + offFt);
+        const yR = isInt ? ( yInner + offFt) : ( yOuter - offFt);
+        const L1 = lenAtY(yL), L2 = lenAtY(yR);
+        return {lenFt:(L1+L2)/2, minFt:Math.min(L1,L2), maxFt:Math.max(L1,L2), note:'Longitudinal (wall)'};
+      }
+      // slab longitudinal (distributed across width, symmetric about centerline)
+      const isInt = loc.includes('int');
+      const widthFt = isInt ? Sft : Bft;
+      const yMin = -widthFt/2 + offFt;
+      const yMax =  widthFt/2 - offFt;
+      const Lmin = lenAtY(yMin), Lmax = lenAtY(yMax);
+      // For symmetric layouts, the average length is the centerline length (y=0)
+      return {lenFt:L, minFt:Math.min(Lmin,Lmax), maxFt:Math.max(Lmin,Lmax), note:'Longitudinal (slab)'};
+    }
+
+    // Transverse slab bars (span direction)
+    if(loc.includes('top slab')){
+      const wIn = loc.includes('int') ? d.S_i : d.B_out;
+      const lenFt = Math.max(0, (wIn - 2*offIn)/12);
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Transverse (slab)'};
+    }
+    if(loc.includes('bot slab') || loc.includes('bottom slab')){
+      const wIn = loc.includes('int') ? d.S_i : d.B_out;
+      const lenFt = Math.max(0, (wIn - 2*offIn)/12);
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Transverse (slab)'};
+    }
+
+    // Transverse wall bars (vertical)
+    if(loc.startsWith('wall') || loc.includes('wall(')){
+      const hIn = loc.includes('int') ? d.R_i : d.H_out;
+      const lenFt = Math.max(0, (hIn - 2*offIn)/12);
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Transverse (wall)'};
+    }
+
+    // Corner bars — approximate L-bar in section using slab+wall thicknesses
+    if(loc.includes('corner')){
+      const tSlab = loc.includes('top') ? d.t_top : d.t_bot;
+      const lenIn = Math.max(0, (tSlab + d.t_w - 2*offIn));
+      const lenFt = lenIn/12;
+      return {lenFt, minFt:lenFt, maxFt:lenFt, note:'Corner (approx L-bar)'};
+    }
+
+    return {lenFt:0, minFt:0, maxFt:0, note:'Unknown (override length)'};
+  }
+
+  function schedTotalSteelForBasis(d, basisName){
+    const rowsIn = schedReadRows();
+    if(!rowsIn.length) return 0;
+    const basisObj = longitBasisFromName(d, basisName);
+    let totalWt = 0;
+    for(const r of rowsIn){
+      const dia = rebarDiaIn(r.size);
+      const wtpf = rebarWtLbFt(r.size);
+      const auto = autoBarLengthFtForBasis(r.loc, d, dia, basisObj);
+      const useLen = (r.override_len_ft && r.override_len_ft>0) ? r.override_len_ft : auto.lenFt;
+      const qty = r.qty || 0;
+      totalWt += (qty * useLen) * wtpf;
+    }
+    return totalWt;
+  }
+
+  function renderPieceMarksTable(d){
+    const table = $('piece_mark_table');
+    if(!table) return;
+    const tb = table.querySelector('tbody');
+    if(!tb) return;
+    tb.innerHTML = '';
+
+    const note = $('piece_mark_note');
+    const mode = getReinfMode();
+
+    const hasScheduleRows = (mode==='schedule') && (schedReadRows().length>0);
+    const steelCache = {};
+
+    const concPrice = toNum('conc_price') || 0; // $/yd³
+
+    const markByKey = new Map();
+    let markIdx = 0;
+
+    for(const p of (d.pieces||[])){
+      const basis = pieceBasisFromKind(p.kind);
+      let steelLb = NaN;
+      if(hasScheduleRows){
+        if(!(basis in steelCache)) steelCache[basis] = schedTotalSteelForBasis(d, basis);
+        steelLb = steelCache[basis];
+      }
+      const steelForWt = isFinite(steelLb) ? steelLb : 0;
+      const pieceWtLb = p.W_lb + steelForWt; // total piece weight (conc + steel, if available)
+      const lenKey = Math.round((p.L_eff_ft||0) * 1000) / 1000;
+      const wtKey  = Math.round(pieceWtLb||0); // lb
+      const key = `${lenKey}|${wtKey}`;
+
+      if(!markByKey.has(key)){
+        markIdx += 1;
+        markByKey.set(key, {
+          mark:`A-${markIdx}`,
+          pieces:[p.i],
+          len_ft:p.L_eff_ft,
+          vol_yd3:p.V_yd3,
+          steel_lb:steelLb,
+          piece_wt_lb:pieceWtLb
+        });
+      } else {
+        markByKey.get(key).pieces.push(p.i);
+      }
+    }
+
+    const rows = [...markByKey.values()].sort((a,b)=>{
+      const ai = parseInt((a.mark.split('-')[1]||'0'),10)||0;
+      const bi = parseInt((b.mark.split('-')[1]||'0'),10)||0;
+      return ai-bi;
+    });
+
+    for(const r of rows){
+      const tr = document.createElement('tr');
+
+      const tdMark = document.createElement('td');
+      tdMark.innerHTML = `
+        <div style="font-weight:900">${r.mark}</div>
+        <span class="sub">Pieces: ${r.pieces.join(', ')} · L=${fmt(r.len_ft,3)} ft</span>
+      `;
+      tr.appendChild(tdMark);
+
+      const tdQty = document.createElement('td');
+      tdQty.innerHTML = `<div style="font-weight:900">${r.pieces.length}</div>`;
+      tr.appendChild(tdQty);
+
+      const tdV = document.createElement('td');
+      const vPer = r.vol_yd3;
+      const vTot = vPer * r.pieces.length;
+      tdV.innerHTML = `
+        <div>${fmt(vPer,3)}</div>
+        ${r.pieces.length>1 ? `<span class="sub">Total: ${fmt(vTot,3)}</span>` : ``}
+      `;
+      tr.appendChild(tdV);
+
+      const tdSteel = document.createElement('td');
+      if(isFinite(r.steel_lb)){
+        const sPer = r.steel_lb;
+        const sTot = sPer * r.pieces.length;
+        tdSteel.innerHTML = `
+          <div>${fmt(sPer,0)}</div>
+          ${r.pieces.length>1 ? `<span class="sub">Total: ${fmt(sTot,0)}</span>` : ``}
+        `;
+      } else {
+        tdSteel.innerHTML = `<div class="muted">—</div>`;
+      }
+      tr.appendChild(tdSteel);
+
+      const tdWt = document.createElement('td');
+      const wPer = r.piece_wt_lb;
+      const wTot = wPer * r.pieces.length;
+      tdWt.innerHTML = `
+        <div>${fmt(wPer,0)}</div>
+        ${r.pieces.length>1 ? `<span class="sub">Total: ${fmt(wTot,0)}</span>` : ``}
+      `;
+      tr.appendChild(tdWt);
+
+      const tdPrice = document.createElement('td');
+      const unitPrice = (r.vol_yd3 || 0) * concPrice;
+      const totPrice = unitPrice * r.pieces.length;
+      tdPrice.innerHTML = `
+        <div>$${fmt(unitPrice,2)}</div>
+        ${r.pieces.length>1 ? `<span class="sub">Total: $${fmt(totPrice,2)}</span>` : ``}
+      `;
+      tr.appendChild(tdPrice);
+
+      tb.appendChild(tr);
+    }
+
+    if(note){
+      if(hasScheduleRows){
+        note.textContent = "Piece marks group pieces that match on effective length and total piece weight. Steel is computed per piece from your Bar Schedule rows; longitudinal auto-lengths use each piece’s skew type (rect / upstream / downstream / both).";
+      } else {
+        note.textContent = "Add Bar Schedule rows to compute steel weight and total piece weight per piece. (In the meantime, steel is shown as — and piece weight is concrete only.)";
+      }
+    }
+  }
+  // Build piece-mark groups for importing into Estimates (uses the same grouping logic as the Piece Marks table)
+  function collectPieceMarkGroupsForQuote(d){
+    const mode = getReinfMode();
+    const hasScheduleRows = (mode==='schedule') && (schedReadRows().length>0);
+    const steelCache = {};
+    const concPrice = toNum('conc_price') || 0; // $/yd³
+    const markByKey = new Map();
+    let markIdx = 0;
+
+    for(const p of (d.pieces||[])){
+      const basis = pieceBasisFromKind(p.kind);
+      let steelLb = NaN;
+      if(hasScheduleRows){
+        if(!(basis in steelCache)) steelCache[basis] = schedTotalSteelForBasis(d, basis);
+        steelLb = steelCache[basis];
+      }
+      const steelForWt = isFinite(steelLb) ? steelLb : 0;
+      const unitWtLb = (p.W_lb || 0) + steelForWt;
+
+      const lenKey = Math.round((p.L_eff_ft||0) * 1000) / 1000;
+      const wtKey  = Math.round(unitWtLb || 0); // lb
+      const key = `${lenKey}|${wtKey}`;
+
+      if(!markByKey.has(key)){
+        markIdx += 1;
+        markByKey.set(key, {
+          mark:`A-${markIdx}`,
+          len_ft:p.L_eff_ft,
+          qty:1,
+          pieces:[p.i],
+          conc_yd3:p.V_yd3,
+          steel_lb:steelLb,
+          unit_weight_lb:unitWtLb,
+          unit_price: (p.V_yd3||0) * concPrice
+        });
+      } else {
+        const g = markByKey.get(key);
+        g.qty += 1;
+        g.pieces.push(p.i);
+      }
+    }
+
+    return [...markByKey.values()].sort((a,b)=>{
+      const ai = parseInt((a.mark.split('-')[1]||'0'),10)||0;
+      const bi = parseInt((b.mark.split('-')[1]||'0'),10)||0;
+      return ai-bi;
+    });
+  }
+
+
+
+function setReinforcementMode(mode){
+    const astm = $('astm_wrap');
+    const sched = $('sched_wrap');
+    if(astm) astm.style.display = (mode==='astm') ? 'block' : 'none';
+    if(sched) sched.style.display = (mode==='schedule') ? 'block' : 'none';
+
+    const btnAs = $('export_as_csv');
+    const btnSc = $('export_sched_csv');
+    if(btnAs) btnAs.disabled = (mode!=='astm');
+    if(btnSc) btnSc.disabled = (mode!=='schedule');
+  }
+
+  function download(filename, text, mime='text/plain'){
+    const blob = new Blob([text], {type: mime});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  }
+// === Helper: polygon centroid via shoelace (plan CG) ===
+function polygonCentroid(pts){
+  // pts: array of {x, y} in consistent order and CLOSED (last repeats first or not; this handles both)
+  const n = pts.length;
+  let A = 0, Cx = 0, Cy = 0;
+  for(let i=0;i<n;i++){
+    const p0 = pts[i];
+    const p1 = pts[(i+1)%n];
+    const cross = p0.x*p1.y - p1.x*p0.y;
+    A += cross;
+    Cx += (p0.x + p1.x) * cross;
+    Cy += (p0.y + p1.y) * cross;
+  }
+  A *= 0.5;
+  if (Math.abs(A) < 1e-12) return {x:0, y:0, A:0}; // degenerate fallback
+  return {x: Cx/(6*A), y: Cy/(6*A), A: A};
+}
+
+// ========= Core compute (REPLACE YOUR compute() WITH THIS) =========
+function compute(){
+  // Inputs (section dims in inches; inside span/rise entered in ft)
+  const S_i   = toNum('in_span') * 12;    // in (entered in ft)
+  const R_i   = toNum('in_rise') * 12;    // in (entered in ft)
+  const t_w   = toNum('t_wall');          // in
+  const t_top = toNum('t_top');           // in
+  const t_bot = toNum('t_bot');           // in
+  const h_h   = toNum('h_h');             // in
+  const h_v   = toNum('h_v');             // in
+
+  const L_lay_ft = toNum('lay_len');      // ft
+  const N        = Math.max(1, Math.round(toNum('n_lays')));
+  const gamma    = toNum('gamma');        // pcf
+  const fill_ft  = Math.max(0, toNum('fill')); // ft
+
+  const cover   = toNum('cover');         // in
+  const barDia  = toNum('bar_dia');       // in
+  const skew_u  = toNum('skew_u');        // deg
+  const skew_d  = toNum('skew_d');        // deg
+
+  // Outer dimensions
+  const B_out = S_i + 2*t_w;               // total width (in)
+  const H_out = R_i + t_top + t_bot;       // total height (in)
+
+  // Areas (in^2)
+  const A_out = B_out * H_out;
+  const A_in_void = (S_i * R_i) - 2*h_h*h_v; // inner opening minus 4 right-triangle haunches
+  const A_conc_in2 = A_out - A_in_void;      // net concrete area
+  // Convert to ft^2
+  const A_conc_ft2 = (A_conc_in2) / 144;
+
+  // Weight per linear foot (lb/ft)
+  const w_per_ft_lb = A_conc_ft2 * gamma;
+
+  // Weight per lay (lb)
+  const W_lay_lb = w_per_ft_lb * L_lay_ft;
+
+  // Total centerline length (ft)
+  const L_center_ft = N * L_lay_ft;
+
+  // Skew edge length offsets (plan) — use outer width in feet
+  const B_out_ft = B_out / 12;
+  const halfW = B_out_ft/2;
+  const m_u = Math.tan(rad(skew_u));
+  const m_d = Math.tan(rad(skew_d));
+
+  const du = m_u * halfW; // ft
+  const dd = m_d * halfW; // ft
+
+  const L_edge_max_ft = L_center_ft + du + dd; // one edge ("north")
+  const L_edge_min_ft = L_center_ft - du - dd; // opposite edge ("south")
+
+  // --- Piece-by-piece concrete volume/weight ---
+  // For perfectly constant sections, the true concrete volume is typically A_conc * L_center.
+  // However, many precast takeoffs (and field expectations) treat skewed end pieces as having
+  // a different effective length. We provide a practical "effective length" based on the
+  // long/short edge lengths of the skewed piece (RMS), which yields a slightly higher value
+  // as skew increases.
+  function skewEffectiveLen(L, off){
+    const o = Math.abs(off);
+    const Llong = L + o;
+    const Lshort = Math.max(0.01, L - o);
+    const Leff = Math.sqrt((Llong*Llong + Lshort*Lshort)/2); // RMS
+    return {Leff, Llong, Lshort};
+  }
+
+  const pieces = [];
+  const eps = 1e-6;
+  const hasDu = Math.abs(du) > eps;
+  const hasDd = Math.abs(dd) > eps;
+
+  // Piece indexing is 1..N from upstream (start) to downstream (end)
+  for(let i=1;i<=N;i++){
+    let kind = 'Rectangular';
+    let off = 0;
+
+    if(N===1){
+      // One piece can have a skew at either end (or both). We approximate by combining offsets.
+      off = (hasDu ? du : 0) + (hasDd ? dd : 0);
+      if(Math.abs(off) > eps){
+        if(hasDu && hasDd) kind = 'Skewed (both ends)';
+        else if(hasDu) kind = 'Skewed (upstream)';
+        else if(hasDd) kind = 'Skewed (downstream)';
+      }
+    } else {
+      if(hasDu && i===1){ kind = 'Skewed (upstream)'; off = du; }
+      if(hasDd && i===N){ kind = 'Skewed (downstream)'; off = dd; }
+    }
+
+    let L_eff = L_lay_ft;
+    let L_long = L_lay_ft;
+    let L_short = L_lay_ft;
+    if(kind.startsWith('Skewed')){
+      const r = skewEffectiveLen(L_lay_ft, off);
+      L_eff = r.Leff; L_long = r.Llong; L_short = r.Lshort;
+    }
+    const V_ft3 = A_conc_ft2 * L_eff;
+    const V_yd3 = V_ft3 / 27;
+    const W_lb = V_ft3 * gamma;
+    pieces.push({i, kind, off_ft: off, L_eff_ft: L_eff, L_long_ft: L_long, L_short_ft: L_short, V_ft3, V_yd3, W_lb});
+  }
+
+  const totalVol_ft3 = pieces.reduce((s,p)=>s+p.V_ft3,0);
+  const totalVol_yd3 = totalVol_ft3/27;
+  const W_run_lb = pieces.reduce((s,p)=>s+p.W_lb,0);
+
+  // CG (cross-section vertical coordinate from invert)
+  const y_out = H_out/2;                   // in from invert
+  const y_in  = t_bot + R_i/2;             // inner void centroid (haunches symmetric ⇒ unchanged)
+  const A_net = A_conc_in2;
+  const ybar_in = (A_out*y_out - A_in_void*y_in)/A_net; // in above invert
+
+  // Distances from CG to faces
+  const d_to_invert_in = ybar_in;          // in
+  const d_to_top_in    = H_out - ybar_in;  // in
+
+  // Reinforcement layer positions (centerlines from faces)
+  const layer_offset = cover + 0.5*barDia;
+
+  // Slab mats (vertical positions)
+  const y_As1 = H_out - layer_offset;                // Top slab exterior (As1)
+  const y_As2 = t_bot + R_i + layer_offset;          // Top slab interior (As2)
+  const y_As3 = layer_offset;                        // Bottom slab interior (As3)
+  const y_As4 = t_bot - layer_offset;                // Bottom slab exterior (As4)
+
+  // Walls mats (horizontal positions from left outer face)
+  const x_As5 = layer_offset;                        // Left wall exterior (As5)
+  const x_As6 = t_w - layer_offset;                  // Left wall interior (As6)
+  const x_As7 = B_out - t_w + layer_offset;          // Right wall interior (As7)
+  const x_As8 = B_out - layer_offset;                // Right wall exterior (As8)
+  const x_center = B_out/2;
+
+  const dist_CG_to_As = {
+    As1: Math.abs(y_As1 - ybar_in),
+    As2: Math.abs(y_As2 - ybar_in),
+    As3: Math.abs(y_As3 - ybar_in),
+    As4: Math.abs(y_As4 - ybar_in),
+    // walls: horizontal distance from section CG x (mid-width) to mats
+    As5: Math.abs(x_center - x_As5),
+    As6: Math.abs(x_center - x_As6),
+    As7: Math.abs(x_center - x_As7),
+    As8: Math.abs(x_center - x_As8),
+  };
+
+  // --- Plan polygon (accounting for skew) and its centroid ---
+  // Coordinates in feet, centerline along +x, transverse across y
+  const x0 = 0, x1 = L_center_ft;
+  const UL = {x: x0 - m_u*halfW, y: -halfW};
+  const UR = {x: x0 + m_u*halfW, y: +halfW};
+  const DR = {x: x1 + m_d*halfW, y: +halfW};
+  const DL = {x: x1 - m_d*halfW, y: -halfW};
+  const plan_pts = [UL, UR, DR, DL];
+  const Cplan = polygonCentroid(plan_pts);
+  // For symmetric top/bottom, Cy should be ~0; Cx shifts when skews differ.
+
+  const out = {
+    S_i,R_i,t_w,t_top,t_bot,h_h,h_v,
+    B_out,H_out,A_out,A_in_void,A_conc_in2,
+    A_conc_ft2,w_per_ft_lb,W_lay_lb,N,L_lay_ft,L_center_ft,gamma,fill_ft,
+    skew_u,skew_d,B_out_ft,L_edge_max_ft,L_edge_min_ft,
+    // Concrete takeoff
+    pieces,
+    totalVol_ft3,totalVol_yd3,
+    W_run_lb,
+    ybar_in,d_to_invert_in,d_to_top_in,
+    layer_offset, dist_CG_to_As,
+    // Plan outputs
+    plan_pts, plan_cg_ft: {x: Cplan.x, y: Cplan.y}, plan_area_ft2: Math.abs(Cplan.A),
+    // reinforcement selection placeholder filled later
+    AsRow:null
+  };
+
+  return out;
+}
+
+// ========= Section SVG (REPLACE YOUR drawSection WITH THIS) =========
+function drawSection(svg, d){
+  const S_i=d.S_i, R_i=d.R_i, t_w=d.t_w, t_top=d.t_top, t_bot=d.t_bot, h_h=d.h_h, h_v=d.h_v;
+  const B=d.B_out, H=d.H_out;
+
+  // Canvas
+  const pad=20;
+  const vbW=800, vbH=400;
+  svg.innerHTML = "";
+  const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+
+  // Scale to fit
+  const sx = (vbW - 2*pad)/B;
+  const sy = (vbH - 2*pad)/H;
+  const s = Math.min(sx, sy);
+  const ox = (vbW - s*B)/2;
+  const oy = (vbH - s*H)/2;
+
+  function X(x){return ox + s*x;}
+  function Y(y){return vbH - (oy + s*y);} // invert y for SVG
+
+  // Outer rectangle
+  const rect = document.createElementNS(svg.namespaceURI,'rect');
+  rect.setAttribute('x', X(0)); rect.setAttribute('y', Y(H));
+  rect.setAttribute('width', s*B); rect.setAttribute('height', s*H);
+  rect.setAttribute('fill','#ffffff'); rect.setAttribute('stroke','#334155');
+  g.appendChild(rect);
+
+  // Inner opening with haunch (octagon)
+  const x0 = t_w, y0 = t_bot;
+  const pts = [
+    [x0 + h_h, y0],
+    [x0 + S_i - h_h, y0],
+    [x0 + S_i, y0 + h_v],
+    [x0 + S_i, y0 + R_i - h_v],
+    [x0 + S_i - h_h, y0 + R_i],
+    [x0 + h_h, y0 + R_i],
+    [x0, y0 + R_i - h_v],
+    [x0, y0 + h_v],
+  ];
+  const path = document.createElementNS(svg.namespaceURI,'path');
+  path.setAttribute('d', `M ${X(pts[0][0])} ${Y(pts[0][1])} ` + pts.slice(1).map(p=>`L ${X(p[0])} ${Y(p[1])}`).join(' ') + ' Z');
+  path.setAttribute('fill','#ffffff'); path.setAttribute('stroke','#64748b');
+  g.appendChild(path);
+
+  svg.appendChild(g);
+
+  // Annotations
+  const txt = (x,y,text,fill='#93c5fd')=>{
+    const t = document.createElementNS(svg.namespaceURI,'text');
+    t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('fill', fill);
+    t.setAttribute('font-size','12'); t.textContent = text; svg.appendChild(t);
+  };
+  txt(10,20,`Section — B_out=${fmt(B)} in, H_out=${fmt(H)} in`);
+}
+
+// ========= Plan SVG (REPLACE YOUR drawPlan WITH THIS) =========
+function drawPlan(svg, d){
+  const vbW=1000, vbH=400;
+  svg.innerHTML = "";
+  const g = document.createElementNS(svg.namespaceURI,'g');
+  svg.appendChild(g);
+
+  // Layout
+  const pad=30;
+  const width_ft = d.B_out_ft; // across (constant)
+  const Lc = d.L_center_ft;
+  const N = d.N, Llay = d.L_lay_ft;
+  const halfW = width_ft/2;
+  const m_u = Math.tan(rad(d.skew_u)), m_d = Math.tan(rad(d.skew_d));
+
+  // Plan polygon corners (ft)
+  const UL = d.plan_pts[0];
+  const UR = d.plan_pts[1];
+  const DR = d.plan_pts[2];
+  const DL = d.plan_pts[3];
+
+  // Scale to fit polygon extents
+  const minX = Math.min(UL.x, UR.x, DL.x, DR.x);
+  const maxX = Math.max(UL.x, UR.x, DL.x, DR.x);
+  const minY = -halfW, maxY = +halfW;
+  const sx = (vbW - 2*pad) / Math.max(maxX - minX, 1e-6);
+  const sy = (vbH - 2*pad) / Math.max(maxY - minY, 1e-6);
+  const s = Math.min(sx, sy);
+  const ox = pad - s*minX;           // left-shift to include negative x if any
+  const oy = vbH/2;                  // center vertically
+
+  const X = (ft)=> ox + s*ft;
+  const Y = (ft)=> oy + s*ft;
+
+  function poly(points, stroke, fill, sw=2){
+    const p = document.createElementNS(svg.namespaceURI,'polyline');
+    p.setAttribute('points', points.map(pt=>`${X(pt.x)},${Y(pt.y)}`).join(' '));
+    p.setAttribute('fill', fill); p.setAttribute('stroke', stroke); p.setAttribute('stroke-width', sw);
+    return p;
+  }
+
+  // Outline = UL→UR→DR→DL→UL
+  const outline = poly([UL,UR,DR,DL,UL], '#64748b', 'none', 2);
+  g.appendChild(outline);
+
+  // Upstream skew face (line across width)
+  const UpA = {x: 0 - m_u*halfW, y: -halfW};
+  const UpB = {x: 0 + m_u*halfW, y: +halfW};
+  g.appendChild(poly([UpA, UpB], '#334155', 'none', 2));
+
+  // Downstream skew face
+  const DnA = {x: Lc - m_d*halfW, y: -halfW};
+  const DnB = {x: Lc + m_d*halfW, y: +halfW};
+  g.appendChild(poly([DnA, DnB], '#334155', 'none', 2));
+
+  // Internal lay boundaries — vertical (perpendicular to centerline)
+  for(let i=1;i<N;i++){
+    const xi = i*Llay;
+    const l = document.createElementNS(svg.namespaceURI,'line');
+    l.setAttribute('x1', X(xi)); l.setAttribute('x2', X(xi));
+    l.setAttribute('y1', Y(-halfW)); l.setAttribute('y2', Y(+halfW));
+    l.setAttribute('stroke', '#1f2937'); l.setAttribute('stroke-width', 1.5);
+    g.appendChild(l);
+  }
+
+  // Labels
+  const txt = (px,py,text,fill='#93c5fd')=>{
+    const t = document.createElementNS(svg.namespaceURI,'text');
+    t.setAttribute('x', px); t.setAttribute('y', py); t.setAttribute('fill', fill);
+    t.setAttribute('font-size','12'); t.textContent = text; svg.appendChild(t);
+  };
+  txt(10,20,`Plan — N=${N}, L_center=${fmt(Lc,3)} ft, L_edge_max=${fmt(d.L_edge_max_ft,3)} ft, L_edge_min=${fmt(d.L_edge_min_ft,3)} ft`);
+}
+
+  // ========= UI updates =========
+  function update(){
+    const d = compute();
+
+    // Draw
+    drawSection($('svg_section'), d);
+    drawPlan($('svg_plan'), d);
+
+    // Geometry & weight output
+    const pieceLines = (d.pieces||[]).map(p=>{
+      const label = `Piece ${p.i} — ${p.kind}`;
+      const edges = (p.kind.startsWith('Skewed'))
+        ? `edges ${fmt(p.L_short_ft,3)}–${fmt(p.L_long_ft,3)} ft, L_eff=${fmt(p.L_eff_ft,3)} ft`
+        : `L=${fmt(p.L_eff_ft,3)} ft`;
+      return `${label}: ${edges} | V=${fmt(p.V_ft3,2)} ft³ (${fmt(p.V_yd3,3)} yd³) | W=${fmt(p.W_lb,0)} lb`;
+    }).join('\n');
+
+    $('geom_out').textContent =
+      `Outer width B_out = ${fmt(d.B_out,3)} in  (${fmt(d.B_out/12,3)} ft)
+Outer height H_out = ${fmt(d.H_out,3)} in  (${fmt(d.H_out/12,3)} ft)
+Concrete area A = ${fmt(d.A_conc_in2,3)} in²  (${fmt(d.A_conc_ft2,3)} ft²)
+Weight per ft = ${fmt(d.w_per_ft_lb,3)} lb/ft  @γ=${fmt(d.gamma,0)} pcf
+
+Lay length = ${fmt(d.L_lay_ft,3)} ft  |  N lays = ${d.N}  |  Centerline length = ${fmt(d.L_center_ft,3)} ft
+Plan edge lengths (entire run): max=${fmt(d.L_edge_max_ft,3)} ft, min=${fmt(d.L_edge_min_ft,3)} ft
+
+Concrete volume (sum of pieces) ≈ ${fmt(d.totalVol_ft3,2)} ft³  (${fmt(d.totalVol_yd3,3)} yd³)
+Total run weight ≈ ${fmt(d.W_run_lb,0)} lb
+
+Piece-by-piece takeoff (skewed pieces use effective length from long/short edge RMS):
+${pieceLines || '(no pieces)'}\n`;
+
+    // Reinforcement (bar schedule)
+    d.reinf_mode = 'schedule';
+    d.AsRow = null;
+    d.RebarSchedule = schedCompute(d);
+    schedRender(false, d, d.RebarSchedule);
+
+// Store global for export
+    try{ renderPieceMarksTable(d); }catch(_){ /* no-op */ }
+    window.__CULVERT_STATE__ = d;
+
+    // Autosave (debounced)
+    try{ scheduleSave('calculate'); }catch(_e){}
+  }
+
+  // ========= Exports =========
+  const _btnExportCsv = $('export_csv'); if(_btnExportCsv) _btnExportCsv.addEventListener('click', ()=>{
+    const d = window.__CULVERT_STATE__; if(!d){update();}
+    const rows = [
+      ['InsideSpan_in', d.S_i],
+      ['InsideRise_in', d.R_i],
+      ['Wall_in', d.t_w],
+      ['Top_in', d.t_top],
+      ['Bottom_in', d.t_bot],
+      ['HaunchH_in', d.h_h],
+      ['HaunchV_in', d.h_v],
+      ['OuterWidth_in', d.B_out],
+      ['OuterHeight_in', d.H_out],
+      ['ConcreteArea_in2', d.A_conc_in2],
+      ['ConcreteArea_ft2', d.A_conc_ft2],
+      ['Weight_lb_per_ft', d.w_per_ft_lb],
+      ['LayLength_ft', d.L_lay_ft],
+      ['Weight_per_lay_lb', d.W_lay_lb],
+      ['NumLays', d.N],
+      ['CenterlineLength_ft', d.L_center_ft],
+      ['Skew_up_deg', d.skew_u],
+      ['Skew_dn_deg', d.skew_d],
+      ['EdgeLength_max_ft', d.L_edge_max_ft],
+      ['EdgeLength_min_ft', d.L_edge_min_ft],
+      ['RunWeight_lb', d.W_run_lb],
+      ['ConcreteVolume_total_ft3', d.totalVol_ft3],
+      ['ConcreteVolume_total_yd3', d.totalVol_yd3],
+      ['CG_from_invert_in', d.ybar_in],
+      ['CG_from_top_in', d.d_to_top_in],
+      ['Cover_in', d.layer_offset*2 - toNum('bar_dia')],
+      ['BarDia_in', toNum('bar_dia')],
+      ['CG_to_As1_in', d.dist_CG_to_As.As1],
+      ['CG_to_As2_in', d.dist_CG_to_As.As2],
+      ['CG_to_As3_in', d.dist_CG_to_As.As3],
+      ['CG_to_As4_in', d.dist_CG_to_As.As4],
+      ['CG_to_As5_in', d.dist_CG_to_As.As5],
+      ['CG_to_As6_in', d.dist_CG_to_As.As6],
+      ['CG_to_As7_in', d.dist_CG_to_As.As7],
+      ['CG_to_As8_in', d.dist_CG_to_As.As8],
+    ];
+    const csv = rows.map(r=>r.join(',')).join('\n');
+    download('culvert_results.csv', csv, 'text/csv');
+  });
+
+  const _btnExportAsCsv = $('export_as_csv'); if(_btnExportAsCsv) _btnExportAsCsv.addEventListener('click', ()=>{
+    const d = window.__CULVERT_STATE__; if(!d){update();}
+    if(getReinfMode()!=='astm'){
+      alert("Switch to ASTM mode to export the C1577 reinforcement row.");
+      return;
+    }
+    const r = d.AsRow;
+    if(!r){ alert("No reinforcement row selected. Load C1577 CSV first."); return; }
+    const header = "Version,InsideSpan_in,InsideRise_in,Wall_in,Top_in,Bottom_in,FillMin_ft,FillMax_ft,As1,As2,As3,As4,As5,As6,As7,As8\n";
+    const row = [r.Version, r.InsideSpan_in, r.InsideRise_in, r.Wall_in, r.Top_in, r.Bottom_in,
+      r.FillMin_ft, r.FillMax_ft, r.As1, r.As2, r.As3, r.As4, r.As5, r.As6, r.As7, r.As8].join(',');
+    download('reinforcement_row.csv', header + row, 'text/csv');
+  });
+
+  const _btnExportSchedCsv = $('export_sched_csv'); if(_btnExportSchedCsv) _btnExportSchedCsv.addEventListener('click', ()=>{
+    const d = window.__CULVERT_STATE__; if(!d){update();}
+    if(getReinfMode()!=='schedule'){
+      alert("Switch to Bar schedule mode to export the bar schedule.");
+      return;
+    }
+    const sched = d.RebarSchedule || schedCompute(d);
+    const header = "Location,Mark,Qty,Size,Spacing,OverrideLen_ft,AutoLen_ft,UsedLen_ft,TotalLen_ft,WtPerFt_lb,TotalWt_lb\n";
+    const lines = (sched.rows||[]).map(r=>[
+      (r.loc||'').replace(/,/g,';'),
+      (r.mark||'').replace(/,/g,';'),
+      r.qty,
+      r.size,
+      (r.spacing||'').replace(/,/g,';'),
+      r.override_len_ft||'',
+      r.auto_len_ft,
+      r.used_len_ft,
+      r.tot_len_ft,
+      r.wt_lbft,
+      r.total_wt_lb
+    ].join(',')).join('\n');
+    download('bar_schedule.csv', header + lines, 'text/csv');
+  });
+
+$('export_report').addEventListener('click', ()=>{
+    const d0 = window.__CULVERT_STATE__;
+    if(!d0){ update(); }
+    const d = window.__CULVERT_STATE__;
+    const win = window.open('', '_blank');
+
+    const piecesHTML = (d.pieces||[]).map(p=>`
+      <tr>
+        <td>${p.i}</td>
+        <td>${p.kind}</td>
+        <td>${p.kind.startsWith('Skewed') ? `${fmt(p.L_short_ft,3)}–${fmt(p.L_long_ft,3)}` : '—'}</td>
+        <td>${fmt(p.L_eff_ft,3)}</td>
+        <td>${fmt(p.V_ft3,2)}</td>
+        <td>${fmt(p.V_yd3,3)}</td>
+        <td>${fmt(p.W_lb,0)}</td>
+      </tr>
+    `).join('');
+
+    const sched = d.RebarSchedule || schedCompute(d);
+
+    const barSummaryHTML = Object.keys(sched.by_size_wt||{})
+      .map(k=>parseInt(k,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b)
+      .map(s=>{
+        const wt = (sched.by_size_wt||{})[s] || 0;
+        const ln = (sched.by_size_len||{})[s] || 0;
+        const q  = (sched.by_size_qty||{})[s] || 0;
+        return `<tr><td><strong>#${s}</strong></td><td>${fmt(q,0)}</td><td>${fmt(ln,3)}</td><td>${fmt(wt,0)}</td></tr>`;
+      }).join('');
+
+    const reinfHTML = `
+      <h3>Bar schedule</h3>
+      <table>
+        <tr>
+          <th>Location</th><th>Mark</th><th>Qty</th><th>Size</th><th>Spacing</th>
+          <th>Used L (ft)</th><th>Total L (ft)</th><th>Total Wt (lb)</th>
+        </tr>
+        ${
+          (sched.rows||[]).map(r=>`
+            <tr>
+              <td>${(r.loc||'')}</td>
+              <td>${(r.mark||'')}</td>
+              <td>${fmt(r.qty,0)}</td>
+              <td>#${r.size}</td>
+              <td>${(r.spacing||'')}</td>
+              <td>${fmt(r.used_len_ft,3)}</td>
+              <td>${fmt(r.tot_len_ft,3)}</td>
+              <td>${fmt(r.total_wt_lb,0)}</td>
+            </tr>
+          `).join('')
+        }
+        <tr>
+          <th colspan="7">Total</th>
+          <th>${fmt(sched.total_wt_lb,0)}</th>
+        </tr>
+      </table>
+
+      <h3>Totals by bar size</h3>
+      <table>
+        <tr><th>Bar size</th><th>Total qty</th><th>Total length (ft)</th><th>Total weight (lb)</th></tr>
+        ${barSummaryHTML || `<tr><td colspan="4">—</td></tr>`}
+      </table>
+
+      <small>Auto length basis: ${sched.basis.basis} (L=${fmt(sched.basis.L,3)} ft)</small>
+    `;
+
+    const html = `
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Precast Box Culvert Estimator</title>
+<style>
+body{font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;color:#111;padding:20px}
+h1,h2{margin:0 0 10px} h2{margin-top:16px}
+table{border-collapse:collapse;width:100%;margin:10px 0}
+th,td{border:1px solid #888;padding:6px 8px;text-align:left}
+small{color:#555}
+hr{border:0;border-top:1px solid #aaa;margin:16px 0}
+@media print{button{display:none}}
+</style></head><body>
+<button onclick="window.print()">Print / Save as PDF</button>
+<h1>Precast Box Culvert Estimator</h1>
+<small>Generated: ${new Date().toLocaleString()}</small>
+<hr/>
+
+<h2>Inputs</h2>
+<table>
+<tr><th>Inside span (ft)</th><td>${fmt(d.S_i/12,3)}</td><th>Inside rise (ft)</th><td>${fmt(d.R_i/12,3)}</td></tr>
+<tr><th>Wall t (in)</th><td>${fmt(d.t_w)}</td><th>Top t (in)</th><td>${fmt(d.t_top)}</td></tr>
+<tr><th>Bottom t (in)</th><td>${fmt(d.t_bot)}</td><th>Haunch H×V (in)</th><td>${fmt(d.h_h)} × ${fmt(d.h_v)}</td></tr>
+<tr><th>Lay length (ft)</th><td>${fmt(d.L_lay_ft)}</td><th>Num lays</th><td>${fmt(d.N)}</td></tr>
+<tr><th>Skew up (deg)</th><td>${fmt(d.skew_u)}</td><th>Skew dn (deg)</th><td>${fmt(d.skew_d)}</td></tr>
+<tr><th>Concrete unit weight (pcf)</th><td>${fmt(d.gamma)}</td><th>Fill height (ft)</th><td>${fmt(toNum('fill'))}</td></tr>
+<tr><th>Cover (in)</th><td>${fmt(toNum('cover'))}</td><th>Bar dia (in)</th><td>${fmt(toNum('bar_dia'))}</td></tr>
+</table>
+
+<h2>Geometry & Weights</h2>
+<table>
+<tr><th>Outer width B_out (in)</th><td>${fmt(d.B_out)}</td><th>Outer height H_out (in)</th><td>${fmt(d.H_out)}</td></tr>
+<tr><th>Concrete area (in²)</th><td>${fmt(d.A_conc_in2)}</td><th>Concrete area (ft²)</th><td>${fmt(d.A_conc_ft2)}</td></tr>
+<tr><th>Weight per ft (lb/ft)</th><td>${fmt(d.w_per_ft_lb)}</td><th>Rectangular lay weight (lb)</th><td>${fmt(d.W_lay_lb)}</td></tr>
+<tr><th>Centerline length (ft)</th><td>${fmt(d.L_center_ft)}</td><th>Total run weight (lb)</th><td>${fmt(d.W_run_lb)}</td></tr>
+<tr><th>Plan edge length max (ft)</th><td>${fmt(d.L_edge_max_ft)}</td><th>min (ft)</th><td>${fmt(d.L_edge_min_ft)}</td></tr>
+<tr><th>Concrete volume total (ft³)</th><td>${fmt(d.totalVol_ft3)}</td><th>Total (yd³)</th><td>${fmt(d.totalVol_yd3,3)}</td></tr>
+</table>
+
+<h2>Piece-by-piece concrete takeoff</h2>
+<table>
+  <tr>
+    <th>Piece</th><th>Type</th><th>Edge min–max (ft)</th><th>Effective L (ft)</th><th>Volume (ft³)</th><th>Volume (yd³)</th><th>Weight (lb)</th>
+  </tr>
+  ${piecesHTML}
+</table>
+
+
+<h2>Reinforcement</h2>
+${reinfHTML}
+
+<hr/>
+<div><small>Disclaimer: For preliminary use only. Verify with project specs, agency requirements, and a licensed Professional Engineer.</small></div>
+</body></html>`;
+    win.document.write(html);
+    win.document.close();
+  });
+
+  // Buttons
+  $('calc').addEventListener('click', update);
+  $('reset').addEventListener('click', ()=>{
+    ['in_span','in_rise','t_wall','t_top','t_bot','h_h','h_v','lay_len','n_lays','gamma','conc_price','fill','soil_gamma','cover','bar_dia','skew_u','skew_d'].forEach(id=>{
+      $(id).value = $(id).getAttribute('value') || '';
+    });
+    update();
+  });
+
+  // Autosave when any input changes (debounced)
+  document.addEventListener('input', (e)=>{
+    const t = e.target;
+    if(!t) return;
+    if(t.id === "estimate_no") return;
+    if(t.tagName === "INPUT" || t.tagName === "SELECT" || t.tagName === "TEXTAREA"){
+      try{ scheduleSave('input'); }catch(_e){}
+    }
+  });
+
+  // Send to Quote (creates a new estimate and imports piece marks as custom line items)
+  const _btnSendToQuote = $('btnSendToQuote');
+  if(_btnSendToQuote){
+    _btnSendToQuote.addEventListener('click', ()=>{
+      try{
+        if(!window.__CULVERT_STATE__) update();
+        const d = window.__CULVERT_STATE__;
+        const groups = collectPieceMarkGroupsForQuote(d);
+        const sched = (d.RebarSchedule || schedCompute(d));
+        const rebarBySize = Object.keys(sched.by_size_wt||{})
+          .map(k=>parseInt(k,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b)
+          .map(s=>({
+            size: s,
+            qty: (sched.by_size_qty||{})[s] || 0,
+            lengthFt: (sched.by_size_len||{})[s] || 0,
+            weightLb: (sched.by_size_wt||{})[s] || 0
+          }));
+
+        if(!groups.length){
+          alert("No piece marks available. Click Calculate first.");
+          return;
+        }
+
+        const payload = {
+          type: "culvert_piece_marks",
+          version: 1,
+          createdAt: new Date().toISOString(),
+          estimateNumber: (estimateNumber || $("estimate_no")?.value || "").trim(),
+          quoteNumber: (estimateNumber || $("estimate_no")?.value || "").trim(),
+          items: groups.map(g => {
+            const unitPrice = Math.round((g.unit_price || 0) * 100) / 100;
+            return ({
+              pieceMark: g.mark,
+              qty: g.qty,
+              unitWeightLb: Math.round(g.unit_weight_lb || 0),
+              unitPrice: unitPrice,
+              price: unitPrice
+            });
+          }),
+          rebarBySize: rebarBySize
+        };
+        try{ scheduleSave('send_to_quote'); }catch(_e){}
+        try{ localStorage.setItem("pf_culvert_quote_import_v1", JSON.stringify(payload)); }catch(_e){ /* ignore */ }
+
+        const dest = (() => {
+          try{
+            const u = new URL(BACK_PAGE, location.href);
+            u.searchParams.set("import", "culvert");
+            u.searchParams.set("t", String(Date.now()));
+            return u.toString();
+          }catch(_e){
+            return BACK_PAGE;
+          }
+        })();
+
+        window.location.href = dest;
+      }catch(e){
+        console.error(e);
+        alert("Unable to send to quote. Please check the console for details.");
+      }
+    });
+  }
+
+
+  // ========= Open existing estimate UI =========
+  const btnOpenEstimate = $("btnOpenEstimate");
+  const openEstModal = $("openEstModal");
+  const openEstClose = $("openEstClose");
+  const openEstCancel = $("open_est_cancel");
+  const openEstLoad = $("open_est_load");
+  const openEstInput = $("open_est_input");
+  const openEstSelect = $("open_est_select");
+  const openEstStatus = $("open_est_status");
+
+  function setOpenEstStatus(msg=""){
+    if(!openEstStatus) return;
+    openEstStatus.textContent = msg || "";
+  }
+
+  function showOpenEstModal(){
+    if(!openEstModal) return;
+    openEstModal.classList.add("show");
+    openEstModal.setAttribute("aria-hidden","false");
+    setOpenEstStatus("Loading recent estimates…");
+    populateRecentEstimates();
+    try{ (openEstInput||openEstSelect)?.focus(); }catch(_){}
+  }
+
+  function hideOpenEstModal(){
+    if(!openEstModal) return;
+    openEstModal.classList.remove("show");
+    openEstModal.setAttribute("aria-hidden","true");
+  }
+
+  async function populateRecentEstimates(){
+    if(!openEstSelect) return;
+    openEstSelect.innerHTML = '<option value="">Select…</option>';
+
+    if(!pb || !pb.authStore?.isValid){
+      setOpenEstStatus("Sign in to load recent estimates, or type an Estimate #.");
+      return;
+    }
+
+    try{
+      const res = await pb.collection(PB_CULVERT_COL).getList(1, 25, { sort: "-created", fields: "estimateNumber,created" });
+      const items = res?.items || [];
+      for(const it of items){
+        const est = (it.estimateNumber || "").trim();
+        if(!est) continue;
+        const opt = document.createElement("option");
+        opt.value = est;
+        opt.textContent = est;
+        openEstSelect.appendChild(opt);
+      }
+      setOpenEstStatus(items.length ? "Select a recent estimate or type one." : "No recent estimates found.");
+    }catch(e){
+      setOpenEstStatus("Unable to load recent estimates (" + pbErrText(e) + ").");
+    }
+  }
+
+  function navigateToEstimate(est){
+    const clean = String(est || "").trim();
+    if(!clean) return;
+    try{
+      const url = new URL(location.href);
+      url.searchParams.set("est", clean);
+      // Keep the existing back param (and anything else)
+      location.href = url.toString();
+    }catch(_){
+      location.href = "precast_culvert.html?est=" + encodeURIComponent(clean);
+    }
+  }
+
+  if(openEstSelect && openEstInput){
+    openEstSelect.addEventListener("change", ()=>{
+      if(openEstSelect.value) openEstInput.value = openEstSelect.value;
+    });
+  }
+
+  btnOpenEstimate?.addEventListener("click", showOpenEstModal);
+  openEstClose?.addEventListener("click", hideOpenEstModal);
+  openEstCancel?.addEventListener("click", hideOpenEstModal);
+  openEstModal?.addEventListener("click", (e)=>{
+    if(e.target === openEstModal) hideOpenEstModal();
+  });
+  document.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape" && openEstModal?.classList?.contains("show")) hideOpenEstModal();
+  });
+
+  openEstLoad?.addEventListener("click", ()=>{
+    const est = (openEstInput?.value || openEstSelect?.value || "").trim();
+    if(!est){
+      setOpenEstStatus("Enter an Estimate # (example: 26-001).");
+      return;
+    }
+    hideOpenEstModal();
+    navigateToEstimate(est);
+  });
+
+
+
+  
+  // ========= Calculate number of segments (fills Lay length + Number of lays) =========
+  const btnSegCalc = $("btnSegCalc");
+  const segModal = $("segModal");
+  const segClose = $("segClose");
+  const segCancel = $("segCancel");
+  const segComputeBtn = $("segCompute");
+  const segApplyBtn = $("segApply");
+  const segTotalLen = $("seg_total_len");
+  const segJointIn = $("seg_joint_in");
+  const segMaxWt = $("seg_max_wt");
+  const segResult = $("seg_result");
+
+  let __seg_last = null;
+
+  function setSegResult(html=""){
+    if(!segResult) return;
+    segResult.innerHTML = html || "";
+  }
+
+  function getMaxPieceWeightTotalLb(d){
+    const mode = getReinfMode();
+    const hasScheduleRows = (mode==='schedule') && (schedReadRows().length>0);
+    const steelCache = {};
+    let maxW = 0;
+    for(const p of (d.pieces||[])){
+      let steel = 0;
+      if(hasScheduleRows){
+        const basis = pieceBasisFromKind(p.kind);
+        if(!(basis in steelCache)) steelCache[basis] = schedTotalSteelForBasis(d, basis);
+        steel = steelCache[basis] || 0;
+      }
+      const w = (p.W_lb || 0) + (steel || 0);
+      if(w > maxW) maxW = w;
+    }
+    return maxW;
+  }
+
+  function showSegModal(){
+    if(!segModal) return;
+    // Prefill using current inputs
+    try{
+      const d0 = compute();
+      const curMax = getMaxPieceWeightTotalLb(d0);
+      if(segTotalLen) segTotalLen.value = (d0.L_center_ft || 0).toFixed(2);
+      if(segMaxWt) segMaxWt.value = String(Math.round(curMax || 0));
+    }catch(_e){}
+    __seg_last = null;
+    if(segApplyBtn) segApplyBtn.disabled = true;
+    setSegResult("");
+    segModal.classList.add("show");
+    segModal.setAttribute("aria-hidden","false");
+    try{ (segTotalLen || segMaxWt || segJointIn)?.focus(); }catch(_){}
+  }
+
+  function hideSegModal(){
+    if(!segModal) return;
+    segModal.classList.remove("show");
+    segModal.setAttribute("aria-hidden","true");
+  }
+
+  function computeSegments(){
+    const totalFt = toNum("seg_total_len");
+    const jointIn = toNum("seg_joint_in");
+    const maxWt = toNum("seg_max_wt");
+
+    if(!(totalFt > 0)){
+      setSegResult("Enter a positive total culvert length.");
+      return null;
+    }
+    if(!(maxWt > 0)){
+      setSegResult("Enter a positive maximum piece weight.");
+      return null;
+    }
+    const jointFt = Math.max(0, jointIn) / 12;
+
+    const layEl = $("lay_len");
+    const nEl = $("n_lays");
+    if(!layEl || !nEl){
+      setSegResult("Lay length / Number of lays inputs are missing.");
+      return null;
+    }
+
+    const prevLay = layEl.value;
+    const prevN = nEl.value;
+
+    const MAX_N = 200;
+    let found = null;
+
+    for(let n=1; n<=MAX_N; n++){
+      const Llay = (totalFt - (n-1)*jointFt) / n;
+      if(!(Llay > 0)) break;
+
+      // trial compute
+      try{
+        layEl.value = String(Math.round(Llay*1000)/1000);
+        nEl.value = String(n);
+
+        const d = compute();
+        const maxPiece = getMaxPieceWeightTotalLb(d);
+
+        if(maxPiece <= maxWt){
+          found = {
+            N:n,
+            Llay_ft:Llay,
+            maxPieceLb:maxPiece
+          };
+          break;
+        }
+      }catch(e){
+        console.error(e);
+        break;
+      }
+    }
+
+    // restore
+    layEl.value = prevLay;
+    nEl.value = prevN;
+
+    if(!found){
+      setSegResult(`No solution found up to ${MAX_N} lays. Try increasing maximum piece weight, reducing joint thickness, or decreasing total length.`);
+      return null;
+    }
+
+    const totalJointFt = (found.N-1) * jointFt;
+    const overallFt = found.N * found.Llay_ft + totalJointFt;
+
+    setSegResult(`
+      <div style="padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--card2)">
+        <div><strong>Result</strong></div>
+        <div style="margin-top:6px">Number of lays: <strong>${found.N}</strong></div>
+        <div>Lay length: <strong>${fmt(found.Llay_ft,3)} ft</strong></div>
+        <div>Max piece weight (using current schedule): <strong>${fmt(found.maxPieceLb,0)} lb</strong> <span class="muted">(${fmt(found.maxPieceLb/2000,2)} tons)</span></div>
+        <div class="muted" style="margin-top:6px">Overall length check: ${fmt(overallFt,3)} ft = pieces (${fmt(found.N*found.Llay_ft,3)} ft) + joints (${fmt(totalJointFt,3)} ft)</div>
+      </div>
+    `);
+
+    __seg_last = found;
+    if(segApplyBtn) segApplyBtn.disabled = false;
+    return found;
+  }
+
+  btnSegCalc?.addEventListener("click", showSegModal);
+  segClose?.addEventListener("click", hideSegModal);
+  segCancel?.addEventListener("click", hideSegModal);
+  segModal?.addEventListener("click", (e)=>{ if(e.target === segModal) hideSegModal(); });
+
+  document.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape" && segModal?.classList?.contains("show")) hideSegModal();
+  });
+
+  segComputeBtn?.addEventListener("click", ()=>{
+    try{ computeSegments(); }catch(e){ setSegResult("Unable to compute segments (" + (e?.message || e) + ")."); }
+  });
+
+  segApplyBtn?.addEventListener("click", ()=>{
+    if(!__seg_last) return;
+    $("lay_len").value = String(Math.round(__seg_last.Llay_ft*1000)/1000);
+    $("n_lays").value = String(__seg_last.N);
+    hideSegModal();
+    update();
+  });
+
+
+
+// ========= Bar schedule UI wiring =========
+  (function initScheduleUI(){
+    const basisSel = $('sched_len_basis');
+    if(basisSel){
+      basisSel.addEventListener('change', ()=>{ update(); try{ scheduleSave('input'); }catch(_e){} });
+    }
+
+    // Schedule buttons
+    const btnDemo = $('sched_load_demo');
+    if(btnDemo){
+      btnDemo.addEventListener('click', ()=>{
+        schedClear();
+        DEMO_SCHEDULE.forEach(r=>schedAddRow(r));
+        if(window.__CULVERT_STATE__) schedRecompute(window.__CULVERT_STATE__);
+      });
+    }
+    const btnAdd = $('sched_add_row');
+    if(btnAdd){
+      btnAdd.addEventListener('click', ()=>{
+        schedAddRow({location:'', mark:'', qty:0, size:4, spacing:'', override_len_ft:''});
+        if(window.__CULVERT_STATE__) schedRecompute(window.__CULVERT_STATE__);
+      });
+    }
+
+    // Start with a sample schedule so users can edit immediately (unless we loaded one from PocketBase)
+    if(!window.__CULVERT_SCHEDULE_LOADED__){
+      schedClear();
+      DEMO_SCHEDULE.forEach(r=>schedAddRow(r));
+    }
+  })();
+  // Initial
+  initEstimateNumber().finally(()=>{ update(); });
+})();
+// ===================== DXF R12 Minimal Writer =====================
+function dxfPair(code, value){ return code+"\n"+String(value)+"\n"; }
+
+function dxfHeaderR12(){
+  let s = "";
+  s += dxfPair(0,"SECTION");
+  s += dxfPair(2,"HEADER");
+  s += dxfPair(9,"$ACADVER"); s += dxfPair(1,"AC1009"); // R12
+  // Units are often implicit in R12; we’ll keep geometry in real units noted in file name.
+  s += dxfPair(0,"ENDSEC");
+  return s;
+}
+function dxfLayersTable(layers){
+  let s = "";
+  s += dxfPair(0,"SECTION");
+  s += dxfPair(2,"TABLES");
+  s += dxfPair(0,"TABLE");
+  s += dxfPair(2,"LAYER");
+  s += dxfPair(70, layers.length);
+  for(const L of layers){
+    s += dxfPair(0,"LAYER");
+    s += dxfPair(2, L.name);      // name
+    s += dxfPair(70, 0);          // flags
+    s += dxfPair(62, L.color||7); // color index (ACI)
+    s += dxfPair(6, "CONTINUOUS");// linetype
+  }
+  s += dxfPair(0,"ENDTAB");
+  s += dxfPair(0,"ENDSEC");
+  return s;
+}
+function dxfEntitiesStart(){ return dxfPair(0,"SECTION")+dxfPair(2,"ENTITIES"); }
+function dxfEntitiesEnd(){ return dxfPair(0,"ENDSEC"); }
+function dxfEOF(){ return dxfPair(0,"EOF"); }
+
+// ENTITIES
+function dxfPolyline(points, layer, closed=true){
+  // points: [{x,y}]
+  let s="";
+  s += dxfPair(0,"POLYLINE");
+  s += dxfPair(8,layer);
+  s += dxfPair(66,1);          // vertices follow
+  s += dxfPair(70, closed?1:0);// closed flag (2D)
+  for(const p of points){
+    s += dxfPair(0,"VERTEX");
+    s += dxfPair(8,layer);
+    s += dxfPair(10, +p.x); // x
+    s += dxfPair(20, +p.y); // y
+    s += dxfPair(30, 0.0);  // z
+  }
+  s += dxfPair(0,"SEQEND");
+  return s;
+}
+function dxfLine(x1,y1,x2,y2, layer){
+  let s="";
+  s += dxfPair(0,"LINE");
+  s += dxfPair(8,layer);
+  s += dxfPair(10,+x1);
+  s += dxfPair(20,+y1);
+  s += dxfPair(30,0.0);
+  s += dxfPair(11,+x2);
+  s += dxfPair(21,+y2);
+  s += dxfPair(31,0.0);
+  return s;
+}
+function dxfPoint(x,y, layer){
+  let s="";
+  s += dxfPair(0,"POINT");
+  s += dxfPair(8,layer);
+  s += dxfPair(10,+x);
+  s += dxfPair(20,+y);
+  s += dxfPair(30,0.0);
+  return s;
+}
+
+// ===================== Builders from current state =====================
+// Section DXF (units: inches)
+function buildSectionDXF(d){
+  const layers = [
+    {name:"SECTION_OUTER", color:7}, // white
+    {name:"SECTION_INNER", color:5}, // blue
+  ];
+  let s = "";
+  s += dxfHeaderR12();
+  s += dxfLayersTable(layers);
+  s += dxfEntitiesStart();
+
+  // Outer rectangle (0,0) → (B,H) in inches
+  const B = d.B_out;
+  const H = d.H_out;
+  const outer = [{x:0,y:0},{x:B,y:0},{x:B,y:H},{x:0,y:H}];
+  s += dxfPolyline(outer,"SECTION_OUTER", true);
+
+  // Inner opening (octagon with haunches), same points we used for SVG
+  const S_i=d.S_i, R_i=d.R_i, t_w=d.t_w, t_bot=d.t_bot, h_h=d.h_h, h_v=d.h_v;
+  const x0 = t_w, y0 = t_bot;
+  const inner = [
+    {x:x0 + h_h,       y:y0},
+    {x:x0 + S_i - h_h, y:y0},
+    {x:x0 + S_i,       y:y0 + h_v},
+    {x:x0 + S_i,       y:y0 + R_i - h_v},
+    {x:x0 + S_i - h_h, y:y0 + R_i},
+    {x:x0 + h_h,       y:y0 + R_i},
+    {x:x0,             y:y0 + R_i - h_v},
+    {x:x0,             y:y0 + h_v},
+  ];
+  s += dxfPolyline(inner,"SECTION_INNER", true);
+
+  s += dxfEntitiesEnd();
+  s += dxfEOF();
+  return s;
+}
+
+// Plan DXF (units: feet)
+function buildPlanDXF(d, opts={}){
+  const includeCenterline = opts.centerline ?? true;
+  const includeLays = opts.lays ?? true;
+  const layers = [
+    {name:"PLAN_OUTLINE", color:7},
+    {name:"PLAN_LAYS", color:8},        // gray
+    {name:"PLAN_CENTERLINE", color:1},  // red
+    {name:"PLAN_CG", color:3},          // green
+  ];
+  let s = "";
+  s += dxfHeaderR12();
+  s += dxfLayersTable(layers);
+  s += dxfEntitiesStart();
+
+  const halfW = d.B_out_ft/2;
+  // Outline polygon: UL→UR→DR→DL (already in feet)
+  const UL = d.plan_pts[0], UR = d.plan_pts[1], DR = d.plan_pts[2], DL = d.plan_pts[3];
+  s += dxfPolyline([UL,UR,DR,DL], "PLAN_OUTLINE", true);
+
+  // Internal lay boundaries: vertical lines at x = i*Llay from y=-halfW..+halfW
+  if(includeLays){
+    for(let i=1;i<d.N;i++){
+      const x = i*d.L_lay_ft;
+      s += dxfLine(x, -halfW, x, +halfW, "PLAN_LAYS");
+    }
+  }
+
+  // Optional centerline
+  if(includeCenterline){
+    s += dxfLine(0, 0, d.L_center_ft, 0, "PLAN_CENTERLINE");
+  }
+  s += dxfEntitiesEnd();
+  s += dxfEOF();
+  return s;
+}
+
+// ===================== Wire the Export button =====================
+(function(){
+  const btn = document.getElementById('export_dxf');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    const d = window.__CULVERT_STATE__;
+    if(!d){ alert('Please Calculate first.'); return; }
+    const sectionDXF = buildSectionDXF(d);
+    const planDXF = buildPlanDXF(d, {centerline:true, lays:true});
+    // Two downloads (like SVG export)
+    const download = (filename, text, mime='application/dxf')=>{
+      const blob = new Blob([text], {type: mime});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    };
+    download('culvert_section_in.dxf', sectionDXF, 'application/dxf'); // inches
+    setTimeout(()=>download('culvert_plan_ft.dxf', planDXF, 'application/dxf'), 350); // feet
+  });
+})();
+</script>
+
+</body>
+</html>

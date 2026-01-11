@@ -7,32 +7,65 @@
 <title>Fisher Precast Management System</title>
 <!-- PocketBase JS SDK (place at pb_public/vendor/pocketbase.umd.js) -->
 <script src="/vendor/pocketbase.umd.js"></script>
+
 <link rel="stylesheet" href="precastflow-ui.css">
+<style>
+  /* Production calendar (index-only) */
+  .pf-calWrap{ margin-top: 12px; }
+  .pf-calTop{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .pf-calMonthRow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .pf-calMonth{ font-weight:700; font-size:16px; padding:6px 10px; border:1px solid var(--stroke); border-radius:12px; background: var(--panel); }
+  .pf-calHint{ font-size:12px; }
+  .pf-calGrid{ display:grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap:8px; }
+  .pf-calDow{ font-size:12px; color: var(--muted); font-weight:700; padding:0 6px; }
+  .pf-calCell{
+    border:1px solid var(--stroke);
+    background: var(--panel);
+    border-radius:16px;
+    padding:8px;
+    min-height:120px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    overflow:hidden;
+    cursor:pointer;
+  }
+  .pf-calCell:hover{ box-shadow: 0 10px 30px rgba(0,0,0,.08); transform: translateY(-1px); transition: 120ms ease; }
+  .pf-calCell.isOut{ opacity:.55; }
+  .pf-calCell.isSelected{ outline: 3px solid rgba(59,130,246,.25); }
+  .pf-calDateRow{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .pf-calDate{ font-weight:800; font-size:13px; }
+  .pf-calBadge{ font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid var(--stroke); color: var(--muted); background: rgba(0,0,0,.02); }
+  .pf-calEvents{ display:flex; flex-direction:column; gap:4px; overflow:hidden; }
+  .pf-calEvt{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-size:12px;
+    padding:6px 8px;
+    border-radius:12px;
+    border:1px solid var(--stroke);
+    background: rgba(0,0,0,.02);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .pf-calEvt .left{ overflow:hidden; text-overflow:ellipsis; }
+  .pf-calEvt .qty{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; color: var(--muted); }
+  .pf-calMore{ font-size:12px; color: var(--muted); padding:2px 6px; }
+  .pf-calDetail{ margin-top:12px; border:1px solid var(--stroke); background: var(--panel); border-radius:20px; padding:12px; }
+  .pf-calDetailHead{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:10px; flex-wrap:wrap;}
+  .pf-calDetailList{ display:grid; gap:10px; }
+  @media (max-width: 900px){
+    .pf-calGrid{ gap:6px; }
+    .pf-calCell{ min-height:105px; padding:7px; border-radius:14px; }
+  }
+  @media (max-width: 640px){
+    .pf-calGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pf-calDow{ display:none; }
+    .pf-calCell{ min-height:110px; }
+  }
+</style>
 </head>
 <body>
-<div class="splashOverlay" id="splash" role="button" aria-label="Start screen (click to enter)" tabindex="0">
-  <div class="splashCard">
-    <div class="splashInner">
-      <div class="splashArt">
-        <img src="precast-splash.png" alt="Precast inventory app illustration"/>
-      </div>
-      <div class="splashInfo">
-        <div class="title">Precast Plant Manager</div>
-        <div class="sub">An inventory + production + shipping hub powered by PocketBase.</div>
-        <div class="chips">
-          <div class="chip">Inventory</div>
-          <div class="chip">Production</div>
-          <div class="chip">Yard / Locations</div>
-          <div class="chip">Shipping</div>
-          <div class="chip">Moves / Transactions</div>
-          <div class="chip">Print Reports</div>
-        </div>
-        <div class="hint"><span class="dot"></span>Click anywhere to begin</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- LOGIN VIEW -->
 <div class="login-shell" id="viewLogin" style="display:none">
 <div class="login-card">
@@ -144,15 +177,12 @@
     <button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
     <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
-    <button type="button" class="tab" data-tab="reports"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19V5a2 2 0 0 1 2-2h12v2H6v14h14v2H6a2 2 0 0 1-2-2Zm5-2V9h2v8H9Zm4 0V7h2v10h-2Zm4 0v-5h2v5h-2Z"/></svg><span class="navLabel">Reports</span></button>
-
-    <div class="pf-more">
+<div class="pf-more">
       <details>
         <summary>More</summary>
         <div class="pf-moreItems">
           <button type="button" class="tab" data-tab="schedule"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2Zm15 8H4v11h18V10Z"/></svg><span class="navLabel">Schedule</span></button>
-          <button type="button" class="tab" data-tab="projects"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v2H3V6Zm0 6h22v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8Z"/></svg><span class="navLabel">Projects</span></button>
-          <button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
+<button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
         </div>
       </details>
     </div>
@@ -271,7 +301,7 @@
 
       <div class="pf-inputIcon" style="flex:1; min-width:240px">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 4a6 6 0 1 1-4.472 10.03l-3.28 3.28a1 1 0 0 1-1.415-1.415l3.28-3.28A6 6 0 0 1 10 4Zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
-        <input id="prodSearch" type="search" placeholder="Search work orders… (piece mark, project, pour #)"/>
+        <input id="prodSearch" type="search" placeholder="Search… (piece mark, project, quote #, pour #)"/>
       </div>
 
       <select id="prodScope" title="Scope">
@@ -280,7 +310,55 @@
       </select>
     </div>
 
+    <!-- Production filters (toggle) -->
+    <div class="pf-filters" id="prodFilters" style="display:none">
+      <div class="pf-filterGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end">
+        <div>
+          <label>Quote #</label>
+          <input id="prodQuote" type="text" placeholder="Quote #" inputmode="numeric"/>
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="prodStatus">
+            <option value="">All Status</option>
+            <option>In Production</option>
+            <option>On Hand</option>
+            <option>Allocated</option>
+            <option>Reserved</option>
+            <option>Shipped</option>
+            <option>Scrapped</option>
+          </select>
+        </div>
+        <div class="pf-filterActions" style="display:flex; gap:8px; justify-content:flex-end">
+          <button class="btn ghost" id="btnProdClear" type="button">Clear</button>
+        </div>
+      </div>
+    </div>
+
     <div class="board" id="prodBoard"></div>
+
+    <!-- Production Calendar View -->
+    <div class="pf-calWrap" id="prodCalWrap" style="display:none">
+      <div class="pf-calTop">
+        <div class="pf-calMonthRow">
+          <button class="btn ghost" id="prodCalPrev" type="button" aria-label="Previous month">‹</button>
+          <button class="btn ghost" id="prodCalToday" type="button">Today</button>
+          <button class="btn ghost" id="prodCalNext" type="button" aria-label="Next month">›</button>
+          <div class="pf-calMonth" id="prodCalMonth" aria-live="polite"></div>
+        </div>
+        <div class="pf-calHint muted">Showing production pieces by <b>Cast Date</b>. Pieces without a Cast Date appear under “Unscheduled”.</div>
+      </div>
+
+      <div class="pf-calGrid" id="prodCalGrid" role="grid" aria-label="Production calendar"></div>
+
+      <div class="pf-calDetail">
+        <div class="pf-calDetailHead">
+          <div class="pf-h3" id="prodCalDetailTitle">Items</div>
+          <div class="muted" id="prodCalDetailSub"></div>
+        </div>
+        <div class="pf-calDetailList" id="prodCalDetailList"></div>
+      </div>
+    </div>
 
     <div class="footerbar">
       <span id="prodCountLabel">0 pieces</span>
@@ -794,6 +872,14 @@
 <label>Vendor</label>
 <input id="iVendor" placeholder="e.g., Dayton Superior"/>
 </div>
+<div class="col-6">
+<label>Dimensions</label>
+<input id="iDimensions" placeholder="e.g., 8′ × 12′ × 6&quot; (L×W×H)"/>
+</div>
+<div class="col-6">
+<label>Weight (lb)</label>
+<input id="iWeight" type="number" step="0.01" placeholder="e.g., 2450"/>
+</div>
 <div class="col-2">
 <label>Qty *</label>
 <input id="iQty" placeholder="0" step="0.01" type="number"/>
@@ -831,7 +917,7 @@
 </div>
 <div class="col-12">
 <label>Notes</label>
-<textarea id="iNotes" placeholder="Optional… (dimensions, weight, heat #, QC notes, etc.)" rows="3"></textarea>
+<textarea id="iNotes" placeholder="Optional… (heat #, QC notes, etc.)" rows="3"></textarea>
 <div class="hint">Tip: For finished pieces, use Project + Piece Mark + Location/Bay to find items quickly.</div>
 </div>
 </div>
@@ -976,6 +1062,19 @@
           </select>
         </div>
 
+        <div class="col-3">
+          <label>Driver</label>
+          <input id="shipDriver" placeholder="e.g., Mike Johnson"/>
+        </div>
+        <div class="col-3">
+          <label>Scheduled Ship Date</label>
+          <input id="shipSchedDate" type="date"/>
+        </div>
+        <div class="col-6">
+          <label>Ship To Address</label>
+          <textarea id="shipToAddr" rows="2" placeholder="Street, City, State ZIP"></textarea>
+        </div>
+
         <div class="col-6">
           <label>From (Location/Bin)</label>
           <input id="shipFromLoc" placeholder="e.g., Yard A • Stack 3"/>
@@ -987,7 +1086,7 @@
 
         <div class="col-12">
           <label>Note</label>
-          <input id="shipNote" placeholder="Optional… (driver, trailer, special instructions)"/>
+          <input id="shipNote" placeholder="Optional… (trailer, special instructions, etc.)"/>
           <div class="hint" id="shipHint"></div>
         </div>
 
@@ -1061,35 +1160,18 @@
     document.documentElement.style.setProperty("--kpiH", kh + "px");
   }
   window.addEventListener("resize", setStickyHeights);
+  window.addEventListener("focus", ()=>{ try{ if(currentTab === "dashboard") refreshOpenQuotesKPI(true); } catch{} });
 (() => {
   // --------------------------
   // PocketBase config
   // --------------------------
   const ITEMS = "items";
   const TX = "transactions";
+  const OPP = "crm_opportunities";
 
   const $ = (id) => document.getElementById(id);
 
-  function initSplash(){
-    const el = $("splash");
-    if(!el) return;
-    const hide = ()=>{
-      el.classList.add("hide");
-      setTimeout(()=>{ try{ el.remove(); }catch{} }, 260);
-    };
-    el.addEventListener("click", hide);
-    el.addEventListener("keydown", (e)=>{
-      if(e.key === "Enter" || e.key === " " || e.key === "Escape"){
-        e.preventDefault();
-        hide();
-      }
-    });
-    // Auto-focus for keyboard users
-    try{ el.focus(); }catch{}
-  }
-  initSplash();
-
-  const PB_URL = window.location.origin; // served by PocketBase -> same origin
+const PB_URL = window.location.origin; // served by PocketBase -> same origin
   $("pbUrlLabel").textContent = PB_URL;
 
   // Basic guard: SDK must be loaded
@@ -1117,6 +1199,15 @@
     const normalized = s.replace(",", ".");
     const n = Number(normalized);
     return Number.isFinite(n) ? n : 0;
+  }
+
+  function parseNullableNum(val){
+    if(val === null || val === undefined) return null;
+    const s = String(val).trim();
+    if(!s) return null;
+    const normalized = s.replace(",", ".");
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : null;
   }
 
   // PocketBase "date" fields store DateTime values in UTC format: "YYYY-MM-DD HH:mm:ss.SSSZ".
@@ -1202,6 +1293,10 @@
   // State
   // --------------------------
   let allItems = [];      // items from PB
+  let allOpps = [];      // crm_opportunities (quotes)
+  let openQuotesCount = null; // cached count
+  let _openQuotesLastFetch = 0;
+  let _openQuotesInFlight = false;
   let sortKey = "updated";
   let sortDir = "desc";   // asc/desc
 
@@ -1290,6 +1385,8 @@
     SETTINGS = loadSettings();
     // fetch items
     await fetchItems();
+    // fetch open quotes/opportunities (non-fatal)
+    await fetchOpps();
     // populate drop-downs that depend on items
     populateProjectFilters();
     populateReportProjects();
@@ -1311,6 +1408,57 @@
       allItems = [];
     }
   }
+
+
+
+async function fetchOpps(){
+  // Loads CRM opportunities/quotes. Silent if collection doesn't exist or rules block access.
+  try{
+    allOpps = await pb.collection(OPP).getFullList(200, { sort: "-updated" });
+  } catch (e){
+    // Avoid noisy toasts; dashboard will show placeholder if CRM isn't enabled.
+    allOpps = [];
+  }
+  // Update cached open quotes count
+  try{
+    openQuotesCount = allOpps.filter(o=>{
+      const st = ((o.stage ?? o.Stage ?? o.status ?? o.Status ?? "") + "").toLowerCase().trim();
+      return st === "quoted" || st === "negotiation";
+    }).length;
+  } catch {
+    openQuotesCount = null;
+  }
+}
+
+async function refreshOpenQuotesKPI(force=false){
+  // Updates the Dashboard KPI "Open Quotes" from crm_opportunities.
+  // Throttled to avoid spamming the server.
+  const now = Date.now();
+  if(_openQuotesInFlight) return;
+  if(!force && (now - _openQuotesLastFetch) < 15000 && openQuotesCount !== null){
+    // still update DOM from cache
+    const vEl = $("dashOpenQuotesVal");
+    const sEl = $("dashOpenQuotesSub");
+    if(vEl && sEl){
+      vEl.textContent = String(openQuotesCount ?? "—");
+      sEl.textContent = (openQuotesCount > 0) ? "Quoted / Negotiation" : "No open quotes";
+    }
+    return;
+  }
+  _openQuotesLastFetch = now;
+  _openQuotesInFlight = true;
+  try{
+    await fetchOpps();
+    const vEl = $("dashOpenQuotesVal");
+    const sEl = $("dashOpenQuotesSub");
+    if(vEl && sEl){
+      vEl.textContent = (openQuotesCount === null) ? "—" : openQuotesCount.toLocaleString();
+      sEl.textContent = (openQuotesCount === null) ? "Connect CRM opportunities" : ((openQuotesCount > 0) ? "Quoted / Negotiation" : "No open quotes");
+    }
+  } finally {
+    _openQuotesInFlight = false;
+  }
+}
 
   async function createItem(data){
     return pb.collection(ITEMS).create(data);
@@ -1351,7 +1499,17 @@
     return qty <= rp && rp > 0;
   }
 
+
+function isArchivedItem(item){
+  const v = item?.archived ?? item?.isArchived ?? item?.Archived;
+  if(v === true || v === "true" || v === 1 || v === "1") return true;
+  const st = (getStatus(item) || "").toString().trim().toLowerCase();
+  return st === "archived" || st === "delivered";
+}
+
+
   function matchesFilters(item){
+    if(isArchivedItem(item)) return false;
     const q = normalize($("q").value);
     const fType = $("fType").value;
     const fStatus = $("fStatus").value;
@@ -1430,7 +1588,7 @@
   }
 
   function renderKPIs(){
-  const items = allItems;
+  const items = allItems.filter(i=>!isArchivedItem(i));
   const count = items.length;
   const value = items.reduce((s,i)=> s + itemTotalValue(i), 0);
   const low = items.filter(isLow).length;
@@ -1501,7 +1659,7 @@
   // Plant Manager Views (Dashboard / Production / Shipping / Projects)
   // --------------------------
   function isFinishedPiece(item){
-    return (getType(item) || "").toLowerCase() === "finished piece";
+    return (getType(item) || "").toLowerCase() === "finished piece" && !isArchivedItem(item);
   }
 
   function getProjects(){
@@ -1527,6 +1685,11 @@
   if(!$("dashKpiRow")) return;
 
   const pieces = allItems.filter(isFinishedPiece);
+
+  // Open quotes (from crm_opportunities)
+  const oq = (typeof openQuotesCount === "number") ? openQuotesCount : null;
+  const oqVal = (oq === null) ? "—" : oq.toLocaleString();
+  const oqSub = (oq === null) ? "Loading quotes…" : (oq > 0 ? "Quoted / Negotiation" : "No open quotes");
 
   // KPI cards (use existing data; keep conservative if CRM isn't configured yet)
   const activeProjects = new Set(
@@ -1563,11 +1726,11 @@
       </div>
       <div class="pf-kpiIcon" aria-hidden="true">🚚</div>
     </div>
-    <div class="pf-kpiCard">
+    <div class="pf-kpiCard" id="dashOpenQuotesCard">
       <div class="pf-kpiMeta">
         <div class="pf-kpiK">Open Quotes</div>
-        <div class="pf-kpiV">0</div>
-        <div class="pf-kpiS">Connect CRM opportunities</div>
+        <div class="pf-kpiV" id="dashOpenQuotesVal">${oqVal}</div>
+        <div class="pf-kpiS" id="dashOpenQuotesSub">${oqSub}</div>
       </div>
       <div class="pf-kpiIcon" aria-hidden="true">📄</div>
     </div>
@@ -1580,6 +1743,24 @@
       <div class="pf-kpiIcon" aria-hidden="true">⏱</div>
     </div>
   `;
+
+
+// Wire Open Quotes KPI (click to open Estimates) + refresh count from PocketBase
+const oqCard = $("dashOpenQuotesCard");
+if(oqCard){
+  oqCard.style.cursor = "pointer";
+  oqCard.setAttribute("role","button");
+  oqCard.setAttribute("tabindex","0");
+  oqCard.addEventListener("click", ()=>{ window.location.href = "estimates.html"; });
+  oqCard.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      window.location.href = "estimates.html";
+    }
+  });
+}
+refreshOpenQuotesKPI(false);
+
 
   // Work orders list (projects grouped)
   const byProject = new Map();
@@ -1725,7 +1906,17 @@
 
     const project = ($("prodProject")?.value || "").trim();
     const q = normalize(($("prodSearch")?.value || "").trim());
+    const quoteQ = normalize(($("prodQuote")?.value || "").trim());
+    const statusFilter = ($("prodStatus")?.value || "").trim();
     const scope = ($("prodScope")?.value || "active");
+
+    // Indicate active filters on the Filter button
+    const fbtn = $("btnProdFilter");
+    if(fbtn){
+      const active = !!quoteQ || !!statusFilter;
+      fbtn.classList.toggle("primary", active);
+      fbtn.classList.toggle("ghost", !active);
+    }
 
 // KPIs (best-effort from current data)
 const allPieces = allItems.filter(isFinishedPiece);
@@ -1766,14 +1957,47 @@ if(kpi){
       items = items.filter(it => (it.project || "").trim() === project);
     }
 
+    if(quoteQ){
+      items = items.filter(it => {
+        const candidates = [
+          it.quoteNumber, it.quoteNo, it.quote, it.quoteNum,
+          it.bin, it.sku
+        ].filter(v => v !== undefined && v !== null)
+         .map(v => normalize(String(v)));
+        return candidates.some(v => v.includes(quoteQ));
+      });
+    }
+
+    if(statusFilter){
+      items = items.filter(it => getStatus(it) === statusFilter);
+    }
+
     if(q){
       items = items.filter(it => {
-        const hay = normalize([it.project, it.pieceMark, it.sku, it.name, it.location, it.bin, getPourNumber(it), getCastDate(it)].filter(Boolean).join(" "));
+        const hay = normalize([
+          it.project, it.pieceMark, it.sku, it.name, it.location,
+          it.bin, it.quoteNumber, it.quoteNo, it.quote,
+          getPourNumber(it), getCastDate(it)
+        ].filter(Boolean).join(" "));
         return hay.includes(q);
       });
     }
 
-    const cols = [
+    
+    // Toggle between board and calendar view
+    const calWrap = $("prodCalWrap");
+    if(prodViewMode === "calendar"){
+      if(wrap) wrap.style.display = "none";
+      if(calWrap) calWrap.style.display = "";
+      renderProductionCalendar(items);
+      $("prodCountLabel").textContent = `${items.length.toLocaleString()} piece record${items.length===1?"":"s"}`;
+      return;
+    }else{
+      if(wrap) wrap.style.display = "";
+      if(calWrap) calWrap.style.display = "none";
+    }
+
+const cols = [
       { key:"In Production", label:"In Production", note:"Casting / curing / finishing" },
       { key:"On Hand", label:"In Yard (On Hand)", note:"Available in yard/warehouse" },
       { key:"Allocated", label:"Allocated / Reserved", note:"Held for shipment/erection" }
@@ -1792,7 +2016,8 @@ if(kpi){
       const sub = it.name && title !== it.name ? it.name : "";
       const cast = getCastDate(it);
       const pour = getPourNumber(it);
-      const loc = [it.location, it.bin].filter(Boolean).join(" / ");
+      const locOnly = (it.location || "").toString().trim();
+      const quoteNo = (it.bin || "").toString().trim();
 
       const adminActions = admin ? `
         ${getStatus(it)==="In Production" ? `<button class="tiny" data-act="setStatus" data-id="${it.id}" data-to="On Hand">To Yard</button>` : ``}
@@ -1812,7 +2037,8 @@ if(kpi){
             ${cast ? `<span>Cast: <span class="mono">${escapeHtml(cast)}</span></span>` : ``}
             ${pour ? `<span>Pour: <span class="mono">${escapeHtml(pour)}</span></span>` : ``}
             <span>Qty: <span class="mono">${fmtNum(it.qty || 0)}</span></span>
-            ${loc ? `<span>Loc: <span class="mono">${escapeHtml(loc)}</span></span>` : ``}
+            ${locOnly ? `<span>Loc: <span class="mono">${escapeHtml(locOnly)}</span></span>` : ``}
+            ${quoteNo ? `<span class="pf-chip">Quote # <span class="mono">${escapeHtml(quoteNo)}</span></span>` : ``}
           </div>
           <div class="actions">
             <button class="tiny" data-act="tx" data-id="${it.id}">${admin ? "Moves" : "View Moves"}</button>
@@ -1862,7 +2088,213 @@ if(kpi){
     return map;
   }
 
-  function renderShippingView(){
+  
+  function renderProductionCalendar(items){
+    const wrap = $("prodCalWrap");
+    const grid = $("prodCalGrid");
+    if(!wrap || !grid) return;
+
+    const monthLabel = $("prodCalMonth");
+    const detailTitle = $("prodCalDetailTitle");
+    const detailSub = $("prodCalDetailSub");
+    const detailList = $("prodCalDetailList");
+
+    // Wire one-time controls
+    if(!wrap.dataset.wired){
+      wrap.dataset.wired = "1";
+      $("prodCalPrev")?.addEventListener("click", ()=>{
+        prodCalState.m -= 1;
+        if(prodCalState.m < 0){ prodCalState.m = 11; prodCalState.y -= 1; }
+        renderProductionView();
+      });
+      $("prodCalNext")?.addEventListener("click", ()=>{
+        prodCalState.m += 1;
+        if(prodCalState.m > 11){ prodCalState.m = 0; prodCalState.y += 1; }
+        renderProductionView();
+      });
+      $("prodCalToday")?.addEventListener("click", ()=>{
+        const now = new Date();
+        prodCalState.y = now.getFullYear();
+        prodCalState.m = now.getMonth();
+        prodCalState.selected = ymdFromLocalDate(now);
+        renderProductionView();
+      });
+
+      grid.addEventListener("click", (e)=>{
+        const cell = e.target.closest("[data-ymd]");
+        if(!cell) return;
+        prodCalState.selected = cell.getAttribute("data-ymd");
+        renderProductionView();
+      });
+
+      // Production actions should work in calendar detail list too
+      detailList?.addEventListener("click", (e)=>{
+        const btn = e.target.closest("button[data-act]");
+        if(!btn) return;
+        const id = btn.getAttribute("data-id");
+        const act = btn.getAttribute("data-act");
+        if(!id) return;
+        const item = allItems.find(i => i.id === id);
+        if(!item) return;
+
+        if(act === "tx") return openTxModal(id);
+        if(act === "edit"){ if(!requireAdmin("Only admins can edit items.")) return; return openItemModal(item); }
+        if(act === "ship"){ if(!requireAdmin("Only admins can ship items.")) return; return openShipModal(id); }
+        if(act === "setStatus"){
+          const to = btn.getAttribute("data-to") || "";
+          if(!to) return;
+          return quickSetStatus(id, to);
+        }
+      });
+    }
+
+    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    if(monthLabel) monthLabel.textContent = `${monthNames[prodCalState.m]} ${prodCalState.y}`;
+
+    // Map items to dates (by cast date)
+    const byDay = new Map(); // ymd -> [items]
+    const unscheduled = [];
+    items.forEach(it=>{
+      const cast = getCastDate(it);
+      if(!cast){ unscheduled.push(it); return; }
+      const k = String(cast).slice(0,10);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(k)){ unscheduled.push(it); return; }
+      if(!byDay.has(k)) byDay.set(k, []);
+      byDay.get(k).push(it);
+    });
+
+    // Calendar range
+    const first = new Date(prodCalState.y, prodCalState.m, 1);
+    const firstDow = first.getDay(); // 0=Sun
+    const daysInMonth = new Date(prodCalState.y, prodCalState.m+1, 0).getDate();
+
+    // Default selected date: today if in month, otherwise first of month
+    const todayYmd = ymdFromLocalDate(new Date());
+    if(!prodCalState.selected){
+      prodCalState.selected = (todayYmd.startsWith(`${prodCalState.y}-${String(prodCalState.m+1).padStart(2,"0")}`))
+        ? todayYmd
+        : `${prodCalState.y}-${String(prodCalState.m+1).padStart(2,"0")}-01`;
+    }
+
+    // Build day-of-week header + cells
+    const dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    let out = dows.map(d=>`<div class="pf-calDow" role="columnheader">${d}</div>`).join("");
+
+    const totalCells = 42; // 6 weeks
+    for(let i=0;i<totalCells;i++){
+      const dayNum = i - firstDow + 1;
+      const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
+      let ymd = "";
+      if(inMonth){
+        ymd = `${prodCalState.y}-${String(prodCalState.m+1).padStart(2,"0")}-${String(dayNum).padStart(2,"0")}`;
+      }else{
+        // Adjacent month padding
+        const d = new Date(prodCalState.y, prodCalState.m, dayNum);
+        ymd = ymdFromLocalDate(d);
+      }
+      const isSelected = prodCalState.selected === ymd;
+      const list = byDay.get(ymd) || [];
+      const count = list.length;
+
+      // Show up to 3 events
+      const shown = list.slice(0,3).map(it=>{
+        const label = (it.pieceMark || it.sku || it.name || "Piece").toString();
+        const q = Number.isFinite(parseNum(it.qty)) ? parseNum(it.qty) : (it.qty || 0);
+        return `<div class="pf-calEvt" title="${escapeHtml(label)}">
+          <div class="left">${escapeHtml(label)}</div>
+          <div class="qty">${fmtNum(q)}</div>
+        </div>`;
+      }).join("");
+      const more = count > 3 ? `<div class="pf-calMore">+${count-3} more</div>` : "";
+
+      out += `
+        <div class="pf-calCell ${inMonth ? "" : "isOut"} ${isSelected ? "isSelected" : ""}" role="gridcell" data-ymd="${escapeHtml(ymd)}">
+          <div class="pf-calDateRow">
+            <div class="pf-calDate">${inMonth ? dayNum : new Date(ymd+"T00:00:00").getDate()}</div>
+            ${count ? `<div class="pf-calBadge">${count}</div>` : ``}
+          </div>
+          <div class="pf-calEvents">
+            ${shown}
+            ${more}
+          </div>
+        </div>
+      `;
+    }
+
+    grid.innerHTML = out;
+
+    // Render detail list for selected day
+    const sel = prodCalState.selected;
+    const selItems = (byDay.get(sel) || []);
+    const admin = isAdmin();
+
+    function pieceCard(it){
+      const mark = (it.pieceMark || it.sku || it.name || "Piece").toString();
+      const proj = (it.project || "").toString();
+      const loc = (it.location || "").toString();
+      const quoteNo = (it.bin || "").toString().trim();
+      const cast = getCastDate(it);
+      const pour = getPourNumber(it);
+
+      const title = [mark, proj].filter(Boolean).join(" • ");
+      const sub = [loc].filter(Boolean).join(" • ");
+
+      const adminActions = admin ? `
+        ${getStatus(it)==="In Production" ? `<button class="tiny" data-act="setStatus" data-id="${it.id}" data-to="On Hand">To Yard</button>` : ``}
+        ${["On Hand","Allocated","Reserved"].includes(getStatus(it)) ? `<button class="tiny" data-act="setStatus" data-id="${it.id}" data-to="Allocated">Allocate</button>` : ``}
+        ${["On Hand","Allocated","Reserved"].includes(getStatus(it)) ? `<button class="tiny primary" data-act="ship" data-id="${it.id}">Ship…</button>` : ``}
+      ` : ``;
+
+      return `
+        <div class="pieceCard" role="group" aria-label="Piece">
+          <div class="top">
+            <div>
+              <div class="name">${escapeHtml(title)}</div>
+              ${sub ? `<div class="smallMuted">${escapeHtml(sub)}</div>` : ``}
+            </div>
+            <div>${statusPill(it)}</div>
+          </div>
+          <div class="meta">
+            ${cast ? `<span>Cast: <span class="mono">${escapeHtml(cast)}</span></span>` : ``}
+            ${pour ? `<span>Pour: <span class="mono">${escapeHtml(pour)}</span></span>` : ``}
+            <span>Qty: <span class="mono">${fmtNum(it.qty || 0)}</span></span>
+            ${quoteNo ? `<span class="pf-chip">Quote # <span class="mono">${escapeHtml(quoteNo)}</span></span>` : ``}
+          </div>
+          <div class="actions">
+            <button class="tiny" data-act="tx" data-id="${it.id}">${admin ? "Moves" : "View Moves"}</button>
+            ${admin ? `<button class="tiny" data-act="edit" data-id="${it.id}">Edit</button>` : ``}
+            ${adminActions}
+          </div>
+        </div>
+      `;
+    }
+
+    // If nothing on selected day, show unscheduled list as helper
+    if(detailTitle){
+      detailTitle.textContent = selItems.length ? `Items • ${sel}` : `Unscheduled Items`;
+    }
+    if(detailSub){
+      detailSub.textContent = selItems.length
+        ? `${selItems.length.toLocaleString()} piece record${selItems.length===1?"":"s"} on this day`
+        : `${unscheduled.length.toLocaleString()} piece record${unscheduled.length===1?"":"s"} without a Cast Date`;
+    }
+
+    if(detailList){
+      const listToShow = selItems.length ? selItems : unscheduled;
+      detailList.innerHTML = listToShow.length ? listToShow.map(pieceCard).join("") : `<div class="muted" style="padding:8px">No items</div>`;
+    }
+  }
+
+  function ymdFromLocalDate(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+let shippingGroupsByKey = Object.create(null);
+
+function renderShippingView(){
   const listEl = $("shipList");
   if(!listEl) return;
 
@@ -1876,7 +2308,7 @@ if(kpi){
 
   let rows = pieces.map(it=>{
     const tx = lastTx[it.id] || null;
-    const whenMs = parsePBDateTime(tx?.when || it.updated || it.created)?.getTime() ?? null;
+    const whenMs = parsePBDateTime(tx?.scheduledShipDate || tx?.when || it.updated || it.created)?.getTime() ?? null;
     return { it, tx, whenMs };
   });
 
@@ -1907,7 +2339,7 @@ if(kpi){
     const day = r.whenMs ? new Date(r.whenMs).toISOString().slice(0,10) : "unknown";
     const key = ref ? (pr+"||"+ref) : (pr+"||"+day);
     if(!groups.has(key)){
-      groups.set(key, { project: pr, ref, day, whenMs: r.whenMs ?? 0, items: [], qty: 0 });
+      groups.set(key, { key, project: pr, ref, day, whenMs: r.whenMs ?? 0, items: [], qty: 0 });
     }
     const g = groups.get(key);
     g.items.push(r);
@@ -1916,6 +2348,11 @@ if(kpi){
   }
 
   const shipments = [...groups.values()].sort((a,b)=> (b.whenMs ?? 0) - (a.whenMs ?? 0));
+
+  // index shipments for click actions
+  shippingGroupsByKey = Object.create(null);
+  for(const s of shipments){ shippingGroupsByKey[s.key] = s; }
+
 
   // KPIs (best-effort)
   const todayKey = new Date().toISOString().slice(0,10);
@@ -1974,11 +2411,19 @@ if(kpi){
 
   // Render cards
   listEl.innerHTML = shipments.length ? shipments.map(s=>{
-    const when = s.whenMs ? new Date(s.whenMs).toLocaleString(undefined, { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }) : "—";
+    const tx0 = s.items[0]?.tx || {};
+    const sched = (tx0.scheduledShipDate || "").toString().trim();
+    const driver = (tx0.driver || "").toString().trim();
+    const addr = (tx0.shipToAddress || tx0.toLoc || "").toString().trim();
+
+    const shippedWhen = s.whenMs ? new Date(s.whenMs).toLocaleString(undefined, { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }) : "—";
+    const schedKey = (sched.match(/^(\d{4}-\d{2}-\d{2})/)||[])[1] || "";
+    const schedMs = schedKey ? dateOnlyToMs(schedKey) : (parsePBDateTime(sched)?.getTime() ?? null);
+    const schedPretty = schedMs ? new Date(schedMs).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" }) : "";
+    const eta = schedPretty || shippedWhen;
     const id = (s.ref || ("SH-" + s.day.replaceAll("-","")));
     const itemCount = s.items.length;
     const qty = s.items.reduce((sum,r)=> sum + Number(r.it.qty||0), 0);
-    const addr = s.items[0]?.tx?.toLoc || "";
     const city = ""; // optional
     return `
       <div class="pf-shipCard">
@@ -1989,17 +2434,39 @@ if(kpi){
             <div class="pf-stage info">Shipped</div>
           </div>
           <div class="pf-shipProject">${escapeHtml(s.project)}</div>
+          ${(addr || driver || schedPretty) ? `
+            <div class="pf-shipRoute" role="group" aria-label="Shipment details">
+              ${addr ? `
+                <div class="pf-shipRouteItem pf-shipRouteFull">
+                  <div class="pf-shipRouteLabel">Ship to</div>
+                  <div class="pf-shipRouteValue">${escapeHtml(addr)}</div>
+                </div>
+              ` : ``}
+              ${driver ? `
+                <div class="pf-shipRouteItem">
+                  <div class="pf-shipRouteLabel">Driver</div>
+                  <div class="pf-shipRouteValue">${escapeHtml(driver)}</div>
+                </div>
+              ` : ``}
+              ${schedPretty ? `
+                <div class="pf-shipRouteItem">
+                  <div class="pf-shipRouteLabel">Scheduled</div>
+                  <div class="pf-shipRouteValue">${escapeHtml(schedPretty)}</div>
+                </div>
+              ` : ``}
+            </div>
+          ` : ``}
           <div class="pf-shipMeta">
-            <div><span class="pf-muted">ETA</span><br><span class="mono">${escapeHtml(when)}</span></div>
+            <div><span class="pf-muted">ETA</span><br><span class="mono">${escapeHtml(eta)}</span></div>
             <div><span class="pf-muted">Items</span><br><span class="mono">${itemCount}</span></div>
             <div><span class="pf-muted">Qty</span><br><span class="mono">${fmtNum(qty)}</span></div>
             <div><span class="pf-muted">Ref</span><br><span class="mono">${escapeHtml(s.ref || "")}</span></div>
           </div>
-          ${addr ? `<div class="pf-shipAddr"><span class="pf-muted">To:</span> ${escapeHtml(addr)}</div>` : ``}
+
         </div>
         <div class="pf-shipActions">
           <button class="btn" type="button" disabled title="Placeholder">Track</button>
-          <button class="btn primary" type="button" disabled title="Placeholder">Confirm Delivery</button>
+          <button class="btn primary" type="button" data-action="confirmDelivery" data-shipkey="${escapeAttr(s.key)}">Confirm Delivery</button>
           <button class="btn ghost icon" type="button" disabled aria-label="More">⋯</button>
         </div>
       </div>
@@ -2010,12 +2477,142 @@ if(kpi){
   if(countEl) countEl.textContent = `${shipments.length.toLocaleString()} shipment${shipments.length===1?"":"s"}`;
 }
 
+
+
+async function confirmDeliveryShipment(shipKey){
+  if(!requireAdmin("Only admins can confirm delivery.")) return;
+  const s = shippingGroupsByKey?.[shipKey];
+  if(!s){ toast("Shipment not found."); return; }
+
+  const shipId = (s.ref || ("SH-" + (s.day||"").replaceAll("-","")));
+  const tx0 = s.items?.[0]?.tx || {};
+  const driver = (tx0.driver || "").toString().trim();
+  const addr = (tx0.shipToAddress || tx0.toLoc || "").toString().trim();
+  const sched = (tx0.scheduledShipDate || "").toString().trim();
+
+  const itemCount = s.items?.length || 0;
+  const totalQty = (s.items || []).reduce((sum,r)=> sum + Number(r.it?.qty||0), 0);
+
+  const msg =
+    `Confirm delivery for shipment ${shipId}?\n\n` +
+    `Project: ${(s.project||"—")}\n` +
+    (driver ? `Driver: ${driver}\n` : "") +
+    (addr ? `Ship To: ${addr}\n` : "") +
+    `Items: ${itemCount} (Qty ${fmtNum(totalQty)})\n\n` +
+    `This will archive the delivered items and remove them from Inventory.`;
+  if(!confirm(msg)) return;
+
+  const deliveredWhen = nowISO();
+
+  // helper: best-effort archive flag without requiring schema changes
+  async function archiveItemRecord(itemId, basePatch){
+    // Try common field names for archive flags; fall back to status-only
+    const candidates = [
+      { archived: true },
+      { isArchived: true },
+      { Archived: true }
+    ];
+    for(const extra of candidates){
+      try{
+        await updateItem(itemId, { ...basePatch, ...extra });
+        return;
+      }catch(_e){}
+    }
+    await updateItem(itemId, basePatch);
+  }
+
+async function createDeliveryTransaction(preferred){
+  const order = [
+    preferred,
+    { ...preferred, type: "ADJUST" },
+    { ...preferred, type: "TRANSFER" },
+    { ...preferred, type: "OUT" }
+  ];
+  let lastErr = null;
+  for(const d of order){
+    try{ return await createTransaction(d); }catch(e){ lastErr = e; }
+  }
+  throw lastErr;
+}
+
+
+
+  try{
+    for(const r of (s.items || [])){
+      const it = r.it;
+      if(!it?.id) continue;
+      const tx = r.tx || {};
+      const ref = (tx.ref || s.ref || "").toString().trim();
+      const fromLoc = (tx.fromLoc || "").toString().trim();
+      const toLoc = (tx.toLoc || addr || "").toString().trim();
+
+      const noteParts = ["DELIVERED", `Shipment:${shipId}`];
+      const proj = (it.project || s.project || "").toString().trim();
+      const mark = (it.pieceMark || it.sku || "").toString().trim();
+      if(proj) noteParts.push(`Project:${proj}`);
+      if(mark) noteParts.push(`Piece:${mark}`);
+      if(driver) noteParts.push(`Driver:${driver}`);
+      if(sched) noteParts.push(`Scheduled:${sched}`);
+      if(addr) noteParts.push(`Address:${addr}`);
+
+      const baseTxData = {
+        item: it.id,
+        type: "DELIVERED",
+        qtyChange: 0,
+        when: deliveredWhen,
+        ref,
+        fromLoc,
+        toLoc,
+        note: noteParts.join(" • "),
+        createdBy: pb.authStore?.record?.id || null
+      };
+
+      // Optional delivery metadata fields (if you add them to PB later)
+      const txData = { ...baseTxData };
+      if(driver) txData.driver = driver;
+      if(sched) txData.scheduledShipDate = sched;
+      if(addr) txData.shipToAddress = addr;
+
+      try{
+        await createDeliveryTransaction(txData);
+      }catch(txErr){
+        console.warn("Delivery transaction failed (schema or type mismatch). Falling back.", txErr);
+        await createDeliveryTransaction(baseTxData);
+      }
+
+      // Archive item: set status + zero qty (removes from inventory views)
+      const basePatch = {
+        qty: 0,
+        Status: "Archived",
+        updatedBy: pb.authStore?.record?.id || null
+      };
+
+      await archiveItemRecord(it.id, basePatch);
+    }
+
+    toast(`Delivered: ${shipId}`);
+    // Refresh lists
+    await refreshAll();
+    await ensureTxLoaded();
+    renderShippingView();
+    renderTable();
+  }catch(e){
+    console.error(e);
+    toast("Confirm Delivery failed. Check permissions and schema.");
+  }
+}
+
   function renderProjectsView(){
     const wrap = $("projGrid");
     if(!wrap) return;
 
     const q = normalize(($("projSearch")?.value || "").trim());
     const pieces = allItems.filter(isFinishedPiece);
+
+  // Open quotes (from crm_opportunities)
+  const oq = (typeof openQuotesCount === "number") ? openQuotesCount : null;
+  const oqVal = (oq === null) ? "—" : oq.toLocaleString();
+  const oqSub = (oq === null) ? "Loading quotes…" : (oq > 0 ? "Quoted / Negotiation" : "No open quotes");
 
     const byProject = new Map();
     for(const it of pieces){
@@ -2116,6 +2713,10 @@ if(kpi){
     const fromDefault = [item.location, item.bin].filter(Boolean).join(" • ");
     $("shipFromLoc").value = fromDefault;
     $("shipToLoc").value = "";
+    $("shipDriver").value = "";
+    $("shipSchedDate").value = (toLocalDateTimeValue(new Date()) || "").split("T")[0] || "";
+    $("shipToAddr").value = "";
+
 
     $("shipNote").value = "";
 
@@ -2156,6 +2757,9 @@ if(kpi){
     const fromLoc = $("shipFromLoc").value.trim();
     const toLoc = $("shipToLoc").value.trim();
     const noteRaw = $("shipNote").value.trim();
+    const driver = ($("shipDriver")?.value || "").trim();
+    const schedDateVal = ($("shipSchedDate")?.value || "").trim();
+    const shipToAddr = ($("shipToAddr")?.value || "").trim();
 
     // audit-friendly note (doesn't require schema changes)
     const auditParts = ["SHIP"];
@@ -2164,11 +2768,15 @@ if(kpi){
     if(proj) auditParts.push(`Project:${proj}`);
     if(mark) auditParts.push(`Piece:${mark}`);
     if(noteRaw) auditParts.push(noteRaw);
+    if(driver) auditParts.push(`Driver:${driver}`);
+    if(schedDateVal) auditParts.push(`Scheduled:${schedDateVal}`);
+    if(shipToAddr) auditParts.push(`Address:${shipToAddr}`);
     const note = auditParts.join(" • ");
 
     try{
+
       // 1) write transaction (audit trail)
-      await createTransaction({
+      const baseTxData = {
         item: shipItemId,
         type: "OUT",
         qtyChange: -Math.abs(shipQty),
@@ -2178,7 +2786,22 @@ if(kpi){
         toLoc,
         note,
         createdBy: pb.authStore?.record?.id || null
-      });
+      };
+
+      // Optional shipping metadata (recommended fields in PB: driver, scheduledShipDate, shipToAddress)
+      const txData = { ...baseTxData };
+      if(driver) txData.driver = driver;
+      if(schedDateVal) txData.scheduledShipDate = schedDateVal; // PB "date" field accepts YYYY-MM-DD
+      if(shipToAddr) txData.shipToAddress = shipToAddr;
+
+      try{
+        await createTransaction(txData);
+      } catch(txErr){
+        // Fallback: if the PB schema doesn't include the optional fields, still save the transaction via the note.
+        console.warn("Ship tx metadata fields not saved (schema mismatch). Saving base transaction only.", txErr);
+        await createTransaction(baseTxData);
+      }
+
 
       // 2) update item qty + status (pipeline)
       let newQty = curQty - Math.abs(shipQty);
@@ -2249,6 +2872,8 @@ if(kpi){
     $("iLocation").value = item?.location || "";
     $("iBin").value = item?.bin || "";
     $("iVendor").value = item?.vendor || "";
+    $("iDimensions").value = item?.dimensions ?? item?.Dimensions ?? "";
+    $("iWeight").value = (item?.weight ?? item?.Weight ?? "") === null ? "" : (item?.weight ?? item?.Weight ?? "");
     $("iQty").value = item?.qty ?? 0;
     $("iUom").value = item?.uom || "ea";
     $("iUnitCost").value = item?.unitcost ?? item?.unitCost ?? 0;
@@ -2285,6 +2910,8 @@ if(kpi){
       location: $("iLocation").value.trim(),
       bin: $("iBin").value.trim(),
       vendor: $("iVendor").value.trim(),
+      dimensions: $("iDimensions").value.trim(),
+      weight: parseNullableNum($("iWeight").value),
       qty: parseNum($("iQty").value),
       uom: $("iUom").value,
       unitcost: parseNum($("iUnitCost").value),
@@ -2320,7 +2947,40 @@ if(kpi){
       renderTable();
     } catch(e){
       console.error(e);
-      toast("Save failed. Check required fields + collection rules.");
+
+      // If PocketBase schema uses "Dimensions"/"Weight" instead of "dimensions"/"weight",
+      // retry once with the capitalized field names.
+      const dbg = (e?.message || "") + " " + JSON.stringify(e?.data || e?.response || "");
+      const lower = dbg.toLowerCase();
+
+      if(lower.includes("dimensions") || lower.includes("weight")){
+        try{
+          const alt = { ...data };
+          alt.Dimensions = data.dimensions;
+          alt.Weight = data.weight;
+          delete alt.dimensions;
+          delete alt.weight;
+
+          let savedAlt;
+          if(editingId){
+            savedAlt = await updateItem(editingId, alt);
+            toast("Item updated.");
+          } else {
+            alt.createdBy = pb.authStore?.record?.id || null;
+            savedAlt = await createItem(alt);
+            toast("Item added.");
+          }
+
+          closeItemModal();
+          await fetchItems();
+          renderTable();
+          return;
+        } catch(e2){
+          console.error(e2);
+        }
+      }
+
+      toast("Save failed. Ensure the items collection has fields: dimensions (text) and weight (number), and check collection rules.");
     }
   }
 
@@ -2761,6 +3421,11 @@ if(kpi){
     try{
       const pieces = allItems.filter(isFinishedPiece);
 
+  // Open quotes (from crm_opportunities)
+  const oq = (typeof openQuotesCount === "number") ? openQuotesCount : null;
+  const oqVal = (oq === null) ? "—" : oq.toLocaleString();
+  const oqSub = (oq === null) ? "Loading quotes…" : (oq > 0 ? "Quoted / Negotiation" : "No open quotes");
+
       const byProject = new Map();
       for(const it of pieces){
         const p = (it.project || "").trim() || "— Unassigned —";
@@ -3085,6 +3750,15 @@ if(kpi){
   let allTx = [];
   let txLoaded = false;
 
+  // Production view mode (board vs calendar) + calendar state
+  let prodViewMode = "board"; // "board" | "calendar"
+  const prodCalState = {
+    y: (new Date()).getFullYear(),
+    m: (new Date()).getMonth(), // 0-11
+    selected: null, // "YYYY-MM-DD"
+  };
+
+
   async function ensureTxLoaded(){
     if(txLoaded) return;
     await fetchAllTransactions();
@@ -3191,6 +3865,7 @@ document.body.classList.remove("sidebarOpen");
     }
     if(tab === "dashboard"){
       renderDashboard();
+      refreshOpenQuotesKPI(true);
     }
     if(tab === "production"){
       renderProductionView();
@@ -3523,6 +4198,7 @@ function updateReportPreview(){
     if(currentTab === "production"){
       const project = ($("prodProject")?.value || "").trim();
       const q = normalize(($("prodSearch")?.value || "").trim());
+    const quoteQ = normalize(($("prodQuote")?.value || "").trim());
       const scope = ($("prodScope")?.value || "active");
 
       let items = allItems.filter(isFinishedPiece);
@@ -3854,7 +4530,7 @@ function updateReportPreview(){
       }
     });
   });
-  ["prodProject","prodSearch","prodScope"].forEach(id=>{
+  ["prodProject","prodSearch","prodQuote","prodStatus","prodScope"].forEach(id=>{
     $(id)?.addEventListener("input", renderProductionView);
     $(id)?.addEventListener("change", renderProductionView);
   });
@@ -3975,6 +4651,39 @@ function updateReportPreview(){
   $("prodScope")?.addEventListener("change", renderProductionView);
   $("prodSearch")?.addEventListener("input", ()=>{ renderProductionView(); });
 
+  $("prodQuote")?.addEventListener("input", ()=>{ renderProductionView(); });
+
+  // Production toolbar: filters toggle + clear
+  $("btnProdFilter")?.addEventListener("click", ()=>{
+    const el = $("prodFilters");
+    if(!el) return;
+    const isClosed = (el.style.display === "none" || !el.style.display);
+    el.style.display = isClosed ? "" : "none";
+    if(isClosed){
+      setTimeout(()=>{ $("prodQuote")?.focus?.(); }, 0);
+    }
+  });
+  $("btnProdClear")?.addEventListener("click", ()=>{
+    if($("prodQuote")) $("prodQuote").value = "";
+    if($("prodStatus")) $("prodStatus").value = "";
+    renderProductionView();
+  });
+
+  $("btnProdCalendar")?.addEventListener("click", ()=>{
+    // Toggle view
+    prodViewMode = (prodViewMode === "calendar") ? "board" : "calendar";
+    const b = $("btnProdCalendar");
+    if(b){
+      const isCal = prodViewMode === "calendar";
+      b.classList.toggle("primary", isCal);
+      b.classList.toggle("ghost", !isCal);
+      b.textContent = isCal ? "Board" : "Calendar";
+      b.title = isCal ? "Switch back to Board view" : "Open Calendar view";
+    }
+    renderProductionView();
+  });
+
+
   $("prodBoard")?.addEventListener("click", (e)=>{
     const btn = e.target.closest("button[data-act]");
     if(!btn) return;
@@ -4011,6 +4720,16 @@ function updateReportPreview(){
     if($("shipTo")) $("shipTo").value = "";
     renderShippingView();
   });
+
+// Shipping card actions
+$("shipList")?.addEventListener("click", (e)=>{
+  const btn = e.target.closest('button[data-action="confirmDelivery"]');
+  if(!btn) return;
+  const key = btn.getAttribute("data-shipkey");
+  confirmDeliveryShipment(key);
+});
+
+
 
   // Projects controls
   $("projSearch")?.addEventListener("input", ()=>{ renderProjectsView(); });
@@ -4074,6 +4793,20 @@ function updateReportPreview(){
       showApp();
       await bindRealtime();
       await refreshAll();
+
+      // Deep-link support (e.g., index.html?view=production&project=...&quote=...)
+      try{
+        const params = new URLSearchParams(window.location.search);
+        const view = params.get("view");
+        const proj = params.get("project");
+        const quote = params.get("quote");
+        if(view) setTab(view);
+        if(view === "production"){
+          if(proj && $("prodProject")) $("prodProject").value = proj;
+          if(quote && $("prodQuote")) $("prodQuote").value = quote;
+          renderProductionView();
+        }
+      }catch(_e){}
     } else {
       showLogin();
     }
