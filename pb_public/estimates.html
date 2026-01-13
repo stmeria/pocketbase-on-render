@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Fisher Precast • Estimates</title>
-  <script src="/vendor/pocketbase.umd.js"></script>
+  <script src="vendor/pocketbase.umd.js"></script>
   <link rel="stylesheet" href="precastflow-ui.css">
   <style>
     .pf-topbar-title #pageSubtitle{display:block}
@@ -61,33 +61,6 @@
       .pf-segBtn{flex:1}
       .pf-inlineRow{gap:8px}
     }
-
-    /* Filter popover */
-    .pf-popMenu{
-      position:fixed;
-      min-width:220px;
-      background:var(--card,#fff);
-      border:1px solid var(--line,#e5e7eb);
-      border-radius:14px;
-      padding:8px;
-      box-shadow:0 18px 55px rgba(16,24,40,.18);
-      z-index:2600;
-      display:none;
-    }
-    .pf-popMenu .pf-popTitle{padding:8px 10px;color:var(--muted,#6b7280);font-weight:800;font-size:12px}
-    .pf-popMenu button{
-      width:100%;
-      text-align:left;
-      padding:10px 10px;
-      border-radius:12px;
-      border:0;
-      background:transparent;
-      cursor:pointer;
-      font-weight:900;
-      color:var(--text,#111827);
-    }
-    .pf-popMenu button:hover{background:rgba(59,130,246,.10)}
-    .pf-popMenu button.active{background:rgba(59,130,246,.16)}
 </style>
 
   <style>
@@ -162,12 +135,12 @@
   <div class="tabs" id="tabs" aria-label="Navigation tabs">
     <button type="button" class="tab" data-tab="dashboard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11Z"/></svg><span class="navLabel">Dashboard</span></button>
     <button type="button" class="tab" data-tab="crm"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11a4 4 0 1 0-8 0a4 4 0 0 0 8 0Zm-4 6c-4.42 0-8 2.01-8 4.5V23h16v-1.5C20 19.01 16.42 17 12 17Z"/></svg><span class="navLabel">CRM</span></button>
+    <button type="button" class="tab" data-tab="jobs"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2h3a2 2 0 0 1 2 2v3H1V9a2 2 0 0 1 2-2h5Zm2 0h4V5h-4v2ZM1 14h22v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-6Z"/></svg><span class="navLabel">Jobs</span></button>
+
     <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
     <button type="button" class="tab active" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
-    <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
-
-    <div class="pf-more">
+    <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>    <div class="pf-more">
       <details>
         <summary>More</summary>
         <div class="pf-moreItems">
@@ -201,7 +174,7 @@
           <div class="pf-headRight">
             <button class="btn ghost" type="button" id="btnFilter">Filter: All</button>
             <button class="btn ghost" type="button" id="btnOpenFisher">Open Fisher Stack</button>
-            <button class="btn ghost" type="button" id="btnOpenCulvertEstimator">Precast Box Culvert Estimator</button>
+            <button class="btn ghost" type="button" id="btnOpenCulvertTop">Precast Box Culvert Estimator</button>
             <button class="btn primary" type="button" id="btnNewEst">+ New Estimate</button>
           </div>
         </div>
@@ -218,6 +191,9 @@
           </div>
           <div class="pf-cardBody">
             <div class="pf-estList" id="estList"></div>
+            <div style="display:flex;justify-content:center;margin-top:12px">
+              <button class="btn ghost" type="button" id="btnLoadMore" style="display:none">Load more</button>
+            </div>
           </div>
         </div>
 
@@ -322,7 +298,7 @@
   <input id="cusName" class="pf-input pf-liCustom" type="text" placeholder="Custom item description" style="min-width:260px; display:none">
 
   <input id="liQty" class="pf-input" type="number" min="0" step="1" placeholder="Qty" style="width:110px">
-  <input id="liWeight" class="pf-input" type="number" min="0" step="0.01" placeholder="Unit Wt (lb)" style="width:160px">
+  <input id="liWeight" class="pf-input" type="number" min="0" step="1" placeholder="Wt (lb)" style="width:130px">
   <input id="liPrice" class="pf-input" type="number" min="0" step="0.01" placeholder="Unit Price" style="width:150px">
   <button class="btn primary" id="btnAddLine" type="button">Add</button>
 </div>
@@ -334,8 +310,8 @@
                     <th style="width:160px">SKU</th>
                     <th>Item</th>
                     <th style="width:110px;text-align:right">Qty</th>
-                    <th style="width:140px;text-align:right">Unit Wt</th>
-                    <th style="width:150px;text-align:right">Line Wt</th>
+                    <th style="width:130px;text-align:right">Wt (lb)</th>
+                    <th style="width:150px;text-align:right">Total Wt (lb)</th>
                     <th style="width:150px;text-align:right">Price</th>
                     <th style="width:160px;text-align:right">Line Total</th>
                     <th style="width:70px"></th>
@@ -362,7 +338,6 @@
 
         <div class="pf-totals" style="margin-top:12px">
           <div class="row"><div class="k">Subtotal</div><div class="v" id="qSubtotal">$0.00</div></div>
-          <div class="row"><div class="k">Total Weight</div><div class="v" id="qWeightOut">0 lb</div></div>
           <div class="row"><div class="k">Delivery</div><div class="v" id="qDeliveryOut">$0.00</div></div>
           <div class="row"><div class="k">Tax</div><div class="v" id="qTaxOut">$0.00</div></div>
           <div class="row total"><div class="k">Total</div><div class="v" id="qTotal">$0.00</div></div>
@@ -380,6 +355,7 @@
         <button class="btn ghost" type="button" id="btnQuoteDelete" style="display:none">Delete</button>
         <span style="flex:1"></span>
         <button class="btn" type="button" id="btnQuotePrint">Print Quote (PDF)</button>
+        <button class="btn" type="button" id="btnQuoteCulvert">Open Culvert Tool</button>
         <button class="btn" type="button" id="btnQuoteCancel">Cancel</button>
         <button class="btn primary" type="button" id="btnQuoteSave">Save</button>
       </div>
@@ -395,62 +371,11 @@
 
   const $$ = (id) => document.getElementById(id);
 
-  // --------------------------
-  // Topbar auth/connection indicator
-  // --------------------------
-  function initialsFromName(name){
-    const s = String(name||"").trim();
-    if(!s) return "U";
-    const parts = s.split(/\s+/).filter(Boolean);
-    const first = parts[0]?.[0] || "";
-    const second = parts[1]?.[0] || "";
-    return (first + second).toUpperCase() || "U";
-  }
-
-  function setModePill(text, cls){
-    const el = $$("modePill");
-    if(!el) return;
-    el.textContent = text;
-    // Keep base badge styling; optionally add state class
-    el.classList.remove("good","warn","bad","info");
-    if(cls) el.classList.add(cls);
-  }
-
-  function updateAuthUI(){
-    const isValid = !!pb?.authStore?.isValid;
-    if(isValid){
-      setModePill("Online", "good");
-      const u = pb.authStore.record || {};
-      const name = u.name || u.fullName || u.username || u.email || "Signed in";
-      const role = u.role || u.Role || (u.isAdmin ? "Admin" : "User");
-
-      const elName = $$("userName");
-      if(elName) elName.textContent = name;
-      const elRole = $$("userRole");
-      if(elRole) elRole.textContent = role;
-      const elBadge = $$("userBadge");
-      if(elBadge) elBadge.textContent = "Signed in";
-      const elInit = $$("userInitials");
-      if(elInit) elInit.textContent = initialsFromName(name);
-
-      const lo = $$("btnLogout");
-      if(lo) lo.style.display = "";
-    } else {
-      setModePill("Offline", "warn");
-      const elBadge = $$("userBadge");
-      if(elBadge) elBadge.textContent = "Not signed in";
-      const lo = $$("btnLogout");
-      if(lo) lo.style.display = "none";
-    }
-  }
-
-  // Update indicator immediately and whenever auth changes
+  // Mode pill (top right)
   try{
-    pb.authStore.onChange(() => updateAuthUI(), true);
-  }catch(_e){
-    // Older PocketBase builds: fall back to one-time update
-    updateAuthUI();
-  }
+    const pill = $$("modePill");
+    if(pill) pill.textContent = pb.authStore.isValid ? "Connected" : "Sign in";
+  }catch(_e){}
 
   // --------------------------
   // Navigation (sidebar tabs)
@@ -460,6 +385,7 @@
     if(tab === "inventory") return "index.html?view=inventory";
     if(tab === "production") return "index.html?view=production";
     if(tab === "shipping") return "index.html?view=shipping";
+    if(tab === "jobs") return "index.html?view=jobs";
     if(tab === "reports") return "index.html?view=reports";
     if(tab === "crm") return "crm.html";
     if(tab === "schedule") return "schedule.html";
@@ -492,20 +418,6 @@
     const x = Number(n || 0);
     return x.toLocaleString(undefined, { style:"currency", currency:"USD", minimumFractionDigits:2, maximumFractionDigits:2 });
   };
-
-  const fmtLbs = (lbs) => {
-    const x = Number(lbs || 0);
-    if(!Number.isFinite(x) || x <= 0) return "0 lb";
-    const lbStr = x.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    const tons = x / 2000;
-    const tonStr = tons.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return `${lbStr} lb (${tonStr} tons)`;
-  };
-  const fmtLbsShort = (lbs) => {
-    const x = Number(lbs || 0);
-    if(!Number.isFinite(x) || x <= 0) return "0";
-    return x.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  };
   const fmtDate = (iso) => {
     if(!iso) return "—";
     const d = new Date(iso);
@@ -521,6 +433,27 @@
     const dd = String(x.getDate()).padStart(2,"0");
     return `${yyyy}-${mm}-${dd}`;
   };
+// Compatibility helpers (safe across different PocketBase field names)
+const pick = (obj, keys, fallback = "") => {
+  for(const k of (keys || [])){
+    if(!obj) continue;
+    if(Object.prototype.hasOwnProperty.call(obj, k) && obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
+  }
+  return fallback;
+};
+
+const toISODateMaybe = (v) => {
+  if(!v) return "";
+  if(typeof v === "string"){
+    const s = v.trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    if(/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
+  }
+  const d = new Date(v);
+  if(Number.isNaN(+d)) return "";
+  return toISODate(d);
+};
+
   const addDays = (isoDate, days) => {
     if(!isoDate) return "";
     const d = new Date(isoDate + "T00:00:00");
@@ -545,6 +478,8 @@
   // Auth gate
   // --------------------------
   const ensureAuth = async () => {
+    const pill = $$("modePill");
+    if(pill) pill.textContent = pb.authStore.isValid ? "Connected" : "Sign in";
     if(pb.authStore.isValid) return true;
     // If you prefer direct login here, you can add it — for now route to index
     window.location.href = "index.html";
@@ -635,13 +570,8 @@
   const getSku = (it) => it?.sku ?? it?.SKU ?? it?.Sku ?? "";
   const getName = (it) => it?.name ?? it?.Name ?? it?.item ?? it?.Item ?? "";
   const getUnitPrice = (it) => Number(it?.unitcost ?? it?.unitCost ?? it?.price ?? it?.unitPrice ?? 0) || 0;
-const getUnitWeight = (it) => {
-    const v = it?.unitWeight ?? it?.unitweight ?? it?.weight ?? it?.Weight ?? it?.wt ?? it?.WT ?? it?.unit_wt ?? it?.unitWt ?? 0;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : 0;
-  };
+  const getUnitWeight = (it) => Number(it?.weightLb ?? it?.weight_lb ?? it?.unitWeightLb ?? it?.unit_weight_lb ?? it?.unitWeight ?? it?.unit_weight ?? it?.weight ?? it?.wt ?? 0) || 0;
 
-  
   let invMap = new Map();
   async function loadInventoryOptions(query=""){
     const pick = $$("invPick");
@@ -710,7 +640,7 @@ const getUnitWeight = (it) => {
     if(qn) qn.readOnly = true;
 
     // Disable main form fields
-    const ids = ["qDate","qProject","qLocation","qCompany","qNotes","qDelivery","qTaxRate","invSearch","invPick","liQty","liWeight","liPrice","cusSku","cusName","liModeInv","liModeCustom","btnAddLine"];
+    const ids = ["qDate","qProject","qLocation","qCompany","qNotes","qDelivery","qTaxRate","invSearch","invPick","liQty","liPrice","cusSku","cusName","liModeInv","liModeCustom","btnAddLine"];
     ids.forEach(id => {
       const el = $$(id);
       if(!el) return;
@@ -725,7 +655,7 @@ const getUnitWeight = (it) => {
     if(del) del.style.display = (modalReadOnly || !editId) ? "none" : "inline-flex";
 
     // Line table edits + remove buttons
-    qm.querySelectorAll("input.liQty, input.liWt, input.liPrice").forEach(el => el.disabled = !!modalReadOnly);
+    qm.querySelectorAll("input.liQty, input.liPrice").forEach(el => el.disabled = !!modalReadOnly);
     qm.querySelectorAll("button.liRemove").forEach(btn => btn.style.display = modalReadOnly ? "none" : "inline-flex");
   }
 
@@ -768,8 +698,8 @@ const getUnitWeight = (it) => {
         sku: x.sku || "",
         name: x.name || x.item || "",
         qty: Number(x.qty || 0),
-        unitWeight: Number(x.unitWeight ?? x.weight ?? x.unitWt ?? 0) || 0,
-        price: Number(x.price || 0)
+        price: Number(x.price || 0),
+        weightLb: Number(x.weightLb ?? x.unitWeightLb ?? x.unitWeight ?? x.weight ?? 0) || 0
       })) : [];
 
       $$("qDelivery").value = (q.deliveryPrice ?? 0);
@@ -832,14 +762,14 @@ const getUnitWeight = (it) => {
           <td style="text-align:right">
             <input class="pf-input liQty" type="number" min="0" step="1" value="${Number(li.qty||0)}" style="text-align:right">
           </td>
-                    <td style="text-align:right">
-            <input class="pf-input liWt" type="number" min="0" step="0.01" value="${Number(li.unitWeight ?? li.weight ?? 0)}" style="text-align:right">
+          <td style="text-align:right">
+            <input class="pf-input liWeight" type="number" min="0" step="1" value="${Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0)}" style="text-align:right">
           </td>
-          <td style="text-align:right;font-weight:750">${fmtLbsShort(Number(li.qty||0) * Number(li.unitWeight ?? li.weight ?? 0))} lb</td>
+          <td data-role="lineWeight" style="text-align:right;font-weight:750">${(Number(li.qty||0) * (Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0) || 0)) ? Math.round(Number(li.qty||0) * (Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0) || 0)).toLocaleString() + " lb" : "—"}</td>
           <td style="text-align:right">
             <input class="pf-input liPrice" type="number" min="0" step="0.01" value="${Number(li.price||0)}" style="text-align:right">
           </td>
-          <td style="text-align:right;font-weight:750">${money(lineTotal)}</td>
+          <td data-role="lineTotal" style="text-align:right;font-weight:750">${money(lineTotal)}</td>
           <td style="text-align:right">
             <button class="btn ghost tiny liRemove" type="button">✕</button>
           </td>
@@ -850,20 +780,17 @@ const getUnitWeight = (it) => {
 
   function computeTotals(){
     const subtotal = lineItems.reduce((sum, li) => sum + (Number(li.qty||0) * Number(li.price||0)), 0);
-    const weight = lineItems.reduce((sum, li) => sum + (Number(li.qty||0) * Number(li.unitWeight ?? li.weight ?? 0)), 0);
     const delivery = Number($$("qDelivery").value || 0) || 0;
     const taxRate = Number($$("qTaxRate").value || 0) || 0;
     const tax = (subtotal + delivery) * (taxRate/100);
     const total = subtotal + delivery + tax;
 
     $$("qSubtotal").textContent = money(subtotal);
-    const wEl = $$("qWeightOut");
-    if(wEl) wEl.textContent = fmtLbs(weight);
     $$("qDeliveryOut").textContent = money(delivery);
     $$("qTaxOut").textContent = money(tax);
     $$("qTotal").textContent = money(total);
 
-    return { subtotal, delivery, taxRate, tax, total, weight };
+    return { subtotal, delivery, taxRate, tax, total };
   }
 
   // --------------------------
@@ -923,6 +850,93 @@ const getUnitWeight = (it) => {
     throw lastErr || new Error("Unable to save");
   }
 
+// --------------------------
+// Jobs upsert (best-effort) — keeps a job record in sync with the saved quote
+// --------------------------
+const JOB_COLLECTION_CANDIDATES = ["jobs", "job", "production_jobs"];
+
+function sumPiecesRequired(items){
+  return (items || []).reduce((s, li) => s + (Number(li?.qty || 0) || 0), 0);
+}
+
+async function upsertJobOnSave(quoteObj, totals, companyId, companyName, opportunityId, stageOverride="Quoted"){
+  const qn = (quoteObj?.quoteNumber || "").toString().trim();
+  if(!qn) return;
+
+  // Normalize weight fields for downstream pages (Jobs / Shipping / Production)
+  const normalizedItems = (quoteObj?.items || []).map(li => {
+    const qty = Number(li?.qty || 0) || 0;
+    const uw = Number(li?.weightLb ?? li?.unitWeightLb ?? li?.unitWeight ?? li?.weight ?? 0) || 0;
+    const lw = Number(li?.totalWeightLb ?? (qty * uw)) || 0;
+    return {
+      ...li,
+      qty,
+      weightLb: uw,
+      unitWeight: uw,
+      unitWeightLb: uw,
+      weight: uw,
+      totalWeightLb: lw,
+      lineWeightLb: lw
+    };
+  });
+  const totalWeightLb = normalizedItems.reduce((s, li) => s + (Number(li.totalWeightLb || 0) || 0), 0);
+
+  const jobDraft = {
+    quoteNumber: qn,
+    projectName: quoteObj?.projectName || "",
+    customerName: companyName || "",
+    status: stageOverride || "Quoted",
+    stage: stageOverride || "Quoted",
+    quoteOpportunityId: opportunityId || "",
+    summary: {
+      piecesRequired: sumPiecesRequired(normalizedItems),
+      subtotal: Number(totals?.subtotal ?? quoteObj?.subtotal ?? 0) || 0,
+      total: Number(totals?.total ?? quoteObj?.total ?? 0) || 0,
+      totalWeightLb
+    },
+    quoteSnapshot: { ...quoteObj, items: normalizedItems, totalWeightLb, companyId, companyName },
+    quoteVersion: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  const qEsc = qn.replace(/"/g, '\"');
+
+  for(const col of JOB_COLLECTION_CANDIDATES){
+    try{
+      // find existing job by quoteNumber
+      let existing = null;
+      try{
+        const res = await pb.collection(col).getList(1, 1, {
+          filter: 'quoteNumber="' + qEsc + '" || QuoteNumber="' + qEsc + '"',
+          sort: '-created',
+          fields: 'id,quoteNumber,QuoteNumber'
+        });
+        existing = res?.items?.[0] || null;
+      }catch(_e){}
+
+      const attempts = [];
+      attempts.push({ ...jobDraft });
+      attempts.push({ quoteNumber: jobDraft.quoteNumber, projectName: jobDraft.projectName, status: jobDraft.status });
+      attempts.push({ quoteNumber: jobDraft.quoteNumber, project: jobDraft.projectName, status: jobDraft.status });
+      attempts.push({ QuoteNumber: jobDraft.quoteNumber, projectName: jobDraft.projectName, status: jobDraft.status });
+      attempts.push({ quoteNumber: jobDraft.quoteNumber });
+
+      let lastErr = null;
+      for(const a of attempts){
+        try{
+          if(existing?.id) return await pb.collection(col).update(existing.id, a);
+          return await pb.collection(col).create(a);
+        }catch(e){ lastErr = e; }
+      }
+
+      // If the collection doesn't exist, try next candidate
+      if(lastErr?.status === 404) continue;
+    }catch(_e){
+      // try next collection
+    }
+  }
+}
+
   function gatherQuote(){
     let quoteNumber = $$("qNumber").value.trim();
     if(!quoteNumber && reservedQuoteNumber) quoteNumber = reservedQuoteNumber;
@@ -939,15 +953,21 @@ const getUnitWeight = (it) => {
     if(!companyId) throw new Error("Company is required.");
     if(lineItems.length === 0) throw new Error("Add at least one line item.");
     // sanitize line items
-    const items = lineItems.map(li => ({
-      source: (li.source || (li.itemId ? "inventory" : "custom")),
-      itemId: li.itemId || "",
-      sku: li.sku || "",
-      name: li.name || "",
-      qty: Number(li.qty||0),
-      unitWeight: Number(li.unitWeight ?? li.weight ?? 0) || 0,
-      price: Number(li.price||0)
-    })).filter(x => x.qty > 0);
+    const items = lineItems.map(li => {
+      const qty = Number(li.qty||0) || 0;
+      const weightLb = Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0) || 0;
+      return {
+        source: (li.source || (li.itemId ? "inventory" : "custom")),
+        itemId: li.itemId || "",
+        sku: li.sku || "",
+        name: li.name || "",
+        qty,
+        price: Number(li.price||0),
+        weightLb,
+        unitWeight: weightLb,                 // convenience for other pages
+        totalWeightLb: qty * weightLb         // line total weight
+      };
+    }).filter(x => x.qty > 0);
 
     if(items.length === 0) throw new Error("Line items must have Qty > 0.");
 
@@ -963,7 +983,7 @@ const getUnitWeight = (it) => {
       taxAmount: totals.tax,
       subtotal: totals.subtotal,
       total: totals.total,
-      totalWeight: totals.weight,
+      totalWeightLb: items.reduce((s,li)=> s + (Number(li.totalWeightLb||0)||0), 0),
       updatedAt: new Date().toISOString()
     };
 
@@ -1004,9 +1024,13 @@ const getUnitWeight = (it) => {
       // Legacy fallback: store quote JSON in notes if PB schema doesn't have the fields yet
       const legacy = { ...full, notes: buildNotes(userNotes, quoteObj) };
 
-      await safeSaveOpportunity(full, legacy);
+      const saved = await safeSaveOpportunity(full, legacy);
+      try{
+        const companyName = $$('qCompany').selectedOptions?.[0]?.textContent || '';
+        await upsertJobOnSave(quoteObj, totals, companyId, companyName, saved?.id || editId);
+      }catch(_e){}
       closeModal();
-      await refresh();
+      await refresh({ reset: true });
     }catch(e){
       setErr(e?.data?.message || e?.message || "Save failed.");
       console.error(e);
@@ -1031,7 +1055,6 @@ const getUnitWeight = (it) => {
   // Print (PDF via browser)
   // --------------------------
   function buildPrintHtml(companyName, quoteObj){
-    const totalWeight = Number(quoteObj.totalWeight ?? 0) || (quoteObj.items || []).reduce((sum, it) => sum + (Number(it.qty||0) * Number(it.unitWeight ?? it.weight ?? 0)), 0);
     const rows = (quoteObj.items||[]).map(li => {
       const lt = Number(li.qty||0) * Number(li.price||0);
       return `
@@ -1039,11 +1062,16 @@ const getUnitWeight = (it) => {
           <td>${(li.sku||"—")}</td>
           <td>${(li.name||"—")}</td>
           <td style="text-align:right">${Number(li.qty||0)}</td>
+          <td style="text-align:right">${(Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0) || 0) ? Math.round(Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0)) : ""}</td>
+          <td style="text-align:right">${(Number(li.qty||0) * (Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0) || 0)) ? Math.round(Number(li.qty||0) * (Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0) || 0)) : ""}</td>
           <td style="text-align:right">${money(li.price||0)}</td>
           <td style="text-align:right">${money(lt)}</td>
         </tr>
       `;
     }).join("");
+
+    const totalWeightLb = (quoteObj.items||[]).reduce((s, li) => s + (Number(li.qty||0) * Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0)), 0);
+
 
     return `<!doctype html>
 <html>
@@ -1104,6 +1132,8 @@ const getUnitWeight = (it) => {
           <th style="width:120px">SKU</th>
           <th>Item</th>
           <th style="width:70px;text-align:right">Qty</th>
+          <th style="width:90px;text-align:right">Wt (lb)</th>
+          <th style="width:110px;text-align:right">Total Wt</th>
           <th style="width:110px;text-align:right">Price</th>
           <th style="width:120px;text-align:right">Total</th>
         </tr>
@@ -1116,8 +1146,9 @@ const getUnitWeight = (it) => {
     <div class="totals">
       <div class="tbox">
         <div class="row"><div>Subtotal</div><div>${money(quoteObj.subtotal||0)}</div></div>
-        <div class="row"><div>Total Weight</div><div>${fmtLbs(totalWeight)}</div></div>
-        <div class="row"><div>Delivery</div><div>${money(quoteObj.deliveryPrice||0)}</div></div>
+        
+        ${totalWeightLb > 0 ? `<div class="row"><div>Total Weight</div><div>${Math.round(totalWeightLb)} lb</div></div>` : ``}
+<div class="row"><div>Delivery</div><div>${money(quoteObj.deliveryPrice||0)}</div></div>
         <div class="row"><div>Tax</div><div>${money(quoteObj.taxAmount||0)}</div></div>
         <div class="row total"><div>Total</div><div>${money(quoteObj.total||0)}</div></div>
       </div>
@@ -1162,199 +1193,315 @@ const getUnitWeight = (it) => {
   }
 
   // --------------------------
-  // Data loading & list rendering
-  // --------------------------
-  let all = [];
-  let stageFilter = "all"; // all | quoted | negotiation | won | lost
-  function pickStage(o){
-    return o.stage || o.Stage || o.status || "Quoted";
+// Data loading & list rendering (FAST: avoids pulling huge notes/quote JSON on list views)
+// --------------------------
+let all = [];
+let page = 1;
+const PER_PAGE = 50;
+let hasMore = true;
+let activeStageFilter = "All"; // All | Quoted | Negotiation | Won | Lost
+let companyNameById = new Map();
+
+function pickStage(o){
+  return o.stage || o.Stage || o.status || o.Status || "Quoted";
+}
+
+function stageForSelect(st){
+  const s = String(st || "").trim().toLowerCase();
+  if(s.startsWith("neg")) return "Negotiation";
+  if(s.startsWith("won")) return "Won";
+  if(s.startsWith("lost")) return "Lost";
+  return "Quoted";
+}
+
+function pickValue(o){
+  return Number(o.estimatedValue ?? o.value ?? o.Value ?? o.total ?? o.Total ?? 0) || 0;
+}
+
+function liteQuoteFromOpp(o){
+  // Only use fields on the record (no notes parsing) so list view stays snappy.
+  const quoteNumber = String(pick(o, ["quoteNumber","QuoteNumber","estimateNumber","EstimateNumber"], "") || "").trim();
+  const projectName = String(pick(o, ["projectName","ProjectName","relatedProject","RelatedProject","name","title"], "") || "").trim();
+  const projectLocation = String(pick(o, ["projectLocation","ProjectLocation","location","Location"], "") || "").trim();
+  const quoteDate = pick(o, ["quoteDate","QuoteDate","bidDate","BidDate","created"], "");
+  const validUntil = pick(o, ["validUntil","ValidUntil"], "");
+  const total = Number(pick(o, ["total","Total","estimatedValue","EstimatedValue","value","Value"], 0)) || 0;
+  return { quoteNumber, projectName, projectLocation, quoteDate, validUntil, total };
+}
+
+function estimateCode(o){
+  const qn = liteQuoteFromOpp(o).quoteNumber;
+  if(qn) return qn;
+  return ("EST-" + String(o?.id||"").slice(-6).toUpperCase());
+}
+
+function pillClass(st){
+  st = (st||"").toLowerCase();
+  if(st.includes("won")) return "good";
+  if(st.includes("lost")) return "bad";
+  if(st.includes("negoti")) return "warn";
+  return "info";
+}
+
+function isOpenStageLower(st){
+  return st === "quoted" || st === "quote" || st === "negotiation" || st === "negotiations";
+}
+
+function isClosedStageLower(st){
+  return st === "won" || st === "lost";
+}
+
+function setFilterButtonLabel(){
+  const b = $$("btnFilter");
+  if(!b) return;
+  b.textContent = `Filter: ${activeStageFilter}`;
+}
+
+function closeAnyFilterMenu(){
+  const old = document.getElementById("pfFilterMenu");
+  if(old) old.remove();
+}
+
+function openFilterMenu(){
+  closeAnyFilterMenu();
+  const btn = $$("btnFilter");
+  if(!btn) return;
+
+  const menu = document.createElement("div");
+  menu.id = "pfFilterMenu";
+  menu.style.position = "absolute";
+  menu.style.zIndex = "50";
+  menu.style.minWidth = "180px";
+  menu.style.border = "1px solid rgba(148,163,184,.35)";
+  menu.style.background = "white";
+  menu.style.borderRadius = "12px";
+  menu.style.boxShadow = "0 12px 34px rgba(2,6,23,.18)";
+  menu.style.padding = "8px";
+
+  const opts = ["All","Quoted","Negotiation","Won","Lost"];
+  menu.innerHTML = opts.map(v => {
+    const active = v === activeStageFilter;
+    return `<button type="button" class="btn ghost" style="width:100%;justify-content:flex-start;margin:2px 0;${active?'background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.25);':''}" data-val="${v}">${active?'✓ ':''}${v}</button>`;
+  }).join("");
+
+  const r = btn.getBoundingClientRect();
+  menu.style.top = (window.scrollY + r.bottom + 8) + "px";
+  menu.style.left = (window.scrollX + r.left) + "px";
+
+  menu.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-val]");
+    if(!b) return;
+    activeStageFilter = b.getAttribute("data-val") || "All";
+    setFilterButtonLabel();
+    renderList();
+    closeAnyFilterMenu();
+  });
+
+  document.body.appendChild(menu);
+
+  // click outside to close
+  const onDoc = (e) => {
+    if(e.target.closest("#pfFilterMenu") || e.target.closest("#btnFilter")) return;
+    closeAnyFilterMenu();
+    document.removeEventListener("click", onDoc);
+  };
+  setTimeout(() => document.addEventListener("click", onDoc), 0);
+}
+
+function renderList(){
+  const list = $$("estList");
+  const hint = $$("summaryHint");
+  const loadMore = $$("btnLoadMore");
+  if(!list) return;
+
+  const q = ($$("topSearch")?.value || "").trim().toLowerCase();
+
+  const matchStage = (o) => {
+    if(activeStageFilter === "All") return true;
+    return stageForSelect(pickStage(o)) === activeStageFilter;
+  };
+
+  const matchQuery = (o) => {
+    if(!q) return true;
+    const lite = liteQuoteFromOpp(o);
+    const comp = companyNameById.get(o.company || o.companyId || "") || "";
+    const fields = [
+      o.name, o.title,
+      comp,
+      lite.quoteNumber,
+      lite.projectName,
+      lite.projectLocation
+    ].filter(Boolean).join(" ").toLowerCase();
+    return fields.includes(q);
+  };
+
+  const items = all.filter(o => matchStage(o) && matchQuery(o));
+
+  const open = [];
+  const closed = [];
+  let openVal = 0;
+
+  for(const o of items){
+    const stRaw = pickStage(o);
+    const stLower = String(stRaw||"").trim().toLowerCase();
+    const lite = liteQuoteFromOpp(o);
+    if(isClosedStageLower(stLower)) closed.push(o); else open.push(o);
+    if(isOpenStageLower(stLower)) openVal += (Number(lite.total || pickValue(o) || 0) || 0);
   }
-  function stageForSelect(st){
-    const s = String(st || "").trim().toLowerCase();
-    if(s.startsWith("neg")) return "Negotiation";
-    if(s.startsWith("won")) return "Won";
-    if(s.startsWith("lost")) return "Lost";
-    return "Quoted";
+
+  // sort newest first
+  const sorter = (a,b) => new Date(b.created||b.updated||0) - new Date(a.created||a.updated||0);
+  open.sort(sorter);
+  closed.sort(sorter);
+
+  // update hint
+  if(hint) hint.textContent = `${open.length} open • ${closed.length} closed • ${money(openVal)} pipeline`;
+
+  if(loadMore){
+    loadMore.style.display = hasMore ? "inline-flex" : "none";
   }
 
-  function stageKey(raw){
-    return stageForSelect(raw).toLowerCase(); // quoted | negotiation | won | lost
-  }
-  function stageLabel(key){
-    switch(String(key||"all").toLowerCase()){
-      case "quoted": return "Quoted";
-      case "negotiation": return "Negotiation";
-      case "won": return "Won";
-      case "lost": return "Lost";
-      default: return "All";
-    }
+  if(open.length === 0 && closed.length === 0){
+    list.innerHTML = `<div class="pf-empty">No quotes found. Click <b>New Estimate</b> to create one.</div>`;
+    return;
   }
 
-  function pickValue(o){
-    return Number(o.estimatedValue ?? o.value ?? o.Value ?? 0) || 0;
-  }
-  function estimateCode(o){
-    const qn = (o?.quoteNumber && String(o.quoteNumber).trim()) ? String(o.quoteNumber).trim() : "";
-    if(qn) return qn;
-    const legacy = splitNotes(o?.notes || "").quote;
-    return (legacy?.quoteNumber && String(legacy.quoteNumber).trim())
-      ? String(legacy.quoteNumber).trim()
-      : ("EST-" + String(o?.id||"").slice(-6).toUpperCase());
-  }
+  const renderSection = (title, arr) => {
+    if(arr.length === 0) return "";
+    const cards = arr.map(o => {
+      const companyId = o.company || o.companyId || "";
+      const comp = companyNameById.get(companyId) || "";
+      const stRaw = pickStage(o);
+      const st = stageForSelect(stRaw);
+      const isClosed = (st === "Won" || st === "Lost");
+      const quote = liteQuoteFromOpp(o);
+      const val = money(Number(quote?.total ?? pickValue(o) ?? 0) || 0);
+      const qNum = estimateCode(o);
+      const qDate = fmtDate(quote?.quoteDate || o.bidDate || o.created);
+      const valid = fmtDate(quote?.validUntil);
+      const loc = quote?.projectLocation || "—";
+      const proj = quote?.projectName || o.name || "Untitled Quote";
 
-
-  function pillClass(st){
-    st = (st||"").toLowerCase();
-    if(st.includes("won")) return "good";
-    if(st.includes("lost")) return "bad";
-    if(st.includes("negoti")) return "warn";
-    return "info";
-  }
-
-  
-  function isOpenStageLower(st){
-    return st === "quoted" || st === "quote" || st === "negotiation" || st === "negotiations";
-  }
-  function isClosedStageLower(st){
-    return st === "won" || st === "lost";
-  }
-
-  function renderList(){
-    const list = $$("estList");
-    const hint = $$("summaryHint");
-    if(!list) return;
-
-    const q = ($$("topSearch")?.value || "").trim().toLowerCase();
-
-    const matchQuery = (o) => {
-      const quote = normalizeQuoteFromOpp(o);
-      const fields = [
-        o.name, o.title,
-        o.expand?.company?.name,
-        quote?.quoteNumber,
-        quote?.projectName,
-        quote?.projectLocation
-      ].filter(Boolean).join(" ").toLowerCase();
-      return !q || fields.includes(q);
-    };
-
-    const stageFilteredAll = all.filter(o => (stageFilter === "all") || (stageKey(pickStage(o)) === stageFilter));
-
-    const openAll = stageFilteredAll.filter(o => isOpenStageLower(stageKey(pickStage(o))));
-    const closedAll = stageFilteredAll.filter(o => isClosedStageLower(stageKey(pickStage(o))));
-
-    const open = openAll.filter(matchQuery);
-    const closed = closedAll.filter(matchQuery);
-
-    const totalOpen = openAll.length;
-    const totalClosed = closedAll.length;
-
-    const openVal = openAll.reduce((s,o)=> {
-      const quote = normalizeQuoteFromOpp(o);
-      return s + (Number(quote?.total ?? pickValue(o) ?? 0) || 0);
-    }, 0);
-
-    if(hint) hint.textContent = `${stageLabel(stageFilter)} • ${totalOpen} open • ${totalClosed} closed • ${money(openVal)} pipeline`;
-
-    if(open.length === 0 && closed.length === 0){
-      list.innerHTML = `<div class="pf-empty">No quotes found for <b>${stageLabel(stageFilter)}</b>. Click <b>New Estimate</b> to create one.</div>`;
-      return;
-    }
-
-    const renderSection = (title, arr) => {
-      if(arr.length === 0) return "";
-      const cards = arr.map(o => {
-        const comp = o.expand?.company?.name || "";
-        const stRaw = pickStage(o);
-        const st = stageForSelect(stRaw);
-        const isClosed = (st === "Won" || st === "Lost");
-        const quote = normalizeQuoteFromOpp(o);
-        const val = money(Number(quote?.total ?? pickValue(o) ?? 0) || 0);
-        const qNum = estimateCode(o);
-        const qDate = fmtDate(quote?.quoteDate || o.bidDate || o.created);
-        const valid = fmtDate(quote?.validUntil);
-        const loc = quote?.projectLocation || "—";
-        const proj = quote?.projectName || o.name || "Untitled Quote";
-
-        const opt = (v) => `<option value="${v}" ${v === st ? "selected" : ""}>${v}</option>`;
-        const disabled = isClosed ? "disabled" : "";
-
-        return `
-          <div class="pf-estCard" data-id="${o.id}">
-            <div class="pf-estIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm1 2.5L19.5 9H15V4.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Z"/></svg>
-            </div>
-
-            <div class="pf-invMain">
-              <div class="pf-invQuote">
-                <span class="mono">${qNum}</span>
-                <span class="pf-miniHint">•</span>
-                <span class="pf-miniHint">${qDate}</span>
-                <span class="pf-miniHint">•</span>
-                <span class="badge ${pillClass(stRaw)}">${st}</span>
-              </div>
-              <div class="pf-invProject">${proj}</div>
-              <div class="pf-invMeta">${comp || "—"} • ${loc}</div>
-            </div>
-
-            <div class="pf-invRight">
-              <div class="pf-invAmount">${val}</div>
-              <div class="pf-invValid">Valid until <b>${valid}</b></div>
-              <div class="pf-invActions">
-                <select class="pf-stageSelect" data-act="stage" data-prev="${st}" aria-label="Status" ${disabled}>
-                  ${opt("Quoted")}${opt("Negotiation")}${opt("Won")}${opt("Lost")}
-                </select>
-                <button class="btn ghost small" type="button" data-act="print">PDF</button>
-                <button class="btn small" type="button" data-act="edit">${isClosed ? "View" : "Open"}</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
+      const opt = (v) => `<option value="${v}" ${v === st ? "selected" : ""}>${v}</option>`;
+      const disabled = isClosed ? "disabled" : "";
 
       return `
-        <div style="margin:10px 0 6px 0;font-weight:900;color:var(--text)">${title}</div>
-        ${cards}
+        <div class="pf-estCard" data-id="${o.id}">
+          <div class="pf-estIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm1 2.5L19.5 9H15V4.5ZM8 12h8v2H8v-2Zm0 4h8v2H8v-2Z"/></svg>
+          </div>
+
+          <div class="pf-invMain">
+            <div class="pf-invQuote">
+              <span class="mono">${qNum}</span>
+              <span class="pf-miniHint">•</span>
+              <span class="pf-miniHint">${qDate}</span>
+              <span class="pf-miniHint">•</span>
+              <span class="badge ${pillClass(stRaw)}">${st}</span>
+            </div>
+            <div class="pf-invProject">${proj}</div>
+            <div class="pf-invMeta">${comp || "—"} • ${loc}</div>
+          </div>
+
+          <div class="pf-invRight">
+            <div class="pf-invAmount">${val}</div>
+            <div class="pf-invValid">Valid until <b>${valid}</b></div>
+            <div class="pf-invActions">
+              <select class="pf-stageSelect" data-act="stage" data-prev="${st}" aria-label="Status" ${disabled}>
+                ${opt("Quoted")}${opt("Negotiation")}${opt("Won")}${opt("Lost")}
+              </select>
+              <button class="btn ghost small" type="button" data-act="print">PDF</button>
+              <button class="btn small" type="button" data-act="edit">${isClosed ? "View" : "Open"}</button>
+            </div>
+          </div>
+        </div>
       `;
-    };
+    }).join("");
 
-    list.innerHTML =
-      renderSection("Open Quotes", open) +
-      renderSection("Closed (Won / Lost)", closed);
-  }
+    return `
+      <div style="margin:10px 0 6px 0;font-weight:900;color:var(--text)">${title}</div>
+      ${cards}
+    `;
+  };
 
+  list.innerHTML =
+    renderSection("Open Quotes", open) +
+    renderSection("Closed (Won / Lost)", closed);
+}
 
+async function safeGetOppList(p, perPage){
+  const fieldAttempts = [
+    // Rich (recommended schema)
+    "id,created,updated,name,stage,company,quoteNumber,projectName,projectLocation,quoteDate,validUntil,estimatedValue,total,value,bidDate",
+    // Medium
+    "id,created,updated,name,stage,company,quoteNumber,projectName,projectLocation,estimatedValue,value",
+    // Minimal
+    "id,created,updated,name,stage,company,quoteNumber",
+    "id,created,updated,name,stage,company"
+  ];
 
-  async function refresh(){
-    const ok = await ensureAuth();
-    if(!ok) return;
+  let lastErr = null;
+  for(const fields of fieldAttempts){
     try{
-      // Grab recent opportunities; keep stages for list filtering client-side
-      const res = await pb.collection("crm_opportunities").getList(1, 200, {
+      return await pb.collection("crm_opportunities").getList(p, perPage, {
         sort: "-created",
-        expand: "company"
+        fields
       });
-      all = res?.items || [];
-      renderList();
-      // load companies for modal
-      await loadCompanies();
     }catch(e){
-      console.error(e);
-      setErr(e?.data?.message || e?.message || "Failed to load estimates.");
+      lastErr = e;
     }
   }
+  throw lastErr || new Error("Unable to load opportunities");
+}
 
-  async function loadCompanies(){
-    const sel = $$("qCompany");
-    if(!sel) return;
+async function refresh(opts = { reset: true }){
+  const reset = opts?.reset !== false;
+  const ok = await ensureAuth();
+  if(!ok) return;
+
+  try{
+    if(reset){
+      page = 1;
+      all = [];
+      hasMore = true;
+    }
+
+    // Load companies once for both the modal dropdown and fast list display
+    if(companyNameById.size === 0){
+      await loadCompanies();
+    }
+
+    const res = await safeGetOppList(page, PER_PAGE);
+    const newItems = res?.items || [];
+    if(reset) all = newItems; else all = all.concat(newItems);
+    hasMore = !!(res && res.page < res.totalPages);
+
+    setFilterButtonLabel();
+    renderList();
+  }catch(e){
+    console.error(e);
+    setErr(e?.data?.message || e?.message || "Failed to load estimates.");
+  }
+}
+
+async function loadCompanies(){
+  const sel = $$("qCompany");
+  if(sel){
     const prev = sel.value;
     sel.innerHTML = `<option value="">Select company…</option>`;
     try{
-      const res = await pb.collection("crm_companies").getList(1, 200, { sort: "name" });
+      const res = await pb.collection("crm_companies").getList(1, 300, {
+        sort: "name",
+        fields: "id,name,Name"
+      });
+      companyNameById = new Map();
       (res?.items || []).forEach(c => {
+        const id = c.id;
+        const nm = c.name || c.Name || "";
+        if(id) companyNameById.set(id, nm);
         const o = document.createElement("option");
-        o.value = c.id;
-        o.textContent = c.name || c.Name || "(Unnamed)";
+        o.value = id;
+        o.textContent = nm || "(Unnamed)";
         sel.appendChild(o);
       });
       if(prev) sel.value = prev;
@@ -1365,12 +1512,22 @@ const getUnitWeight = (it) => {
       o.textContent = "Unable to load companies";
       sel.appendChild(o);
     }
+  } else {
+    // still populate the map for list usage
+    try{
+      const res = await pb.collection("crm_companies").getList(1, 300, { sort: "name", fields: "id,name,Name" });
+      companyNameById = new Map();
+      (res?.items || []).forEach(c => {
+        const id = c.id;
+        const nm = c.name || c.Name || "";
+        if(id) companyNameById.set(id, nm);
+      });
+    }catch(_e){}
   }
+}
 
-  // --------------------------
-  
-  // --------------------------
-  // Quote numbering (YY-###)
+// Quote numbering (YY-###)
+
   // --------------------------
   // Recommended PocketBase collection:
   //   quote_counters: { year (text, unique), nextSeq (number) }
@@ -1442,6 +1599,7 @@ const getUnitWeight = (it) => {
         const res = await pb.collection("crm_opportunities").getList(1, 1, {
           filter: `${f} ~ "${yy}-"`,
           sort: `-${f}`,
+          fields: 'id,' + f
         });
         const it = res?.items?.[0];
         const val = it ? (it[f] || "") : "";
@@ -1521,114 +1679,166 @@ const getUnitWeight = (it) => {
   }
 
 
-  // Start a new quote using a provided Quote/Estimate number (does NOT hit quote_counters).
-  async function startNewQuoteWithNumber(qn){
-    setErr("");
-    reservedQuoteNumber = null;
 
-    // Open modal immediately for fast UX
-    openModal("new");
+  // --------------------------
+  // Import from Precast Culvert tool (Send to Quote)
+  // --------------------------
+  const CULVERT_IMPORT_KEY = "pf_culvert_quote_import_v1";
 
-    const btns = [$$("btnNewEstTop"), $$("btnNewEst")].filter(Boolean);
-    btns.forEach(b => b.disabled = true);
+  function uomQtyFromRebarEntry(uom, entry){
+    const u = String(uom || "").toLowerCase();
+    const wt = Number(entry?.totalWeightLb ?? entry?.total_weight_lb ?? entry?.weightLb ?? entry?.wt_lb ?? 0) || 0;
+    const ln = Number(entry?.totalLenFt ?? entry?.total_len_ft ?? entry?.lenFt ?? entry?.len_ft ?? 0) || 0;
+    const qb = Number(entry?.qtyBars ?? entry?.qty ?? entry?.count ?? 0) || 0;
 
+    if(u.includes("ton")) return wt/2000;
+    if(u.includes("lb")) return wt;
+    if(u.includes("ft")) return ln;
+    return qb || wt || ln;
+  }
+
+  async function findRebarInventoryItem(size){
+    const q = `#${size}`;
     try{
-      const fixed = String(qn || "").trim();
-      if(!fixed) throw new Error("Missing quote number.");
+      const res = await pb.collection("items").getList(1, 50, {
+        sort: "name",
+        filter: `(sku ~ "${escapePB(q)}" || name ~ "${escapePB(q)}" || SKU ~ "${escapePB(q)}" || Name ~ "${escapePB(q)}")`
+      });
+      const arr = res?.items || [];
+      if(!arr.length) return null;
 
-      reservedQuoteNumber = fixed;
-      if($$("qNumber")) $$("qNumber").value = fixed;
-
-      // Try to save a draft quote immediately so it exists in PocketBase right away.
-      const today = $$("qDate")?.value || toISODate(new Date());
-      const valid = $$("qValid")?.value || addDays(today, 30);
-
-      const draft = {
-        stage: "Quoted",
-        name: `Quote ${fixed}`,
-        quoteNumber: fixed,
-        quoteDate: today,
-        validUntil: valid,
-        projectName: "",
-        projectLocation: "",
-        quoteItems: [],
-        subtotal: 0,
-        deliveryPrice: 0,
-        taxRate: 0,
-        taxAmount: 0,
-        total: 0,
-        totalWeight: 0,
-        estimatedValue: 0,
-        bidDate: today,
-        notes: ""
+      const score = (it) => {
+        const txt = `${getSku(it)} ${getName(it)}`.toLowerCase();
+        let s = 0;
+        if(txt.includes("rebar")) s += 10;
+        if(txt.includes("bar")) s += 2;
+        if(txt.includes(`#${size}`)) s += 5;
+        return s;
       };
-
-      try{
-        const created = await pb.collection("crm_opportunities").create(draft);
-        editId = created?.id || null;
-        if(editId){
-          $$("quoteModalTitle").textContent = "Edit Quote";
-        }
-      }catch(e){
-        // If the quote already exists (unique constraint), open it instead.
-        const msg = (e?.data?.message || e?.message || "").toLowerCase();
-        if(msg.includes("unique") || msg.includes("exists") || msg.includes("already")){
-          try{
-            const qEsc = escapePB(fixed);
-            const res = await pb.collection("crm_opportunities").getList(1, 1, {
-              filter: `(quoteNumber = "${qEsc}" || QuoteNumber = "${qEsc}")`,
-              sort: "-created",
-            });
-            const rec = res?.items?.[0];
-            if(rec){
-              openModal("edit", rec);
-              toast(`Opened existing quote # ${fixed}.`, "info");
-            } else {
-              toast(`Quote # ${fixed} already exists. Use Search to open it.`, "info");
-            }
-          }catch(_e2){
-            toast(`Quote # ${fixed} already exists. Use Search to open it.`, "info");
-          }
-        } else {
-          console.warn("Draft create failed; will create on Save.", e);
-          toast(`Quote # ${fixed} set. Fill details and click Save to create the quote.`, "info");
-        }
-      }
-    }catch(e){
-      console.error(e);
-      setErr(e?.data?.message || e?.message || "Unable to start a new quote.");
-      // allow manual entry if needed
-      const qnInput = $$("qNumber");
-      if(qnInput){
-        qnInput.removeAttribute("readonly");
-        qnInput.placeholder = "Enter quote # (e.g., 26-001)";
-      }
-    }finally{
-      btns.forEach(b => b.disabled = false);
+      arr.sort((a,b) => score(b) - score(a));
+      return arr[0] || null;
+    }catch(_e){
+      return null;
     }
   }
 
-  function currentPageName(){
-    const p = (window.location.pathname || "").split("/").pop();
-    return (p && p.trim()) ? p.trim() : "estimates.html";
+  async function maybeImportFromCulvert(){
+    let raw = null;
+    try{ raw = localStorage.getItem(CULVERT_IMPORT_KEY); }catch(_e){}
+    if(!raw) return;
+
+    let payload = null;
+    try{ payload = JSON.parse(raw); }catch(_e){}
+    try{ localStorage.removeItem(CULVERT_IMPORT_KEY); }catch(_e){}
+    if(!payload) return;
+
+    const qn = String(payload.quoteNumber || payload.estimateNumber || "").trim();
+    if(qn) reservedQuoteNumber = qn;
+
+    // Open modal without reserving a new number
+    openModal("new");
+    if(qn && $$("qNumber")) $$("qNumber").value = qn;
+
+    // Piece marks -> custom line items
+    const pm = Array.isArray(payload.items) ? payload.items : [];
+    const importedLines = [];
+
+    lineItems = [];
+
+    for(const it of pm){
+      const mark = String(it.pieceMark || it.mark || it.sku || "").trim();
+      if(!mark) continue;
+      const qty = Number(it.qty || 0) || 0;
+      const price = Number(it.unitPrice ?? it.price ?? 0) || 0;
+
+      const weightLb = Number(it.weightLb ?? it.unitWeightLb ?? it.unit_weight_lb ?? it.weight ?? 0) || 0;
+      lineItems.push({
+        source: "custom",
+        itemId: "",
+        sku: mark,
+        name: `Box Culvert Piece ${mark}`,
+        qty,
+        price,
+        weightLb
+      });
+      importedLines.push(mark);
+    }
+
+    // Rebar totals by size (best effort: match inventory item; otherwise custom)
+    const rebar = Array.isArray(payload.rebarBySize) ? payload.rebarBySize : [];
+    for(const r of rebar){
+      const size = Number(r.size || r.barSize || r.no || 0) || 0;
+      if(!size) continue;
+
+      const inv = await findRebarInventoryItem(size);
+      if(inv){
+        const uom = inv?.uom ?? inv?.UOM ?? inv?.unit ?? inv?.Unit ?? "";
+        const qty = uomQtyFromRebarEntry(uom, r);
+        const price = getUnitPrice(inv);
+
+        lineItems.push({
+          source: "inventory",
+          itemId: inv.id,
+          sku: getSku(inv) || `#${size}`,
+          name: getName(inv) || `Rebar #${size}`,
+          qty,
+          price
+        });
+      }else{
+        // fallback: custom item with lb qty
+        const qty = uomQtyFromRebarEntry("lb", r);
+        lineItems.push({
+          source: "custom",
+          itemId: "",
+          sku: `REBAR-#${size}`,
+          name: `Rebar #${size} (lb)`,
+          qty,
+          price: 0
+        });
+      }
+    }
+
+    // Add note stamp
+    const stamp = `Imported from Precast Box Culvert Estimator (${qn || "unknown"}) on ${new Date().toLocaleString()}.`;
+    const nEl = $$("qNotes");
+    if(nEl){
+      nEl.value = (nEl.value ? (nEl.value + "\n") : "") + stamp;
+    }
+
+    renderLines();
+    computeTotals();
+
+    toast(`Imported ${importedLines.length} piece mark line(s)${rebar.length ? " + rebar totals" : ""} from culvert.`, "good");
   }
-  function openFisherStack(){
-    const back = encodeURIComponent(currentPageName());
-    window.location.href = `Fisher_Stack_with_back.html?back=${back}&v=${Date.now()}`;
-  }
-  function openCulvertEstimator(){
-    const back = encodeURIComponent(currentPageName());
-    window.location.href = `precast_culvert.html?back=${back}&v=${Date.now()}`;
-  }
+
+
 
   // Events
   // --------------------------
   $$("btnNewEstTop")?.addEventListener("click", () => startNewQuote());
   $$("btnNewEst")?.addEventListener("click", () => startNewQuote());
-  $$("btnOpenFisherTop")?.addEventListener("click", openFisherStack);
-  $$("btnOpenFisher")?.addEventListener("click", openFisherStack);
-  $$("btnOpenFisher2")?.addEventListener("click", openFisherStack);
-  $$("btnOpenCulvertEstimator")?.addEventListener("click", openCulvertEstimator);
+  $$("btnOpenFisherTop")?.addEventListener("click", () => {
+    window.location.href = "Fisher_Stack_with_back.html?back=estimates.html&v=" + Date.now();
+  });
+$$('btnOpenFisher')?.addEventListener('click', () => {
+  window.location.href = 'Fisher_Stack_with_back.html?back=estimates.html&v=' + Date.now();
+});
+$$('btnOpenFisher2')?.addEventListener('click', () => {
+  window.location.href = 'Fisher_Stack_with_back.html?back=estimates.html&v=' + Date.now();
+});
+$$('btnOpenCulvertTop')?.addEventListener('click', () => {
+  window.location.href = 'precast_culvert.html?back=estimates.html&v=' + Date.now();
+});
+$$('btnFilter')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  openFilterMenu();
+});
+$$('btnLoadMore')?.addEventListener('click', () => {
+  if(!hasMore) return;
+  page += 1;
+  refresh({ reset: false });
+});
+
   $$("btnRefresh")?.addEventListener("click", refresh);
 
   $$("btnQuoteClose")?.addEventListener("click", closeModal);
@@ -1639,6 +1849,13 @@ const getUnitWeight = (it) => {
   $$("btnQuoteDelete")?.addEventListener("click", deleteQuote);
   $$("btnQuotePrint")?.addEventListener("click", () => printCurrentQuote(null));
 
+
+  $$("btnQuoteCulvert")?.addEventListener("click", () => {
+    const qn = ($$("qNumber")?.value || reservedQuoteNumber || "").toString().trim();
+    const base = "precast_culvert.html?back=estimates.html";
+    const url = qn ? (base + "&quoteNumber=" + encodeURIComponent(qn) + "&v=" + Date.now()) : (base + "&v=" + Date.now());
+    window.open(url, "_blank", "noopener");
+  });
   $$("qDate")?.addEventListener("change", () => {
     const d = $$("qDate").value;
     $$("qValid").value = addDays(d, 30);
@@ -1657,8 +1874,10 @@ const getUnitWeight = (it) => {
     if(!it) return;
     const price = getUnitPrice(it);
     if($$("liPrice").value === "" || Number($$("liPrice").value||0) === 0) $$("liPrice").value = price ? String(price) : "";
-    const wt = getUnitWeight(it);
-    if($$("liWeight").value === "" || Number($$("liWeight").value||0) === 0) $$("liWeight").value = wt ? String(wt) : "";
+    const w = getUnitWeight(it);
+    const wEl = $$("liWeight");
+    if(wEl && (wEl.value === "" || Number(wEl.value||0) === 0)) wEl.value = w ? String(Math.round(w)) : "";
+
   });
 
   $$("btnAddLine")?.addEventListener("click", () => {
@@ -1666,7 +1885,7 @@ const getUnitWeight = (it) => {
     setErr("");
     const qty = Number($$("liQty").value || 0);
     const price = Number($$("liPrice").value || 0);
-    const unitWeight = Number($$("liWeight").value || 0) || 0;
+    const weightLbIn = Number($$("liWeight")?.value || 0) || 0;
     if(!(qty > 0)) return setErr("Qty must be greater than 0.");
     if(!(price >= 0)) return setErr("Price must be 0 or more.");
 
@@ -1680,8 +1899,8 @@ const getUnitWeight = (it) => {
         sku,
         name,
         qty,
-        unitWeight,
-        price
+        price,
+        weightLb: weightLbIn
       });
       $$("cusSku").value = "";
       $$("cusName").value = "";
@@ -1695,15 +1914,15 @@ const getUnitWeight = (it) => {
         sku: getSku(it),
         name: getName(it),
         qty,
-        unitWeight: (unitWeight || getUnitWeight(it)),
-        price
+        price,
+        weightLb: (weightLbIn > 0 ? weightLbIn : getUnitWeight(it))
       });
       $$("invPick").value = "";
     }
 
+    if($$("liWeight")) $$("liWeight").value = "";
     // reset
     $$("liQty").value = "";
-    $$("liWeight").value = "";
     $$("liPrice").value = "";
     renderLines();
     computeTotals();
@@ -1720,15 +1939,26 @@ const getUnitWeight = (it) => {
 
     if(e.target.classList.contains("liQty")){
       li.qty = Number(e.target.value || 0);
-    } else if(e.target.classList.contains("liWt")){
-      li.unitWeight = Number(e.target.value || 0) || 0;
+    } else if(e.target.classList.contains("liWeight")){
+      li.weightLb = Number(e.target.value || 0);
     } else if(e.target.classList.contains("liPrice")){
       li.price = Number(e.target.value || 0);
     }
-    computeTotals();
-  });
 
-  $$("lineTbody")?.addEventListener("click", (e) => {
+    // Update computed cells without re-rendering (keeps focus)
+    const qty = Number(li.qty||0) || 0;
+    const unitW = Number(li.weightLb ?? li.unitWeightLb ?? li.weight ?? 0) || 0;
+    const lineW = qty * unitW;
+    const lineTotal = qty * (Number(li.price||0) || 0);
+
+    const wtCell = tr.querySelector('[data-role="lineWeight"]');
+    if(wtCell) wtCell.textContent = lineW ? (Math.round(lineW).toLocaleString() + " lb") : "—";
+
+    const totalCell = tr.querySelector('[data-role="lineTotal"]');
+    if(totalCell) totalCell.textContent = money(lineTotal);
+
+    computeTotals();
+  });$$("lineTbody")?.addEventListener("click", (e) => {
     if(modalReadOnly) return;
     const tr = e.target.closest("tr[data-idx]");
     if(!tr) return;
@@ -1742,80 +1972,6 @@ const getUnitWeight = (it) => {
   $$("qDelivery")?.addEventListener("input", computeTotals);
   $$("qTaxRate")?.addEventListener("input", computeTotals);
   $$("topSearch")?.addEventListener("input", renderList);
-
-
-  // Stage filter popover
-  let filterMenuEl = null;
-  function ensureFilterMenu(){
-    if(filterMenuEl) return filterMenuEl;
-    filterMenuEl = document.createElement("div");
-    filterMenuEl.id = "pfFilterMenu";
-    filterMenuEl.className = "pf-popMenu";
-    filterMenuEl.innerHTML = `
-      <div class="pf-popTitle">Filter by stage</div>
-      <button type="button" data-k="all">All</button>
-      <button type="button" data-k="quoted">Quoted</button>
-      <button type="button" data-k="negotiation">Negotiation</button>
-      <button type="button" data-k="won">Won</button>
-      <button type="button" data-k="lost">Lost</button>
-    `;
-    document.body.appendChild(filterMenuEl);
-
-    filterMenuEl.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-k]");
-      if(!btn) return;
-      setStageFilter(btn.getAttribute("data-k"));
-    });
-
-    return filterMenuEl;
-  }
-
-  function closeFilterMenu(){
-    if(!filterMenuEl) return;
-    filterMenuEl.style.display = "none";
-  }
-
-  function openFilterMenu(){
-    const btn = $$("btnFilter");
-    if(!btn) return;
-    const menu = ensureFilterMenu();
-
-    // Update active state
-    menu.querySelectorAll("button[data-k]").forEach(b => {
-      b.classList.toggle("active", b.getAttribute("data-k") === stageFilter);
-    });
-
-    const r = btn.getBoundingClientRect();
-    const top = Math.min(window.innerHeight - 10, r.bottom + 8);
-    const left = Math.max(10, Math.min(window.innerWidth - 10 - 230, r.right - 230));
-    menu.style.top = top + "px";
-    menu.style.left = left + "px";
-    menu.style.display = "block";
-  }
-
-  function toggleFilterMenu(){
-    const menu = ensureFilterMenu();
-    if(menu.style.display === "block") closeFilterMenu();
-    else openFilterMenu();
-  }
-
-  function setStageFilter(k){
-    stageFilter = String(k || "all").toLowerCase();
-    const btn = $$("btnFilter");
-    if(btn) btn.textContent = `Filter: ${stageLabel(stageFilter)}`;
-    closeFilterMenu();
-    renderList();
-  }
-
-  $$("btnFilter")?.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); toggleFilterMenu(); });
-  document.addEventListener("click", (e) => {
-    if(!filterMenuEl) return;
-    const inBtn = e.target.closest("#btnFilter");
-    const inMenu = e.target.closest("#pfFilterMenu");
-    if(inBtn || inMenu) return;
-    closeFilterMenu();
-  });
-  window.addEventListener("resize", closeFilterMenu);
 
   
   // --------------------------
@@ -1918,7 +2074,7 @@ function toast(msg, type="info", action=null){
       bin: (quoteNumber || "").toString(),
       vendor: (companyName || "").toString(),
       dimensions: (src?.dimensions ?? src?.Dimensions ?? "").toString(),
-      weight: (src?.weight ?? src?.Weight ?? null),
+      weight: (src?.weight ?? src?.Weight ?? li?.weightLb ?? li?.unitWeight ?? li?.unitWeightLb ?? null),
       qty: (qtyOverride != null ? Number(qtyOverride||0) : (Number(li?.qty || 0) || 0)),
       uom: (src?.uom || "ea").toString(),
       unitcost: Number(src?.unitcost ?? src?.unitCost ?? 0) || 0,
@@ -2198,6 +2354,17 @@ BackorderedQty=${toProduce}`
         }
       }
 
+      
+      // Keep Jobs in sync with the new stage (best-effort)
+      try{
+        const oppFull = await pb.collection("crm_opportunities").getOne(id, { expand: "company" });
+        const compId = oppFull?.company || oppFull?.companyId || "";
+        const compName = oppFull?.expand?.company?.name || companyNameById.get(compId) || "";
+        const qObj = normalizeQuoteFromOpp(oppFull);
+        await upsertJobOnSave(qObj, { subtotal: qObj.subtotal, total: qObj.total }, compId, compName, id, next);
+      }catch(_e){}
+
+
       if(rec) rec.stage = next;
       sel.setAttribute("data-prev", next);
       renderList(); // refresh sections
@@ -2235,6 +2402,17 @@ BackorderedQty=${toProduce}`
           }
         }
 
+        
+      // Keep Jobs in sync with the new stage (best-effort)
+      try{
+        const oppFull = await pb.collection("crm_opportunities").getOne(id, { expand: "company" });
+        const compId = oppFull?.company || oppFull?.companyId || "";
+        const compName = oppFull?.expand?.company?.name || companyNameById.get(compId) || "";
+        const qObj = normalizeQuoteFromOpp(oppFull);
+        await upsertJobOnSave(qObj, { subtotal: qObj.subtotal, total: qObj.total }, compId, compName, id, next);
+      }catch(_e){}
+
+
         if(rec) rec.Stage = next;
         sel.setAttribute("data-prev", next);
         renderList();
@@ -2249,23 +2427,25 @@ BackorderedQty=${toProduce}`
   });
 
 // Click on card actions
-  $$("estList")?.addEventListener("click", (e) => {
-    if(e.target.closest("select.pf-stageSelect")) return;
-    const card = e.target.closest(".pf-estCard");
-    if(!card) return;
-    const id = card.getAttribute("data-id");
-    const rec = all.find(x => x.id === id);
-    const actBtn = e.target.closest("button[data-act]");
-    const act = actBtn?.getAttribute("data-act");
-    if(act === "edit" && rec){
-      openModal("edit", rec);
-    } else if(act === "print" && rec){
-      printCurrentQuote(rec);
-    } else if(rec){
-      // default: edit
-      openModal("edit", rec);
-    }
-  });
+  // Click on card actions (fetch full record to access notes/quoteItems only when needed)
+$$('estList')?.addEventListener('click', async (e) => {
+  if(e.target.closest('select.pf-stageSelect')) return;
+  const card = e.target.closest('.pf-estCard');
+  if(!card) return;
+  const id = card.getAttribute('data-id');
+  const actBtn = e.target.closest('button[data-act]');
+  const act = actBtn?.getAttribute('data-act') || 'edit';
+  setErr('');
+  try{
+    const rec = await pb.collection('crm_opportunities').getOne(id, { expand: 'company' });
+    if(act === 'print') return printCurrentQuote(rec);
+    return openModal('edit', rec);
+  }catch(err){
+    console.error(err);
+    toast(err?.data?.message || err?.message || 'Unable to open quote.', 'bad');
+  }
+});
+
 
   // logout (optional)
   const logoutBtn = $$("btnLogout");
@@ -2277,197 +2457,8 @@ BackorderedQty=${toProduce}`
     });
   }
 
-  
-  function detectRebarSizeFromItem(it){
-    const hay = `${getSku(it)} ${getName(it)} ${(it?.pieceMark||"")} ${(it?.category||"")}`.toLowerCase();
-    let m = hay.match(/#\s*(\d{1,2})\b/);
-    if(m) return parseInt(m[1], 10);
-    m = hay.match(/\bno\.?\s*(\d{1,2})\b/);
-    if(m) return parseInt(m[1], 10);
-    m = hay.match(/\brebar\s*(\d{1,2})\b/);
-    if(m) return parseInt(m[1], 10);
-    return null;
-  }
-
-  async function loadRebarInventoryItems(){
-    const all = [];
-    let page = 1;
-    const perPage = 200;
-    const filter = `(Type = "Rebar/Steel" || Type = "Rebar" || Type ~ "Rebar")`;
-    while(true){
-      const res = await pb.collection("items").getList(page, perPage, { filter, sort: "name" });
-      const items = res?.items || [];
-      all.push(...items);
-      if(items.length < perPage) break;
-      page++;
-      if(page > 10) break; // safety
-    }
-    return all;
-  }
-
-  function qtyAndUnitWeightForUom(uom, totalWeightLb, totalLengthFt, totalBars){
-    const u = String(uom || "").toLowerCase().trim();
-    const wt = Number(totalWeightLb || 0) || 0;
-    const ln = Number(totalLengthFt || 0) || 0;
-    const bars = Number(totalBars || 0) || 0;
-
-    if(u.includes("ea") || u === "each"){
-      const qty = bars || 0;
-      const unitWeight = (qty > 0) ? (wt / qty) : 0;
-      return { qty, unitWeight };
-    }
-    if(u.includes("ft")){
-      const qty = ln || 0;
-      const unitWeight = (qty > 0) ? (wt / qty) : 0;
-      return { qty, unitWeight };
-    }
-    if(u.includes("ton")){
-      const qty = wt / 2000;
-      return { qty, unitWeight: 2000 };
-    }
-    if(u.includes("lb")){
-      return { qty: wt, unitWeight: 1 };
-    }
-    // Default to pounds
-    return { qty: wt, unitWeight: 1 };
-  }
-
-  async function maybeImportFromCulvert(){
-    const KEY = "pf_culvert_quote_import_v1";
-    let raw = null;
-    try{ raw = localStorage.getItem(KEY); }catch(_e){ raw = null; }
-    if(!raw) return;
-
-    let payload = null;
-    try{
-      payload = JSON.parse(raw);
-    }catch(_e){
-      // Bad payload: clear it so we don't loop
-      try{ localStorage.removeItem(KEY); }catch(_e2){}
-      return;
-    }
-
-    if(payload?.type !== "culvert_piece_marks") return;
-
-    // If not authenticated, keep payload for after login.
-    if(!pb.authStore.isValid) return;
-
-    try{
-      const incomingQN = String(payload?.quoteNumber || payload?.estimateNumber || "").trim();
-
-      if(incomingQN){
-        await startNewQuoteWithNumber(incomingQN);
-      } else {
-        await startNewQuote();
-      }
-
-      // Default UI to inventory mode (we're about to add both inventory + custom lines)
-      applyLineMode("inv");
-
-      // Start from a clean lines array for NEW quotes.
-      // If startNewQuoteWithNumber opened an existing quote, keep its current lines and append.
-      if(!editId){
-        lineItems = [];
-      }
-
-      // 1) Piece marks (custom lines)
-      const pm = Array.isArray(payload.items) ? payload.items : [];
-      pm.forEach(it => {
-        const mark = String(it?.pieceMark ?? it?.mark ?? "").trim();
-        const qty = Number(it?.qty ?? it?.quantity ?? 0) || 0;
-        const unitWeight = Number(it?.unitWeightLb ?? it?.unitWeight ?? it?.weight ?? 0) || 0;
-        const unitPrice = Number(it?.unitPrice ?? it?.price ?? 0) || 0;
-        if(!mark || !(qty > 0)) return;
-
-        lineItems.push({
-          source: "custom",
-          itemId: "",
-          sku: mark,
-          name: `Piece mark ${mark}`,
-          qty,
-          unitWeight,
-          price: unitPrice
-        });
-      });
-
-      // 2) Rebar by bar size (inventory if available)
-      const rebar = Array.isArray(payload.rebarBySize) ? payload.rebarBySize : [];
-      if(rebar.length){
-        let invItems = [];
-        try{
-          invItems = await loadRebarInventoryItems();
-        }catch(e){
-          console.warn("Unable to load Rebar/Steel inventory list.", e);
-          invItems = [];
-        }
-
-        const sizeMap = new Map();
-        invItems.forEach(it => {
-          const s = detectRebarSizeFromItem(it);
-          if(!s || sizeMap.has(s)) return;
-          sizeMap.set(s, it);
-        });
-
-        rebar.forEach(r => {
-          const size = Number(r?.size ?? r?.barSize ?? r?.no ?? 0) || 0;
-          const totalWeightLb = Number(r?.totalWeightLb ?? r?.weightLb ?? 0) || 0;
-          const totalLengthFt = Number(r?.totalLengthFt ?? r?.lengthFt ?? 0) || 0;
-          const totalBars = Number(r?.totalBars ?? r?.bars ?? 0) || 0;
-          if(!size) return;
-
-          const inv = sizeMap.get(size);
-          if(inv){
-            const uom = inv?.uom || "lb";
-            const { qty, unitWeight } = qtyAndUnitWeightForUom(uom, totalWeightLb, totalLengthFt, totalBars);
-            const qtyFinal = (String(uom||"").toLowerCase().includes("ton"))
-              ? (Math.round(qty * 1000) / 1000)
-              : (String(uom||"").toLowerCase().includes("ft"))
-                ? (Math.round(qty * 1000) / 1000)
-                : (Math.round(qty));
-
-            const unitWeightFinal = isFinite(unitWeight) ? (Math.round(unitWeight * 1000) / 1000) : 0;
-
-            lineItems.push({
-              source: "inventory",
-              itemId: inv.id,
-              sku: getSku(inv),
-              name: getName(inv),
-              qty: qtyFinal,
-              unitWeight: unitWeightFinal,
-              price: getUnitPrice(inv)
-            });
-          } else {
-            // No inventory match -> fallback custom line (qty in pounds)
-            lineItems.push({
-              source: "custom",
-              itemId: "",
-              sku: `REBAR-#${size}`,
-              name: `Rebar #${size}`,
-              qty: Math.round(totalWeightLb),
-              unitWeight: 1,
-              price: 0
-            });
-          }
-        });
-      }
-
-      renderLines();
-      computeTotals();
-
-      try{ localStorage.removeItem(KEY); }catch(_e){}
-      toast("Culvert items (piece marks + rebar) imported into a new estimate.", "good");
-    }catch(e){
-      console.error(e);
-      // Keep payload so the user can refresh and try again
-      toast("Unable to import culvert items. (Estimate not created.)", "bad");
-    }
-  }
-
   // Initial
-
-  refresh()
-    .then(() => maybeImportFromCulvert())
-    .catch((_e) => maybeImportFromCulvert());
+  refresh().then(()=>{ try{ maybeImportFromCulvert(); }catch(_e){} }).catch(()=>{});
 
 })();
 </script>

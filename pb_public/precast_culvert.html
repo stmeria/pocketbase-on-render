@@ -255,9 +255,28 @@
   }
   .iconBtn:hover{background:var(--card2); color:var(--ink); border-color:var(--border)}
 
+
+  /* Modal (calculate segments) */
+  dialog.modal{
+    border:none;
+    border-radius:16px;
+    padding:0;
+    max-width:720px;
+    width:calc(100% - 24px);
+    box-shadow:var(--shadow);
+  }
+  dialog.modal::backdrop{
+    background:rgba(17,24,39,.55);
+    backdrop-filter: blur(2px);
+  }
+  .modalCard{padding:14px}
+  .modalCard h3{margin:0 0 8px;font-size:16px}
+  .modalActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .modalActions button{flex:1}
+
 </style>
 
-<script src="/vendor/pocketbase.umd.js"></script>
+<script src="vendor/pocketbase.umd.js"></script>
 </head>
 <body>
 <header>
@@ -351,6 +370,12 @@
           <input id="lay_len" type="number" min="1" step="0.1" value="6">
         </div>
       </div>
+      <div class="grid" style="margin-top:8px">
+        <div style="grid-column:1/-1">
+          <button id="btnSegCalc" class="btn sec" type="button">Calculate number of segments</button>
+        </div>
+      </div>
+
 
       <div class="grid">
         <div>
@@ -389,56 +414,7 @@
         </div>
       </div>
 
-      
-
-      <div class="flex" style="margin-top:10px">
-        <button id="btnSegCalc" class="btn sec" type="button">Calculate number of segments</button>
-      </div>
-
-      <div id="segModal" class="modalOverlay" aria-hidden="true">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="segTitle">
-          <div class="modalHead">
-            <div>
-              <div id="segTitle" class="modalTitle">Calculate number of segments</div>
-              <div class="muted" style="margin-top:4px">Enter total culvert length, joint thickness, and maximum allowed piece weight. The tool finds the smallest number of lays that meets the weight limit and fills <strong>Lay length</strong> + <strong>Number of lays</strong>.</div>
-            </div>
-            <button class="iconBtn" id="segClose" type="button" aria-label="Close">✕</button>
-          </div>
-          <div class="modalBody">
-            <div class="grid">
-              <div>
-                <label>Total culvert length (ft)</label>
-                <input id="seg_total_len" type="number" min="0" step="0.1" placeholder="e.g. 40">
-              </div>
-              <div>
-                <label>Joint between pieces (in)</label>
-                <input id="seg_joint_in" type="number" min="0" step="0.1" value="2">
-              </div>
-            </div>
-
-            <div class="grid" style="margin-top:10px">
-              <div>
-                <label>Maximum piece weight (lb)</label>
-                <input id="seg_max_wt" type="number" min="0" step="10" placeholder="e.g. 20000">
-                <div class="muted" style="margin-top:6px">Uses total piece weight (concrete + schedule steel if your bar schedule is filled).</div>
-              </div>
-              <div>
-                <label>&nbsp;</label>
-                <button id="segCompute" class="btn" type="button">Compute</button>
-              </div>
-            </div>
-
-            <div id="seg_result" class="muted" style="margin-top:10px"></div>
-
-            <div class="flex" style="margin-top:12px">
-              <button id="segApply" class="btn" type="button" style="flex:1" disabled>Use these values</button>
-              <button id="segCancel" class="btn sec" type="button" style="flex:1">Cancel</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-<div class="grid">
+      <div class="grid">
         <div>
           <label>Fill height H<sub>fill</sub> (ft)</label>
           <input id="fill" type="number" min="0" step="0.1" value="2">
@@ -636,6 +612,51 @@
   </div>
 </div>
 
+
+<!-- Calculate number of segments dialog -->
+<dialog id="seg_dialog" class="modal">
+  <div class="modalCard">
+    <h3>Calculate number of segments</h3>
+    <div class="muted" style="margin-bottom:10px">
+      Enter the total culvert length, joint thickness between pieces, and the maximum allowed piece weight.
+      The tool will compute the smallest number of lays that meets the weight limit and will populate <strong>Lay length</strong> and <strong>Number of lays</strong>.
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Total culvert length (ft)</label>
+        <input id="seg_total_len_ft" type="number" min="0.1" step="0.01" placeholder="e.g. 24">
+      </div>
+      <div>
+        <label>Joint between pieces (in)</label>
+        <input id="seg_joint_in" type="number" min="0" step="0.01" value="0.5">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Maximum piece weight (lb)</label>
+        <input id="seg_max_wt_lb" type="number" min="1" step="1" placeholder="e.g. 45000">
+      </div>
+      <div>
+        <label>Notes</label>
+        <div class="note" style="margin:0">
+          Uses your current section/skew inputs. Checks the heaviest piece; if Bar Schedule rows exist, steel is included in piece weight.
+        </div>
+      </div>
+    </div>
+
+    <div id="seg_result" class="note" style="display:none;margin-top:12px"></div>
+
+    <div class="modalActions">
+      <button id="seg_do_calc" class="btn sec" type="button">Calculate</button>
+      <button id="seg_apply" class="btn" type="button" disabled>Apply to inputs</button>
+      <button id="seg_close" class="btn sec" type="button">Close</button>
+    </div>
+  </div>
+</dialog>
+
+
 <script>
 (function(){
   const $ = id => document.getElementById(id);
@@ -659,7 +680,7 @@
   const pb = (window.PocketBase) ? new PocketBase(window.location.origin) : null;
   try{ pb?.autoCancellation(false); }catch(_e){}
 
-  const PB_CULVERT_COL = "culvert_estimates"; // Create this collection in PocketBase (estimateNumber:text + data:json)
+  const PB_CULVERT_COL = "culvert_estimates"; // PocketBase: { quoteNumber:text (unique), data:json }
   const PB_COUNTER_COL = "quote_counters";   // Shared with Estimates page for sequential numbering
   let pbCulvertRecId = null;
   let estimateNumber = "";
@@ -713,24 +734,51 @@
   async function reserveEstimateNumberPB(){
     if(!pb) throw new Error("PocketBase SDK not loaded.");
     if(!pb.authStore?.isValid) throw new Error("Not authenticated.");
-    const year = new Date().getFullYear();
 
-    let counter = null;
-    try{
-      counter = await pb.collection(PB_COUNTER_COL).getFirstListItem(`year="${escPB(year)}"`);
-    }catch(_e){
-      counter = null;
+    const yearFull = new Date().getFullYear();
+    const year = String(yearFull);
+
+    // We treat quote_counters.nextSeq as "the next sequence number to use".
+    // Reserve by reading nextSeq then incrementing it. Includes a few retries for races.
+    for(let attempt=0; attempt<5; attempt++){
+      let rec = null;
+
+      try{
+        const found = await pb.collection(PB_COUNTER_COL).getList(1, 1, {
+          filter: `year="${escPB(year)}"`,
+          fields: "id,year,nextSeq,lastSeq"
+        });
+        rec = found?.items?.[0] || null;
+      }catch(_e){
+        rec = null;
+      }
+
+      if(!rec){
+        // Seed: nextSeq=2 (we're reserving 1 now)
+        try{
+          await pb.collection(PB_COUNTER_COL).create({ year, nextSeq: 2 });
+          return formatQuoteNumber(yearFull, 1);
+        }catch(_e){
+          continue; // race: someone else created it, retry
+        }
+      }
+
+      const next = Number(rec.nextSeq ?? rec.next ?? 0) || 0;
+      const last = Number(rec.lastSeq ?? 0) || 0;
+      const seq = next > 0 ? next : (last > 0 ? (last + 1) : 1);
+
+      try{
+        const upd = { nextSeq: seq + 1 };
+        // If an older schema still has lastSeq, keep it in sync (harmless if absent)
+        if(rec.lastSeq !== undefined) upd.lastSeq = seq;
+        await pb.collection(PB_COUNTER_COL).update(rec.id, upd);
+        return formatQuoteNumber(yearFull, seq);
+      }catch(_e){
+        continue; // retry on race/update failure
+      }
     }
 
-    let seq = 1;
-    if(counter){
-      seq = (Number(counter.lastSeq || 0) || 0) + 1;
-      await pb.collection(PB_COUNTER_COL).update(counter.id, { lastSeq: seq });
-    }else{
-      seq = 1;
-      await pb.collection(PB_COUNTER_COL).create({ year, lastSeq: seq });
-    }
-    return formatQuoteNumber(year, seq);
+    throw new Error("Unable to reserve estimate number (counter busy).");
   }
 
   function reserveEstimateNumberLocal(){
@@ -775,6 +823,7 @@
     const est = estimateNumber || ($("estimate_no")?.value || "").trim();
     return {
       estimateNumber: est,
+      quoteNumber: est,
       savedAt: new Date().toISOString(),
       reason,
       inputs: snapshotInputs(),
@@ -792,7 +841,7 @@
 
     if(!pb || !pb.authStore?.isValid) return;
 
-    const data = { estimateNumber: est, data: payload };
+    const data = { quoteNumber: est, data: payload };
 
     try{
       if(pbCulvertRecId){
@@ -803,7 +852,7 @@
     }catch(_e){ /* fallthrough */ }
 
     try{
-      const res = await pb.collection(PB_CULVERT_COL).getList(1, 1, { filter: `estimateNumber="${escPB(est)}"` });
+      const res = await pb.collection(PB_CULVERT_COL).getList(1, 1, { filter: `quoteNumber="${escPB(est)}"` });
       const existing = res?.items?.[0] || null;
       if(existing){
         pbCulvertRecId = existing.id;
@@ -861,7 +910,7 @@
   async function loadEstimateFromPB(estNo){
     if(!pb || !pb.authStore?.isValid) return false;
     try{
-      const res = await pb.collection(PB_CULVERT_COL).getList(1, 1, { filter: `estimateNumber="${escPB(estNo)}"` });
+      const res = await pb.collection(PB_CULVERT_COL).getList(1, 1, { filter: `quoteNumber="${escPB(estNo)}"` });
       const rec = res?.items?.[0] || null;
       if(!rec) return false;
       pbCulvertRecId = rec.id;
@@ -880,7 +929,7 @@
     el.readOnly = true;
 
     const params = new URLSearchParams(location.search);
-    const fromUrl = (params.get("est") || params.get("estimate") || params.get("quote") || "").trim();
+    const fromUrl = (params.get("quoteNumber") || params.get("qn") || params.get("est") || params.get("estimate") || params.get("quote") || "").trim();
 
     if(fromUrl){
       estimateNumber = fromUrl;
@@ -2167,6 +2216,164 @@ ${reinfHTML}
     update();
   });
 
+  // Calculate number of segments (modal)
+  (function(){
+    const btnOpen = $('btnSegCalc');
+    const dlg = $('seg_dialog');
+    if(!btnOpen || !dlg) return;
+
+    const inpTotal = $('seg_total_len_ft');
+    const inpJoint = $('seg_joint_in');
+    const inpMaxWt = $('seg_max_wt_lb');
+    const boxRes = $('seg_result');
+    const btnCalc = $('seg_do_calc');
+    const btnApply = $('seg_apply');
+    const btnClose = $('seg_close');
+
+    function openDlg(){
+      // Prefill total length from current inputs (centerline length only)
+      const curN = Math.max(1, Math.round(toNum('n_lays') || 1));
+      const curL = (toNum('lay_len') || 0) * curN;
+      if(!inpTotal.value) inpTotal.value = (isFinite(curL) && curL>0) ? (Math.round(curL*1000)/1000) : '';
+      // Reasonable default joint
+      if(!inpJoint.value) inpJoint.value = 0.5;
+
+      boxRes.style.display = 'none';
+      boxRes.textContent = '';
+      btnApply.disabled = true;
+      btnApply.dataset.lay = '';
+      btnApply.dataset.n = '';
+
+      if(typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open','');
+    }
+
+    function closeDlg(){
+      if(typeof dlg.close === 'function') dlg.close();
+      else dlg.removeAttribute('open');
+    }
+
+    function computeMaxPieceWeight(d){
+      const mode = (typeof getReinfMode === 'function') ? getReinfMode() : 'schedule';
+      const hasScheduleRows = (mode==='schedule') && (typeof schedReadRows === 'function') && (schedReadRows().length>0);
+      const steelCache = {};
+      let maxWt = 0;
+
+      for(const p of (d.pieces || [])){
+        let steelLb = 0;
+        if(hasScheduleRows){
+          const basis = pieceBasisFromKind(p.kind);
+          if(!(basis in steelCache)){
+            steelCache[basis] = schedTotalSteelForBasis(d, basis);
+          }
+          steelLb = steelCache[basis] || 0;
+        }
+        const wt = (p.W_lb || 0) + steelLb;
+        if(wt > maxWt) maxWt = wt;
+      }
+      return maxWt;
+    }
+
+    function computeWithTempLayout(Llay, N){
+      const layEl = $('lay_len');
+      const nEl = $('n_lays');
+      const oldLay = layEl.value;
+      const oldN = nEl.value;
+      layEl.value = Llay;
+      nEl.value = N;
+      const d = compute();
+      layEl.value = oldLay;
+      nEl.value = oldN;
+      return d;
+    }
+
+    function showErr(msg){
+      boxRes.style.display = 'block';
+      boxRes.style.borderColor = '#fecaca';
+      boxRes.style.background = '#fef2f2';
+      boxRes.textContent = msg;
+      btnApply.disabled = true;
+    }
+
+    function showOk(msg){
+      boxRes.style.display = 'block';
+      boxRes.style.borderColor = '#c7d2fe';
+      boxRes.style.background = '#eef2ff';
+      boxRes.textContent = msg;
+    }
+
+    function runCalc(){
+      const Ltotal = parseFloat(inpTotal.value || '');
+      const jointIn = parseFloat(inpJoint.value || '0') || 0;
+      const jointFt = jointIn / 12;
+      const maxWt = parseFloat(inpMaxWt.value || '');
+
+      if(!isFinite(Ltotal) || Ltotal <= 0) return showErr("Enter a valid Total culvert length (ft).");
+      if(!isFinite(maxWt) || maxWt <= 0) return showErr("Enter a valid Maximum piece weight (lb).");
+      if(!isFinite(jointFt) || jointFt < 0) return showErr("Enter a valid Joint between pieces (in).");
+
+      let found = null;
+
+      for(let N=1; N<=300; N++){
+        const concreteLen = Ltotal - (N-1)*jointFt;
+        if(concreteLen <= 0) break;
+
+        const Llay = concreteLen / N;
+        if(!(Llay > 0)) break;
+
+        const d = computeWithTempLayout(Llay, N);
+        const heaviest = computeMaxPieceWeight(d);
+
+        if(heaviest <= maxWt){
+          found = {N, Llay, heaviest};
+          break;
+        }
+      }
+
+      if(!found){
+        return showErr("Could not find a segment count that meets the maximum weight with the given total length and joint. Try increasing the maximum piece weight, reducing the joint thickness, or increasing the total length.");
+      }
+
+      const Lcheck = found.N*found.Llay + (found.N-1)*jointFt;
+      showOk(
+        `Result:\n` +
+        `• Number of lays (segments) = ${found.N}\n` +
+        `• Lay length = ${fmt(found.Llay,3)} ft\n` +
+        `• Joint thickness = ${fmt(jointIn,3)} in\n` +
+        `• Heaviest piece ≈ ${fmt(found.heaviest,0)} lb\n` +
+        `• Total length check = ${fmt(Lcheck,3)} ft`
+      );
+
+      btnApply.disabled = false;
+      btnApply.dataset.lay = String(found.Llay);
+      btnApply.dataset.n = String(found.N);
+    }
+
+    function applyResult(){
+      const Llay = parseFloat(btnApply.dataset.lay || '');
+      const N = parseInt(btnApply.dataset.n || '0', 10);
+      if(!isFinite(Llay) || !(N>0)) return;
+
+      $('lay_len').value = (Math.round(Llay*1000)/1000);
+      $('n_lays').value = N;
+
+      // Refresh outputs
+      update();
+
+      closeDlg();
+    }
+
+    btnOpen.addEventListener('click', openDlg);
+    btnClose.addEventListener('click', closeDlg);
+    btnCalc.addEventListener('click', runCalc);
+    btnApply.addEventListener('click', applyResult);
+
+    // Close when clicking on backdrop (native <dialog> only)
+    dlg.addEventListener('click', (e)=>{
+      if(e.target === dlg) closeDlg();
+    });
+  })();
+
   // Autosave when any input changes (debounced)
   document.addEventListener('input', (e)=>{
     const t = e.target;
@@ -2185,24 +2392,37 @@ ${reinfHTML}
         if(!window.__CULVERT_STATE__) update();
         const d = window.__CULVERT_STATE__;
         const groups = collectPieceMarkGroupsForQuote(d);
-        const sched = (d.RebarSchedule || schedCompute(d));
-        const rebarBySize = Object.keys(sched.by_size_wt||{})
-          .map(k=>parseInt(k,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b)
-          .map(s=>({
-            size: s,
-            qty: (sched.by_size_qty||{})[s] || 0,
-            lengthFt: (sched.by_size_len||{})[s] || 0,
-            weightLb: (sched.by_size_wt||{})[s] || 0
-          }));
 
         if(!groups.length){
           alert("No piece marks available. Click Calculate first.");
           return;
         }
 
+        const sched = (() => { try { return schedCompute(d); } catch(_e){ return null; } })();
+        const rebarBySize = (() => {
+          const out = [];
+          const byWt = (sched && sched.by_size_wt) ? sched.by_size_wt : {};
+          const byLen = (sched && sched.by_size_len) ? sched.by_size_len : {};
+          const byQty = (sched && sched.by_size_qty) ? sched.by_size_qty : {};
+          const sizes = Object.keys(byWt || {}).map(s => parseInt(s,10)).filter(n => isFinite(n)).sort((a,b)=>a-b);
+          for(const s of sizes){
+            const wt = Number(byWt[s] || 0) || 0;
+            const ln = Number(byLen[s] || 0) || 0;
+            const q  = Number(byQty[s] || 0) || 0;
+            if(!(wt>0 || ln>0 || q>0)) continue;
+            out.push({
+              size: s,
+              qtyBars: Math.round(q),
+              totalLenFt: Math.round(ln*1000)/1000,
+              totalWeightLb: Math.round(wt)
+            });
+          }
+          return out;
+        })();
+
         const payload = {
           type: "culvert_piece_marks",
-          version: 1,
+          version: 2,
           createdAt: new Date().toISOString(),
           estimateNumber: (estimateNumber || $("estimate_no")?.value || "").trim(),
           quoteNumber: (estimateNumber || $("estimate_no")?.value || "").trim(),
@@ -2212,11 +2432,12 @@ ${reinfHTML}
               pieceMark: g.mark,
               qty: g.qty,
               unitWeightLb: Math.round(g.unit_weight_lb || 0),
+              weightLb: Math.round(g.unit_weight_lb || 0),
               unitPrice: unitPrice,
               price: unitPrice
             });
           }),
-          rebarBySize: rebarBySize
+          rebarBySize
         };
         try{ scheduleSave('send_to_quote'); }catch(_e){}
         try{ localStorage.setItem("pf_culvert_quote_import_v1", JSON.stringify(payload)); }catch(_e){ /* ignore */ }
@@ -2281,10 +2502,10 @@ ${reinfHTML}
     }
 
     try{
-      const res = await pb.collection(PB_CULVERT_COL).getList(1, 25, { sort: "-created", fields: "estimateNumber,created" });
+      const res = await pb.collection(PB_CULVERT_COL).getList(1, 25, { sort: "-created", fields: "quoteNumber,created" });
       const items = res?.items || [];
       for(const it of items){
-        const est = (it.estimateNumber || "").trim();
+        const est = ((it.quoteNumber || it.estimateNumber || "")).trim();
         if(!est) continue;
         const opt = document.createElement("option");
         opt.value = est;
@@ -2338,172 +2559,7 @@ ${reinfHTML}
 
 
 
-  
-  // ========= Calculate number of segments (fills Lay length + Number of lays) =========
-  const btnSegCalc = $("btnSegCalc");
-  const segModal = $("segModal");
-  const segClose = $("segClose");
-  const segCancel = $("segCancel");
-  const segComputeBtn = $("segCompute");
-  const segApplyBtn = $("segApply");
-  const segTotalLen = $("seg_total_len");
-  const segJointIn = $("seg_joint_in");
-  const segMaxWt = $("seg_max_wt");
-  const segResult = $("seg_result");
-
-  let __seg_last = null;
-
-  function setSegResult(html=""){
-    if(!segResult) return;
-    segResult.innerHTML = html || "";
-  }
-
-  function getMaxPieceWeightTotalLb(d){
-    const mode = getReinfMode();
-    const hasScheduleRows = (mode==='schedule') && (schedReadRows().length>0);
-    const steelCache = {};
-    let maxW = 0;
-    for(const p of (d.pieces||[])){
-      let steel = 0;
-      if(hasScheduleRows){
-        const basis = pieceBasisFromKind(p.kind);
-        if(!(basis in steelCache)) steelCache[basis] = schedTotalSteelForBasis(d, basis);
-        steel = steelCache[basis] || 0;
-      }
-      const w = (p.W_lb || 0) + (steel || 0);
-      if(w > maxW) maxW = w;
-    }
-    return maxW;
-  }
-
-  function showSegModal(){
-    if(!segModal) return;
-    // Prefill using current inputs
-    try{
-      const d0 = compute();
-      const curMax = getMaxPieceWeightTotalLb(d0);
-      if(segTotalLen) segTotalLen.value = (d0.L_center_ft || 0).toFixed(2);
-      if(segMaxWt) segMaxWt.value = String(Math.round(curMax || 0));
-    }catch(_e){}
-    __seg_last = null;
-    if(segApplyBtn) segApplyBtn.disabled = true;
-    setSegResult("");
-    segModal.classList.add("show");
-    segModal.setAttribute("aria-hidden","false");
-    try{ (segTotalLen || segMaxWt || segJointIn)?.focus(); }catch(_){}
-  }
-
-  function hideSegModal(){
-    if(!segModal) return;
-    segModal.classList.remove("show");
-    segModal.setAttribute("aria-hidden","true");
-  }
-
-  function computeSegments(){
-    const totalFt = toNum("seg_total_len");
-    const jointIn = toNum("seg_joint_in");
-    const maxWt = toNum("seg_max_wt");
-
-    if(!(totalFt > 0)){
-      setSegResult("Enter a positive total culvert length.");
-      return null;
-    }
-    if(!(maxWt > 0)){
-      setSegResult("Enter a positive maximum piece weight.");
-      return null;
-    }
-    const jointFt = Math.max(0, jointIn) / 12;
-
-    const layEl = $("lay_len");
-    const nEl = $("n_lays");
-    if(!layEl || !nEl){
-      setSegResult("Lay length / Number of lays inputs are missing.");
-      return null;
-    }
-
-    const prevLay = layEl.value;
-    const prevN = nEl.value;
-
-    const MAX_N = 200;
-    let found = null;
-
-    for(let n=1; n<=MAX_N; n++){
-      const Llay = (totalFt - (n-1)*jointFt) / n;
-      if(!(Llay > 0)) break;
-
-      // trial compute
-      try{
-        layEl.value = String(Math.round(Llay*1000)/1000);
-        nEl.value = String(n);
-
-        const d = compute();
-        const maxPiece = getMaxPieceWeightTotalLb(d);
-
-        if(maxPiece <= maxWt){
-          found = {
-            N:n,
-            Llay_ft:Llay,
-            maxPieceLb:maxPiece
-          };
-          break;
-        }
-      }catch(e){
-        console.error(e);
-        break;
-      }
-    }
-
-    // restore
-    layEl.value = prevLay;
-    nEl.value = prevN;
-
-    if(!found){
-      setSegResult(`No solution found up to ${MAX_N} lays. Try increasing maximum piece weight, reducing joint thickness, or decreasing total length.`);
-      return null;
-    }
-
-    const totalJointFt = (found.N-1) * jointFt;
-    const overallFt = found.N * found.Llay_ft + totalJointFt;
-
-    setSegResult(`
-      <div style="padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--card2)">
-        <div><strong>Result</strong></div>
-        <div style="margin-top:6px">Number of lays: <strong>${found.N}</strong></div>
-        <div>Lay length: <strong>${fmt(found.Llay_ft,3)} ft</strong></div>
-        <div>Max piece weight (using current schedule): <strong>${fmt(found.maxPieceLb,0)} lb</strong> <span class="muted">(${fmt(found.maxPieceLb/2000,2)} tons)</span></div>
-        <div class="muted" style="margin-top:6px">Overall length check: ${fmt(overallFt,3)} ft = pieces (${fmt(found.N*found.Llay_ft,3)} ft) + joints (${fmt(totalJointFt,3)} ft)</div>
-      </div>
-    `);
-
-    __seg_last = found;
-    if(segApplyBtn) segApplyBtn.disabled = false;
-    return found;
-  }
-
-  btnSegCalc?.addEventListener("click", showSegModal);
-  segClose?.addEventListener("click", hideSegModal);
-  segCancel?.addEventListener("click", hideSegModal);
-  segModal?.addEventListener("click", (e)=>{ if(e.target === segModal) hideSegModal(); });
-
-  document.addEventListener("keydown", (e)=>{
-    if(e.key === "Escape" && segModal?.classList?.contains("show")) hideSegModal();
-  });
-
-  segComputeBtn?.addEventListener("click", ()=>{
-    try{ computeSegments(); }catch(e){ setSegResult("Unable to compute segments (" + (e?.message || e) + ")."); }
-  });
-
-  segApplyBtn?.addEventListener("click", ()=>{
-    if(!__seg_last) return;
-    $("lay_len").value = String(Math.round(__seg_last.Llay_ft*1000)/1000);
-    $("n_lays").value = String(__seg_last.N);
-    hideSegModal();
-    update();
-  });
-
-
-
-// ========= Bar schedule UI wiring =========
+  // ========= Bar schedule UI wiring =========
   (function initScheduleUI(){
     const basisSel = $('sched_len_basis');
     if(basisSel){

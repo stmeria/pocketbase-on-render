@@ -77,16 +77,17 @@
   <div class="tabs" id="tabs" aria-label="Navigation tabs">
     <button type="button" class="tab" data-tab="dashboard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11Z"/></svg><span class="navLabel">Dashboard</span></button>
     <button type="button" class="tab active" data-tab="crm"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11a4 4 0 1 0-8 0a4 4 0 0 0 8 0Zm-4 6c-4.42 0-8 2.01-8 4.5V23h16v-1.5C20 19.01 16.42 17 12 17Z"/></svg><span class="navLabel">CRM</span></button>
+    <button type="button" class="tab" data-tab="jobs"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10a2 2 0 0 1 2 2v2h2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7h2V5a2 2 0 0 1 2-2Zm0 4h10V5H7v2Zm-2 2v12h14V9H5Zm3 2h8v2H8v-2Zm0 4h8v2H8v-2Z"/></svg><span class="navLabel">Jobs</span></button>
     <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
     <button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
     <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
-    <div class="pf-more">
+<div class="pf-more">
       <details>
         <summary>More</summary>
         <div class="pf-moreItems">
           <button type="button" class="tab" data-tab="schedule"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2Zm15 8H4v11h18V10Z"/></svg><span class="navLabel">Schedule</span></button>
-          <button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
+<button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
         </div>
       </details>
     </div>
@@ -272,6 +273,133 @@
     activities: "company,contact,opportunity",
   };
 
+  // ---- PocketBase field aliases + auto-mapping
+  // If your PocketBase field names differ (snake_case, TitleCase, etc.), this page will try to
+  // read them automatically. For writing, it learns keys from existing records and caches them in localStorage.
+  const PB_FIELD_ALIASES = {
+    contacts: {
+      firstName: ["firstName","first_name","FirstName"],
+      lastName: ["lastName","last_name","LastName"],
+      company: ["company","companyId","company_id","Company"],
+      title: ["title","Title"],
+      phone: ["phone","Phone","phoneNumber","phone_number"],
+      email: ["email","Email"],
+      preferredContact: ["preferredContact","preferred_contact","PreferredContact"],
+      status: ["status","Status"],
+      notes: ["notes","Notes"]
+    },
+    companies: {
+      name: ["name","Name","companyName","company_name"],
+      phone: ["phone","Phone"],
+      email: ["email","Email"],
+      address: ["address","Address","street","streetAddress","street_address"],
+      city: ["city","City"],
+      state: ["state","State"],
+      zip: ["zip","Zip","postal","postalCode","postal_code"],
+      website: ["website","Website","url","URL"],
+      notes: ["notes","Notes"],
+      tags: ["tags","Tags"]
+    },
+    opps: {
+      name: ["name","Name","opportunity","Opportunity"],
+      company: ["company","companyId","company_id","Company"],
+      primaryContact: ["primaryContact","primary_contact","contact","contactId","contact_id","PrimaryContact"],
+      stage: ["stage","Stage"],
+      estimatedValue: ["estimatedValue","estimated_value","value","Value"],
+      probability: ["probability","Probability"],
+      bidDate: ["bidDate","bid_date","BidDate"],
+      closeDate: ["closeDate","close_date","CloseDate"],
+      owner: ["owner","Owner"],
+      notes: ["notes","Notes"]
+    },
+    activities: {
+      date: ["date","Date","activityDate","activity_date"],
+      type: ["type","Type"],
+      company: ["company","companyId","company_id","Company"],
+      contact: ["contact","contactId","contact_id","Contact"],
+      opportunity: ["opportunity","opportunityId","opportunity_id","Opportunity"],
+      summary: ["summary","Summary","subject","Subject"],
+      notes: ["notes","Notes"],
+      completed: ["completed","Completed","isCompleted","is_completed"]
+    }
+  };
+
+  const PB_FIELD_MAP_LS = "pb_field_map_v1";
+  let pbFieldMap = (() => {
+    try{ return JSON.parse(localStorage.getItem(PB_FIELD_MAP_LS) || "{}"); }catch{ return {}; }
+  })();
+
+  function savePbFieldMap(){
+    try{ localStorage.setItem(PB_FIELD_MAP_LS, JSON.stringify(pbFieldMap)); }catch{}
+  }
+
+  function aliasesFor(kind, logical){
+    return (PB_FIELD_ALIASES?.[kind]?.[logical] || [logical]);
+  }
+
+  function rememberKeysFromRecord(kind, rec){
+    if(!rec) return;
+    pbFieldMap[kind] = pbFieldMap[kind] || {};
+    const schema = schemaFor(kind);
+    for(const f of schema){
+      const logical = f.key;
+      if(pbFieldMap[kind][logical]) continue;
+      const aliases = aliasesFor(kind, logical);
+      for(const a of aliases){
+        if(Object.prototype.hasOwnProperty.call(rec, a)){
+          pbFieldMap[kind][logical] = a;
+          break;
+        }
+      }
+    }
+    savePbFieldMap();
+  }
+
+  function getByAliases(rec, aliases){
+    for(const k of aliases){
+      const v = rec?.[k];
+      if(v !== undefined && v !== null && v !== "") return v;
+    }
+    return null;
+  }
+
+  function normalizePBRecord(kind, rec){
+    // Learn keys
+    rememberKeysFromRecord(kind, rec);
+
+    const out = { ...rec, _id: rec?.id || rec?._id || null };
+    const schema = schemaFor(kind);
+    for(const f of schema){
+      const logical = f.key;
+      const aliases = aliasesFor(kind, logical);
+      out[logical] = getByAliases(rec, aliases);
+      // PB relations may arrive as array; normalize to single id
+      if(f.type === "relation" && Array.isArray(out[logical])) out[logical] = out[logical][0] || null;
+      if(f.type === "checkbox") out[logical] = !!out[logical];
+    }
+    return out;
+  }
+
+  function toPBPayload(kind, data){
+    const payload = {};
+    pbFieldMap[kind] = pbFieldMap[kind] || {};
+    const schema = schemaFor(kind);
+    for(const f of schema){
+      const logical = f.key;
+      if(!(logical in data)) continue;
+      const v = data[logical];
+      // Keep nulls (for clearing) but skip undefined
+      if(v === undefined) continue;
+
+      const learned = pbFieldMap?.[kind]?.[logical];
+      const aliases = aliasesFor(kind, logical);
+      const key = learned || aliases[0] || logical;
+      payload[key] = v;
+    }
+    return payload;
+  }
+
+
   // ---- helpers
   const $ = (id) => document.getElementById(id);
   const escapeHtml = (s) => (s ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -333,7 +461,7 @@
           const params = { sort: "-created" };
           if(EXPANDS[entityKey]) params.expand = EXPANDS[entityKey];
           const res = await pb.collection(ent.col).getList(1, 200, params);
-          return res.items.map(r => ({ ...r, _id: r.id }));
+          return res.items.map(r => normalizePBRecord(entityKey, r));
         }
         return localLoad(ent.storageKey);
       },
@@ -341,7 +469,7 @@
         const mode = await this.mode();
         if(mode === "denied") throw new Error("Access denied by PocketBase rules for " + ent.col);
         if(mode === "pb"){
-          return await pb.collection(ent.col).create(data);
+          return await pb.collection(ent.col).create(toPBPayload(entityKey, data));
         }
         const arr = localLoad(ent.storageKey);
         const rec = { _id: uid(), ...data, created: new Date().toISOString() };
@@ -353,7 +481,7 @@
         const mode = await this.mode();
         if(mode === "denied") throw new Error("Access denied by PocketBase rules for " + ent.col);
         if(mode === "pb"){
-          return await pb.collection(ent.col).update(id, data);
+          return await pb.collection(ent.col).update(id, toPBPayload(entityKey, data));
         }
         const arr = localLoad(ent.storageKey);
         const i = arr.findIndex(x => x._id === id);
@@ -884,6 +1012,7 @@
   // Sidebar nav + user footer (UI only)
   const map = (tab) => {
     if(tab === "crm") return "crm.html";
+    if(tab === "jobs") return "index.html?view=jobs";
     if(tab === "schedule") return "schedule.html";
     if(tab === "estimator") return "estimates.html";
     if(tab === "dashboard") return "index.html?view=dashboard";

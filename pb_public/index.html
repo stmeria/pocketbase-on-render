@@ -6,7 +6,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Fisher Precast Management System</title>
 <!-- PocketBase JS SDK (place at pb_public/vendor/pocketbase.umd.js) -->
-<script src="/vendor/pocketbase.umd.js"></script>
+<script src="vendor/pocketbase.umd.js"></script>
 
 <link rel="stylesheet" href="precastflow-ui.css">
 <style>
@@ -63,11 +63,59 @@
     .pf-calDow{ display:none; }
     .pf-calCell{ min-height:110px; }
   }
+
+  /* Jobs tab layout fixes (prevent horizontal scroll + overlapping KPI text) */
+  #tab_jobs .pf-grid2{
+    display:grid;
+    grid-template-columns: minmax(0,1fr) 420px;
+    gap:12px;
+    align-items:start;
+  }
+  #tab_jobs .pf-grid2 > div{ min-width:0; }
+  @media (max-width: 1200px){
+    #tab_jobs .pf-grid2{ grid-template-columns: 1fr; }
+  }
+  #tab_jobs .table-wrap{ max-width:100%; overflow:auto; }
+  #tab_jobs table{ width:100%; min-width: 880px; }
+  #jobDtlKpis{
+    display:grid !important;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  @media (max-width: 640px){
+    #jobDtlKpis{ grid-template-columns: 1fr; }
+  }
+  #jobDtlKpis .pf-kpiCard{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:14px;
+    min-width:0;
+  }
+  #jobDtlKpis .pf-kpiMeta{ min-width:0; }
+  #jobDtlKpis .pf-kpiK{ font-size:12px; font-weight:800; color:var(--muted); line-height:1.2; }
+  #jobDtlKpis .pf-kpiV{ font-size:22px; font-weight:950; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #jobDtlKpis .pf-kpiS{ font-size:12px; color:var(--muted); font-weight:750; }
+  #jobDtlKpis .pf-kpiIcon{ font-size:20px; opacity:.25; flex:0 0 auto; }
+
+
+  /* Clickable Quote chip */
+  .pf-chipLink{
+    cursor:pointer;
+    border:1px solid var(--stroke);
+    background: rgba(59,130,246,.08);
+  }
+  .pf-chipLink:hover{ box-shadow: 0 8px 20px rgba(0,0,0,.08); transform: translateY(-1px); transition: 120ms ease; }
+  .pf-chipLink:active{ transform: translateY(0px); }
+
 </style>
 </head>
 <body>
 <!-- LOGIN VIEW -->
-<div class="login-shell" id="viewLogin" style="display:none">
+<div class="login-shell" id="viewLogin" style="display:flex">
 <div class="login-card">
 <h2>Sign in</h2>
 <div class="sub">Use your PocketBase auth account (collection <span class="mono">users</span>).</div>
@@ -173,6 +221,13 @@
   <div class="tabs" id="tabs" aria-label="Navigation tabs">
     <button type="button" class="tab" data-tab="dashboard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11Z"/></svg><span class="navLabel">Dashboard</span></button>
     <button type="button" class="tab" data-tab="crm"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11a4 4 0 1 0-8 0a4 4 0 0 0 8 0Zm-4 6c-4.42 0-8 2.01-8 4.5V23h16v-1.5C20 19.01 16.42 17 12 17Z"/></svg><span class="navLabel">CRM</span></button>
+    <button type="button" class="tab" data-tab="jobs">
+      <svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M10 4h4a2 2 0 0 1 2 2v1h3a2 2 0 0 1 2 2v3H1V9a2 2 0 0 1 2-2h3V6a2 2 0 0 1 2-2Zm4 2h-4v1h4V6Zm9 8v7a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-7h22Zm-13 2H5v2h5v-2Z"/>
+      </svg>
+      <span class="navLabel">Jobs</span>
+    </button>
+
     <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
     <button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
@@ -304,35 +359,15 @@
         <input id="prodSearch" type="search" placeholder="Search… (piece mark, project, quote #, pour #)"/>
       </div>
 
+      <div class="pf-search" style="max-width:190px">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h7v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>
+        <input id="prodQuote" type="text" placeholder="Quote #" inputmode="numeric"/>
+      </div>
+
       <select id="prodScope" title="Scope">
         <option value="active" selected>Active pipeline</option>
         <option value="all">All finished pieces</option>
       </select>
-    </div>
-
-    <!-- Production filters (toggle) -->
-    <div class="pf-filters" id="prodFilters" style="display:none">
-      <div class="pf-filterGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end">
-        <div>
-          <label>Quote #</label>
-          <input id="prodQuote" type="text" placeholder="Quote #" inputmode="numeric"/>
-        </div>
-        <div>
-          <label>Status</label>
-          <select id="prodStatus">
-            <option value="">All Status</option>
-            <option>In Production</option>
-            <option>On Hand</option>
-            <option>Allocated</option>
-            <option>Reserved</option>
-            <option>Shipped</option>
-            <option>Scrapped</option>
-          </select>
-        </div>
-        <div class="pf-filterActions" style="display:flex; gap:8px; justify-content:flex-end">
-          <button class="btn ghost" id="btnProdClear" type="button">Clear</button>
-        </div>
-      </div>
     </div>
 
     <div class="board" id="prodBoard"></div>
@@ -405,7 +440,7 @@
 
     <!-- keep legacy table (hidden) for compatibility if needed -->
     <div class="table-wrap" style="display:none">
-      <table style="min-width:980px">
+      <table>
         <thead>
           <tr>
             <th class="nowrap">Last Move</th>
@@ -430,27 +465,97 @@
   </div>
 </section>
 
-<section class="tabPanel" id="tab_projects">
-  <div class="panel">
-    <div class="panel-title">
+<section class="tabPanel" id="tab_jobs">
+  <div class="panel pf-page">
+    <div class="pf-sectionHead">
       <div>
-        <h2>Projects</h2>
-        <div class="muted">Rollups by project (counts, value, production progress)</div>
+        <div class="pf-h2">Jobs</div>
+        <div class="pf-sub">Progress by quote/job number</div>
       </div>
-      <div class="row" style="gap:8px">
-        <span class="badge">Pieces only</span>
+      <div class="pf-headRight">
+        <button class="btn ghost" id="btnJobsRefresh" type="button">Refresh</button>
       </div>
     </div>
 
-    <div class="controls">
-      <input id="projSearch" class="wide" placeholder="Search projects…"/>
-      <div class="spacer"></div>
-      <span class="muted" id="projSummary"></span>
+    <div class="pf-toolbar">
+      <div class="pf-inputIcon" style="min-width:320px">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 4a6 6 0 1 1 3.72 10.72l4.28 4.28-1.41 1.41-4.28-4.28A6 6 0 0 1 10 4Zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
+        <input id="jobsQ" type="search" placeholder="Search jobs… (Quote #, project, customer)"/>
+      </div>
+
+      <select id="jobsStatus" style="min-width:200px">
+        <option value="">All statuses</option>
+        <option value="quoted">Quoted</option>
+        <option value="negotiation">Negotiation</option>
+        <option value="won">Won</option>
+        <option value="production">Production</option>
+        <option value="shipped">Shipped</option>
+        <option value="lost">Lost</option>
+      </select>
+
+      <span class="spacer"></span>
+      <span class="badge" id="jobsCountLabel">0 jobs</span>
     </div>
 
-    <div class="projGrid" id="projGrid"></div>
+    <div class="pf-grid2" style="margin-top:12px">
+      <div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="mono">Quote #</th>
+                <th>Project</th>
+                <th>Status</th>
+                <th class="nowrap">Target Delivery</th>
+                <th class="right nowrap">Pieces</th>
+                <th class="right nowrap">Casted</th>
+                <th class="right nowrap">On Hand</th>
+                <th class="right nowrap">Allocated</th>
+                <th class="right nowrap">Shipped</th>
+                <th class="right nowrap">Weight</th>
+                <th class="right nowrap">Open Issues</th>
+              </tr>
+            </thead>
+            <tbody id="jobsTbody"></tbody>
+          </table>
+        </div>
+        <div class="footerbar">
+          <span class="muted">• Tip: click a row to view details</span>
+        </div>
+      </div>
+
+      <div class="pf-card" id="jobDetailCard">
+        <div class="pf-cardTop">
+          <div>
+            <div class="pf-cardTitle" id="jobDtlTitle">Select a job</div>
+            <div class="pf-cardSub" id="jobDtlSub">Click any job on the left to see a snapshot.</div>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn" id="btnJobOpenDashboard" type="button" disabled>Open Dashboard</button>
+          </div>
+        </div>
+
+        <div class="pf-kpiRow pf-kpiRowSm" id="jobDtlKpis"></div>
+
+        <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="font-weight:700;">Open issues</div>
+          <span class="badge" id="jobDtlIssuesCount">0</span>
+        </div>
+        <div id="jobDtlIssues" style="margin-top:8px; display:flex; flex-direction:column; gap:8px;"></div>
+
+        <div style="margin-top:12px;">
+          <label class="pf-muted" style="display:block; margin-bottom:6px;">Target delivery date</label>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input id="jobDtlTargetDate" type="date" style="min-width:200px"/>
+            <button class="btn primary" id="btnJobSaveTarget" type="button" disabled>Save</button>
+          </div>
+          <div class="pf-muted" style="margin-top:6px; font-size:12px;">Saved to the job record.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
+
 <section class="tabPanel" id="tab_inventory">
   <div class="panel pf-page">
     <div class="pf-sectionHead">
@@ -589,10 +694,13 @@
       </table>
     </div>
 
-    <div class="footerbar">
+    <div class="footerbar" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <span id="countLabel">0 items</span>
+      <span class="muted" id="itemsLoadInfo"></span>
       <span class="muted">• Tip: click headers to sort</span>
       <span class="muted">• Data stored in PocketBase (Export for backups)</span>
+      <span style="flex:1 1 auto"></span>
+      <button class="btn ghost" id="btnInvLoadMore" type="button" style="display:none">Load more</button>
     </div>
   </div>
 </section>
@@ -714,87 +822,6 @@
 <div class="footerbar">
 <span id="txCountLabel">0 transactions</span>
 <span class="muted">• Tip: use the date range to keep results fast</span>
-</div>
-</div>
-</section>
-<section class="tabPanel" id="tab_reports">
-<div class="panel">
-<div class="panel-title">
-<div>
-<h2>Reports</h2>
-<div class="muted">Print-ready snapshots for inventory and movements</div>
-</div>
-<div class="row" style="gap:8px">
-<button class="primary" id="btnRepPrint">Print PDF</button>
-</div>
-</div>
-<div class="controls">
-<select id="repType">
-<option selected="" value="inventory">Inventory Snapshot</option>
-<option value="transactions">Transactions</option>
-</select>
-<select id="repProject" style="min-width:240px; display:none" title="Project">
-<option value="">All Projects</option>
-</select>
-<div class="spacer"></div>
-<span class="muted">Tip: Reports use your current filters/sort on each tab.</span>
-</div>
-<div class="repBlock" id="repInventory">
-<div class="muted" style="margin:8px 0 12px">
-          Prints the current inventory table with KPIs and active filters.
-        </div>
-<div class="cards mini">
-<div class="card card-green">
-<div class="k">Total Items (SKUs)</div>
-<div class="v" id="repKpiSkus">0</div>
-<div class="s">Filtered</div>
-</div>
-<div class="card card-green">
-<div class="k">Total Quantity</div>
-<div class="v" id="repKpiQty">0</div>
-<div class="s">Filtered</div>
-</div>
-<div class="card card-green">
-<div class="k">Total Inventory Value</div>
-<div class="v" id="repKpiValue">$0.00</div>
-<div class="s">Qty × Unit Cost</div>
-</div>
-<div class="card card-red">
-<div class="k">Low Stock</div>
-<div class="v" id="repKpiLow">0</div>
-<div class="s">Qty ≤ Reorder Point</div>
-</div>
-</div>
-</div>
-<div class="repBlock" id="repTransactions" style="display:none">
-<div class="muted" style="margin:8px 0 12px">
-          Prints movements for the selected date range and filters.
-        </div>
-<div class="cards mini">
-<div class="card">
-<div class="k">Transactions</div>
-<div class="v" id="repTxCount">0</div>
-<div class="s">Filtered</div>
-</div>
-<div class="card">
-<div class="k">Total IN</div>
-<div class="v" id="repTxIn">0</div>
-<div class="s">Qty added</div>
-</div>
-<div class="card">
-<div class="k">Total OUT</div>
-<div class="v" id="repTxOut">0</div>
-<div class="s">Qty removed</div>
-</div>
-<div class="card">
-<div class="k">Net Change</div>
-<div class="v" id="repTxNet">0</div>
-<div class="s">IN − OUT ± ADJ</div>
-</div>
-</div>
-<div class="footerbar" style="margin-top:10px">
-<span class="muted">Use the Transactions tab to adjust filters (date/type/location/search) before printing.</span>
-</div>
 </div>
 </div>
 </section>
@@ -1168,6 +1195,7 @@
   const ITEMS = "items";
   const TX = "transactions";
   const OPP = "crm_opportunities";
+  const JOBS = "jobs";
 
   const $ = (id) => document.getElementById(id);
 
@@ -1191,6 +1219,7 @@ const PB_URL = window.location.origin; // served by PocketBase -> same origin
     return sym + x.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
   };
   const fmtNum = (n) => (Number(n || 0)).toLocaleString(undefined, {maximumFractionDigits:2});
+  const fmtInt = (n) => (Number(n || 0)).toLocaleString(undefined, {maximumFractionDigits:0});
   function parseNum(val){
     if(val === null || val === undefined) return 0;
     const s = String(val).trim();
@@ -1293,12 +1322,77 @@ const PB_URL = window.location.origin; // served by PocketBase -> same origin
   // State
   // --------------------------
   let allItems = [];      // items from PB
+  // Items pagination (prevents getFullList() freezing on large datasets)
+  let itemsPage = 1;
+  const itemsPerPage = 200;         // tune as needed
+  let itemsTotal = 0;
+  let itemsHasMore = false;
+  let itemsLoadingMore = false;
   let allOpps = [];      // crm_opportunities (quotes)
+  
+  let oppByQuote = {}; // map quoteNumber -> opportunity (lite)
+  let oppsLoaded = false;
+  let oppsLoadInFlight = false;
+let allJobs = [];      // jobs from PB
+  let jobsLoaded = false;
+  let jobsLoadInFlight = false;
+  let selectedJobId = null;
+  let selectedJobQuote = null;
+  let selectedJobProject = null;
   let openQuotesCount = null; // cached count
   let _openQuotesLastFetch = 0;
   let _openQuotesInFlight = false;
   let sortKey = "updated";
   let sortDir = "desc";   // asc/desc
+
+  // --------------------------
+  // Local cache helpers (prevents full refresh/freeze)
+  // --------------------------
+  function upsertLocalItem(rec){
+    if(!rec || !rec.id) return;
+    const idx = (allItems||[]).findIndex(x => x && x.id === rec.id);
+    if(idx >= 0){
+      allItems[idx] = { ...allItems[idx], ...rec };
+    } else {
+      allItems = [rec, ...(allItems||[])];
+    }
+  }
+  function removeLocalItem(id){
+    if(!id) return;
+    allItems = (allItems||[]).filter(x => x && x.id !== id);
+  }
+
+  let _rerenderTimer = null;
+  function scheduleRerender(){
+    clearTimeout(_rerenderTimer);
+    _rerenderTimer = setTimeout(()=>{
+      try{
+        // Re-render only what the user can see (plus jobs if loaded)
+        if(currentTab === "production") renderProductionView();
+        else if(currentTab === "inventory") renderTable();
+        else if(currentTab === "shipping") renderShippingView();
+        else if(currentTab === "dashboard") renderDashboard();
+        else if(currentTab === "projects") renderProjectsView();
+        else if(currentTab === "transactions") renderTransactions();
+        else if(currentTab === "reports") renderReports();
+        else if(currentTab === "jobs") renderJobsTable();
+
+        if(jobsLoaded){
+          // Update job detail KPIs without resetting selection
+          if(selectedJobId){
+            const j = (allJobs||[]).find(x => x.id === selectedJobId);
+            if(j) renderJobDetail(normalizeJob(j));
+          }
+        }
+      } catch(e){ console.warn(e); }
+    }, 120);
+  }
+
+  function openJobDashboardByQuote(q){
+    const qn = (q || "").toString().trim();
+    if(!qn) return;
+    window.location.href = `job.html?quote=${encodeURIComponent(qn)}`;
+  }
 
   // --------------------------
   // Auth + view switching
@@ -1325,7 +1419,14 @@ const PB_URL = window.location.origin; // served by PocketBase -> same origin
     return role || "user";
   }
   function isAdmin(){
-    return getUserRole().toLowerCase() === "admin";
+    try{
+      // PocketBase superusers/admins (admin auth) OR app-level role field
+      const rec = pb.authStore?.record || pb.authStore?.model || {};
+      const col = (rec.collectionName || pb.authStore?.model?.collectionName || "").toString();
+      if(col === "_superusers" || col === "admins") return true;
+      const role = (rec.role ?? rec.Role ?? rec.ROLE ?? "").toString().trim().toLowerCase();
+      return role === "admin";
+    } catch { return false; }
   }
   function requireAdmin(message="Admin only."){
     if(isAdmin()) return true;
@@ -1387,37 +1488,118 @@ const PB_URL = window.location.origin; // served by PocketBase -> same origin
     await fetchItems();
     // fetch open quotes/opportunities (non-fatal)
     await fetchOpps();
+    // fetch jobs (non-fatal) to power dashboard 'Due' dates and the Jobs tab
+    try{ if(await canUsePBCollection(JOBS)) await fetchJobs(true); } catch {}
+
     // populate drop-downs that depend on items
     populateProjectFilters();
     populateReportProjects();
-    // (re)render current tab content
-    renderTable();
+    // (re)render only what the user can see
+    scheduleRerender();
     applyRoleUI();
-  }
+}
 
   // --------------------------
   // PocketBase data access
   // --------------------------
-  async function fetchItems(){
+
+  // Paged fetch helper (safe alternative to getFullList on large collections)
+  async function fetchAllPaged(collectionName, opts={}, cap=20000){
+    const out = [];
+    let page = 1;
+    const perPage = opts?.perPage || 200;
+    const { perPage: _pp, ...listOpts } = (opts || {});
+    while(true){
+      const res = await pb.collection(collectionName).getList(page, perPage, listOpts);
+      out.push(...(res?.items || []));
+      if(!res || page >= (res.totalPages || 1)) break;
+      if(cap && out.length >= cap) break;
+      page++;
+      // yield to UI thread
+      await new Promise(r=>setTimeout(r, 0));
+    }
+    return out;
+  }
+
+  async function fetchItems(reset=true){
     try{
-      // For bigger datasets, switch to getList with pagination.
-      allItems = await pb.collection(ITEMS).getFullList(500, { sort: "-updated" });
+      if(reset){
+        itemsPage = 1;
+        itemsTotal = 0;
+        itemsHasMore = false;
+      }
+      // Use paged list to avoid getFullList() pulling the entire collection (can freeze on large datasets)
+      const res = await pb.collection(ITEMS).getList(1, itemsPerPage, { sort: "-updated" });
+      allItems = res?.items || [];
+      itemsTotal = Number(res?.totalItems || allItems.length || 0);
+      itemsHasMore = allItems.length < itemsTotal;
+      updateItemsLoadInfo();
     } catch (e){
       console.error(e);
       toast("Failed to load items. Check collection rules and name.");
       allItems = [];
+      itemsTotal = 0;
+      itemsHasMore = false;
+      updateItemsLoadInfo();
+    }
+  }
+
+  async function loadMoreItems(){
+    if(itemsLoadingMore || !itemsHasMore) return;
+    itemsLoadingMore = true;
+    updateItemsLoadInfo();
+    try{
+      const nextPage = itemsPage + 1;
+      const res = await pb.collection(ITEMS).getList(nextPage, itemsPerPage, { sort: "-updated" });
+      const add = res?.items || [];
+      const seen = new Set((allItems||[]).map(x=>x?.id).filter(Boolean));
+      for(const it of add){
+        if(it?.id && !seen.has(it.id)){
+          allItems.push(it);
+          seen.add(it.id);
+        }
+      }
+      itemsPage = nextPage;
+      itemsTotal = Number(res?.totalItems || itemsTotal || allItems.length || 0);
+      itemsHasMore = allItems.length < itemsTotal;
+      updateItemsLoadInfo();
+      scheduleRerender();
+    } catch(e){
+      console.error(e);
+      toast("Failed to load more items.");
+    } finally {
+      itemsLoadingMore = false;
+      updateItemsLoadInfo();
     }
   }
 
 
 
-async function fetchOpps(){
+async function fetchOpps(force=false){
+  if(oppsLoadInFlight) return;
+  if(oppsLoaded && !force) return;
+  oppsLoadInFlight = true;
+
   // Loads CRM opportunities/quotes. Silent if collection doesn't exist or rules block access.
   try{
-    allOpps = await pb.collection(OPP).getFullList(200, { sort: "-updated" });
+    const _opRes = await pb.collection(OPP).getList(1, 500, {
+      sort: "-updated",
+      // Avoid pulling huge notes blobs in list views
+      fields: "id,quoteNumber,QuoteNumber,relatedProject,RelatedProject,projectName,ProjectName,customerName,CustomerName,stage,Stage,status,Status,updated,created"
+    });
+    allOpps = _opRes.items || [];
+    // Build quick lookup map by quote number
+    oppByQuote = {};
+    for(const o of allOpps){
+      const qn = ((o.quoteNumber ?? o.QuoteNumber ?? o.quote ?? o.quoteNo ?? "") + "").trim();
+      if(qn) oppByQuote[qn] = o;
+    }
+    oppsLoaded = true;
   } catch (e){
     // Avoid noisy toasts; dashboard will show placeholder if CRM isn't enabled.
     allOpps = [];
+    oppByQuote = {};
+    oppsLoaded = false;
   }
   // Update cached open quotes count
   try{
@@ -1428,6 +1610,7 @@ async function fetchOpps(){
   } catch {
     openQuotesCount = null;
   }
+  oppsLoadInFlight = false;
 }
 
 async function refreshOpenQuotesKPI(force=false){
@@ -1482,10 +1665,19 @@ async function refreshOpenQuotesKPI(force=false){
     return pb.collection(TX).create(data);
   }
   async function purgeAllTx(){
-    // WARNING: deletes ALL tx records
-    const tx = await pb.collection(TX).getFullList(500, { sort: "-created" });
-    for(const t of tx){
-      await pb.collection(TX).delete(t.id);
+    // WARNING: deletes ALL tx records (paged to avoid browser freezes)
+    let page = 1;
+    const perPage = 200;
+    while(true){
+      const res = await pb.collection(TX).getList(page, perPage, { sort: "-created" });
+      const items = res?.items || [];
+      for(const t of items){
+        try{ await pb.collection(TX).delete(t.id); } catch {}
+      }
+      if(!res || page >= (res.totalPages || 1)) break;
+      page++;
+      // yield to UI thread
+      await new Promise(r=>setTimeout(r, 0));
     }
   }
 
@@ -1587,19 +1779,49 @@ function isArchivedItem(item){
     if(locations.includes(current)) sel.value = current;
   }
 
-  function renderKPIs(){
-  const items = allItems.filter(i=>!isArchivedItem(i));
-  const count = items.length;
-  const value = items.reduce((s,i)=> s + itemTotalValue(i), 0);
-  const low = items.filter(isLow).length;
-  const cats = new Set(items.map(i => getType(i)).filter(Boolean)).size;
+  function updateItemsLoadInfo(){
+    const info = $("itemsLoadInfo");
+    const btn = $("btnInvLoadMore");
+    if(!info || !btn) return;
 
-  if($("kpiSkus")) $("kpiSkus").textContent = count.toLocaleString();
-  if($("kpiSkusSub")) $("kpiSkusSub").textContent = count ? "Records tracked in PocketBase" : "Add your first item to begin";
-  if($("kpiValue")) $("kpiValue").textContent = fmtMoney(value, SETTINGS.currencySymbol);
-  if($("kpiLow")) $("kpiLow").textContent = low.toLocaleString();
-  if($("kpiCats")) $("kpiCats").textContent = cats.toLocaleString();
-}
+    const loaded = (allItems || []).length;
+    const total = Number(itemsTotal || 0);
+
+    if(total && total > loaded){
+      info.textContent = `Loaded ${loaded.toLocaleString()} of ${total.toLocaleString()} items`;
+      btn.style.display = "";
+      btn.disabled = !!itemsLoadingMore;
+    } else if(total && total > 0){
+      info.textContent = `Loaded ${total.toLocaleString()} items`;
+      btn.style.display = "none";
+    } else {
+      info.textContent = "";
+      btn.style.display = "none";
+    }
+  }
+
+  function renderKPIs(){
+    const items = allItems.filter(i=>!isArchivedItem(i));
+    const loaded = items.length;
+    const total = Number(itemsTotal || loaded || 0);
+    const partial = total && total > loaded;
+
+    const value = items.reduce((s,i)=> s + itemTotalValue(i), 0);
+    const low = items.filter(isLow).length;
+    const cats = new Set(items.map(i => getType(i)).filter(Boolean)).size;
+
+    if($("kpiSkus")) $("kpiSkus").textContent = (total || loaded).toLocaleString();
+    if($("kpiSkusSub")){
+      $("kpiSkusSub").textContent = partial
+        ? `Loaded ${loaded.toLocaleString()} of ${total.toLocaleString()} (click Load more)`
+        : (loaded ? "Records tracked in PocketBase" : "Add your first item to begin");
+    }
+    if($("kpiValue")) $("kpiValue").textContent = fmtMoney(value, SETTINGS.currencySymbol);
+    if($("kpiLow")) $("kpiLow").textContent = low.toLocaleString();
+    if($("kpiCats")) $("kpiCats").textContent = cats.toLocaleString();
+
+    updateItemsLoadInfo();
+  }
 
   function renderTable(){
     renderLocations();
@@ -1652,7 +1874,10 @@ function isArchivedItem(item){
       </td></tr>
     `;
 
-    $("countLabel").textContent = `${filtered.length.toLocaleString()} item${filtered.length===1?"":"s"} shown`;
+    const loadedN = (allItems||[]).length;
+    const totalN = Number(itemsTotal || loadedN || 0);
+    const loadNote = (totalN && totalN > loadedN) ? ` • Loaded ${loadedN.toLocaleString()} of ${totalN.toLocaleString()}` : "";
+    $("countLabel").textContent = `${filtered.length.toLocaleString()} item${filtered.length===1?"":"s"} shown${loadNote}`;
   }
 
   // --------------------------
@@ -1783,16 +2008,57 @@ refreshOpenQuotesKPI(false);
     if(shipped === total) stage = "Completed";
     else if(inProd === 0) stage = "Ready";
 
-    // due date heuristic: earliest castDate >= today among not shipped; else earliest castDate
-    const castMs = items
-      .filter(i => getStatus(i) !== "Shipped")
-      .map(i => dateOnlyToMs(getCastDate(i)))
-      .filter(ms => ms !== null);
+    // Due date: prefer Jobs target delivery date when available; else fallback to cast-date heuristic.
+    let dueMs = null;
 
-    let dueMs = null
-    if(castMs.length){
-      const future = castMs.filter(ms => ms >= (new Date(new Date().toDateString()).getTime()));
-      dueMs = (future.length ? Math.min(...future) : Math.min(...castMs));
+    // 1) Jobs target (from Jobs tab / jobs collection)
+    try{
+      if(Array.isArray(allJobs) && allJobs.length){
+        const projKey = normalize(project);
+
+        // Match by project name
+        let job = allJobs.find(j=>{
+          const pn = (pick(j, ["projectName","ProjectName","project","Project"], "") || "").toString().trim();
+          return pn && normalize(pn) === projKey;
+        });
+
+        // If no match, infer quote number(s) from item bins
+        if(!job){
+          const quotes = new Set();
+          for(const it of items){
+            const b = (it.bin || it.Bin || "").toString();
+            const matches = b.match(/\b\d{2,4}-\d{2,6}\b/g);
+            if(matches) matches.forEach(x=>quotes.add(x));
+            const q2 = (it.quoteNumber || it.QuoteNumber || "").toString().trim();
+            if(q2) quotes.add(q2);
+          }
+          if(quotes.size){
+            job = allJobs.find(j=>{
+              const qn = String(pick(j, ["quoteNumber","QuoteNumber","quoteNo","quote","estimateNumber","EstimateNumber"], "")||"").trim();
+              return qn && quotes.has(qn);
+            });
+          }
+        }
+
+        if(job){
+          const t = toISODateMaybe(pick(job, ["targetDeliveryDate","TargetDeliveryDate","target_date","targetDate"], ""));
+          const ms = dateOnlyToMs(t);
+          if(ms !== null) dueMs = ms;
+        }
+      }
+    } catch {}
+
+    // 2) Fallback: earliest castDate >= today among not shipped; else earliest castDate
+    if(dueMs === null){
+      const castMs = items
+        .filter(i => getStatus(i) !== "Shipped")
+        .map(i => dateOnlyToMs(getCastDate(i)))
+        .filter(ms => ms !== null);
+
+      if(castMs.length){
+        const future = castMs.filter(ms => ms >= (new Date(new Date().toDateString()).getTime()));
+        dueMs = (future.length ? Math.min(...future) : Math.min(...castMs));
+      }
     }
 
     const qtySum = items.reduce((s,i)=> s + Number(i.qty||0), 0);
@@ -1907,16 +2173,7 @@ refreshOpenQuotesKPI(false);
     const project = ($("prodProject")?.value || "").trim();
     const q = normalize(($("prodSearch")?.value || "").trim());
     const quoteQ = normalize(($("prodQuote")?.value || "").trim());
-    const statusFilter = ($("prodStatus")?.value || "").trim();
     const scope = ($("prodScope")?.value || "active");
-
-    // Indicate active filters on the Filter button
-    const fbtn = $("btnProdFilter");
-    if(fbtn){
-      const active = !!quoteQ || !!statusFilter;
-      fbtn.classList.toggle("primary", active);
-      fbtn.classList.toggle("ghost", !active);
-    }
 
 // KPIs (best-effort from current data)
 const allPieces = allItems.filter(isFinishedPiece);
@@ -1959,26 +2216,15 @@ if(kpi){
 
     if(quoteQ){
       items = items.filter(it => {
-        const candidates = [
-          it.quoteNumber, it.quoteNo, it.quote, it.quoteNum,
-          it.bin, it.sku
-        ].filter(v => v !== undefined && v !== null)
-         .map(v => normalize(String(v)));
-        return candidates.some(v => v.includes(quoteQ));
+        const bin = normalize((it.bin || "").toString());
+        const sku = normalize((it.sku || "").toString());
+        return bin.includes(quoteQ) || sku.includes(quoteQ);
       });
-    }
-
-    if(statusFilter){
-      items = items.filter(it => getStatus(it) === statusFilter);
     }
 
     if(q){
       items = items.filter(it => {
-        const hay = normalize([
-          it.project, it.pieceMark, it.sku, it.name, it.location,
-          it.bin, it.quoteNumber, it.quoteNo, it.quote,
-          getPourNumber(it), getCastDate(it)
-        ].filter(Boolean).join(" "));
+        const hay = normalize([it.project, it.pieceMark, it.sku, it.name, it.location, it.bin, getPourNumber(it), getCastDate(it)].filter(Boolean).join(" "));
         return hay.includes(q);
       });
     }
@@ -2038,7 +2284,7 @@ const cols = [
             ${pour ? `<span>Pour: <span class="mono">${escapeHtml(pour)}</span></span>` : ``}
             <span>Qty: <span class="mono">${fmtNum(it.qty || 0)}</span></span>
             ${locOnly ? `<span>Loc: <span class="mono">${escapeHtml(locOnly)}</span></span>` : ``}
-            ${quoteNo ? `<span class="pf-chip">Quote # <span class="mono">${escapeHtml(quoteNo)}</span></span>` : ``}
+            ${quoteNo ? `<button class="pf-chip pf-chipLink" type="button" data-act="openJob" data-quote="${escapeAttr(quoteNo)}" title="Open Job Dashboard">Quote # <span class="mono">${escapeHtml(quoteNo)}</span></button>` : ``}
           </div>
           <div class="actions">
             <button class="tiny" data-act="tx" data-id="${it.id}">${admin ? "Moves" : "View Moves"}</button>
@@ -2128,11 +2374,18 @@ const cols = [
       });
 
       // Production actions should work in calendar detail list too
+      
       detailList?.addEventListener("click", (e)=>{
         const btn = e.target.closest("button[data-act]");
         if(!btn) return;
+
+        const act = btn.getAttribute("data-act") || "";
+        if(act === "openJob"){
+          const q = btn.getAttribute("data-quote") || "";
+          return openJobDashboardByQuote(q);
+        }
+
         const id = btn.getAttribute("data-id");
-        const act = btn.getAttribute("data-act");
         if(!id) return;
         const item = allItems.find(i => i.id === id);
         if(!item) return;
@@ -2146,6 +2399,7 @@ const cols = [
           return quickSetStatus(id, to);
         }
       });
+
     }
 
     const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -2258,7 +2512,7 @@ const cols = [
             ${cast ? `<span>Cast: <span class="mono">${escapeHtml(cast)}</span></span>` : ``}
             ${pour ? `<span>Pour: <span class="mono">${escapeHtml(pour)}</span></span>` : ``}
             <span>Qty: <span class="mono">${fmtNum(it.qty || 0)}</span></span>
-            ${quoteNo ? `<span class="pf-chip">Quote # <span class="mono">${escapeHtml(quoteNo)}</span></span>` : ``}
+            ${quoteNo ? `<button class="pf-chip pf-chipLink" type="button" data-act="openJob" data-quote="${escapeAttr(quoteNo)}" title="Open Job Dashboard">Quote # <span class="mono">${escapeHtml(quoteNo)}</span></button>` : ``}
           </div>
           <div class="actions">
             <button class="tiny" data-act="tx" data-id="${it.id}">${admin ? "Moves" : "View Moves"}</button>
@@ -2361,7 +2615,12 @@ function renderShippingView(){
   const deliveredMTD = shipments.filter(s => (s.day || "").slice(0,7) === monthKey).length;
   const inTransit = Math.max(0, shipments.length - deliveredMTD); // placeholder
   const onTimeRate = shipments.length ? 96 : 0;
-  const totalWeight = "—";
+  const totalWeightLb = rows.reduce((s, r) => {
+    const qty = Number(r.it?.qty || 0) || 0;
+    const uw = parseNum(r.it?.weight ?? r.it?.Weight ?? r.it?.unitWeight ?? r.it?.unitWeightLb ?? r.it?.weightLb ?? 0);
+    return s + (uw * (qty || 1));
+  }, 0);
+  const totalWeight = totalWeightLb ? (fmtInt(totalWeightLb) + " lb (" + (totalWeightLb/2000).toFixed(1) + " tons)") : "—";
 
   const kpi = $("shipKpiRow");
   if(kpi){
@@ -2402,7 +2661,7 @@ function renderShippingView(){
         <div class="pf-kpiMeta">
           <div class="pf-kpiK">Total Weight</div>
           <div class="pf-kpiV">${escapeHtml(String(totalWeight))}</div>
-          <div class="pf-kpiS">Not tracked</div>
+          <div class="pf-kpiS">Filtered results</div>
         </div>
         <div class="pf-kpiIcon" aria-hidden="true">⚖</div>
       </div>
@@ -2417,10 +2676,8 @@ function renderShippingView(){
     const addr = (tx0.shipToAddress || tx0.toLoc || "").toString().trim();
 
     const shippedWhen = s.whenMs ? new Date(s.whenMs).toLocaleString(undefined, { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }) : "—";
-    const schedKey = (sched.match(/^(\d{4}-\d{2}-\d{2})/)||[])[1] || "";
-    const schedMs = schedKey ? dateOnlyToMs(schedKey) : (parsePBDateTime(sched)?.getTime() ?? null);
-    const schedPretty = schedMs ? new Date(schedMs).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" }) : "";
-    const eta = schedPretty || shippedWhen;
+    const schedPretty = fmtDate(sched);
+    const eta = (schedPretty !== "—") ? schedPretty : shippedWhen;
     const id = (s.ref || ("SH-" + s.day.replaceAll("-","")));
     const itemCount = s.items.length;
     const qty = s.items.reduce((sum,r)=> sum + Number(r.it.qty||0), 0);
@@ -2460,6 +2717,7 @@ function renderShippingView(){
             <div><span class="pf-muted">ETA</span><br><span class="mono">${escapeHtml(eta)}</span></div>
             <div><span class="pf-muted">Items</span><br><span class="mono">${itemCount}</span></div>
             <div><span class="pf-muted">Qty</span><br><span class="mono">${fmtNum(qty)}</span></div>
+            <div><span class="pf-muted">Weight</span><br><span class="mono">${fmtInt(s.items.reduce((sum,r)=> sum + (parseNum(r.it?.weight ?? r.it?.Weight ?? r.it?.unitWeight ?? r.it?.unitWeightLb ?? r.it?.weightLb ?? 0) * ((Number(r.it?.qty||0)||0) || 1)), 0))} lb</span></div>
             <div><span class="pf-muted">Ref</span><br><span class="mono">${escapeHtml(s.ref || "")}</span></div>
           </div>
 
@@ -2665,27 +2923,21 @@ async function createDeliveryTransaction(preferred){
     $("projSummary").textContent = `${groups.length.toLocaleString()} project${groups.length===1?"":"s"} • ${pieces.length.toLocaleString()} piece record${pieces.length===1?"":"s"}`;
   }
 
+  
   async function quickSetStatus(id, toStatus){
     if(!requireAdmin("Only admins can update statuses.")) return;
     try{
-      await updateItem(id, { Status: toStatus });
+      const updated = await updateItem(id, { Status: toStatus });
+      upsertLocalItem(updated);
       toast(`Status set to "${toStatus}".`);
-      await refreshAll();
-    // Deep-linking: index.html?view=inventory (or production/shipping/reports/etc)
-    const urlTab = new URLSearchParams(window.location.search).get('view');
-    if(urlTab){
-      handleTopTabClick(null, urlTab);
-    } else {
-      setTab(currentTab);
-    }
-
-      setTab(currentTab);
-      setTab(currentTab);
+      // Keep filters and view; just re-render visible panels + jobs progress
+      scheduleRerender();
     }catch(e){
       console.error(e);
       toast("Status update failed.");
     }
   }
+
 
   // --------------------------
   // Shipping workflow (Production → Ship action)
@@ -2840,6 +3092,8 @@ async function createDeliveryTransaction(preferred){
 
       // invalidate + reload transactions when needed
       txLoaded = false;
+      // Refresh tx cache so Jobs progress 'Shipped' updates immediately
+      await ensureTxLoaded();
 
       // re-render current view
       if(currentTab === "production") renderProductionView();
@@ -2994,7 +3248,8 @@ async function createDeliveryTransaction(preferred){
 
     try{
       // delete transactions for this item first
-      const tx = await pb.collection(TX).getFullList(500, { filter: `item="${editingId}"` });
+      const _txRes = await pb.collection(TX).getList(1, 300, { filter: `item="${editingId}"`, sort: "-when" });
+      const tx = _txRes.items || [];
       for(const t of tx) await pb.collection(TX).delete(t.id);
 
       await deleteItemPB(editingId);
@@ -3163,8 +3418,8 @@ async function createDeliveryTransaction(preferred){
   // --------------------------
   async function exportJSON(){
     try{
-      const items = await pb.collection(ITEMS).getFullList(500, { sort: "-updated" });
-      const tx = await pb.collection(TX).getFullList(500, { sort: "-when" });
+      const items = await fetchAllPaged(ITEMS, { sort: "-updated" });
+      const tx = await fetchAllPaged(TX, { sort: "-when" });
       const payload = {
         exportedAt: nowISO(),
         app: "Precast Plant Manager",
@@ -3534,7 +3789,7 @@ async function createDeliveryTransaction(preferred){
         }
 
         // Upsert items by SKU
-        const existing = await pb.collection(ITEMS).getFullList(500, { sort: "-updated" });
+        const existing = await fetchAllPaged(ITEMS, { sort: "-updated" });
         const bySku = new Map(existing.map(i => [normalize(i.sku), i]));
         const idMap = new Map(); // skuNorm -> itemId (for transaction relinking)
 
@@ -3615,9 +3870,9 @@ async function createDeliveryTransaction(preferred){
   async function wipeAll(){
     if(!confirm("Wipe ALL inventory + transactions from PocketBase? This cannot be undone.\n\nExport first if you want a backup.")) return;
     try{
-      const tx = await pb.collection(TX).getFullList(500);
+      const tx = await fetchAllPaged(TX, {}, 50000);
       for(const t of tx) await pb.collection(TX).delete(t.id);
-      const items = await pb.collection(ITEMS).getFullList(500);
+      const items = await fetchAllPaged(ITEMS, {}, 50000);
       for(const it of items) await pb.collection(ITEMS).delete(it.id);
 
       toast("All data wiped.");
@@ -3684,8 +3939,8 @@ async function createDeliveryTransaction(preferred){
 
     try{
       // upsert by SKU (same logic as item modal)
-      await fetchItems();
-      const bySku = new Map(allItems.map(i => [normalize(i.sku), i]));
+      const existingItems = await fetchAllPaged(ITEMS, { sort: "-updated" }, 50000);
+      const bySku = new Map(existingItems.map(i => [normalize(i.sku), i]));
       for(const s of samples){
         const key = normalize(s.sku);
         const existing = bySku.get(key);
@@ -3709,27 +3964,67 @@ async function createDeliveryTransaction(preferred){
   let realtimeBound = false;
   let refreshDebounce = null;
 
-  async function bindRealtime(){
+  
+async function bindRealtime(){
     if(realtimeBound) return;
     realtimeBound = true;
 
-    const debouncedRefresh = () => {
+    // Batch UI refreshes to avoid freezing the browser on rapid updates.
+    let itemEvtQueue = [];
+    let txEvtQueue = [];
+
+    const flush = async () => {
+      // Items: update local cache instead of re-fetching everything.
+      if(itemEvtQueue.length){
+        for(const e of itemEvtQueue){
+          const rec = e?.record;
+          const id = rec?.id;
+          if(e?.action === "delete"){
+            if(id) removeLocalItem(id);
+          } else {
+            if(rec) upsertLocalItem(rec);
+          }
+        }
+        itemEvtQueue = [];
+      }
+
+      // Transactions: re-fetch only when needed (transactions tab or tx modal open).
+      if(txEvtQueue.length){
+        txEvtQueue = [];
+        txLoaded = false;
+        try{
+          if(txItemId) await loadTxTable();
+          if(currentTab === "transactions"){
+            await ensureTransactionsLoaded();
+            renderTransactions();
+          }
+          if(currentTab === "shipping"){
+            await ensureTxLoaded();
+            renderShippingView();
+          }
+        } catch {}
+      }
+
+      // Re-render current view + jobs/progress from updated allItems cache.
+      try{
+        scheduleRerender();
+      } catch {}
+    };
+
+    const queueFlush = () => {
       clearTimeout(refreshDebounce);
-      refreshDebounce = setTimeout(async () => {
-        await fetchItems();
-        renderTable();
-        if(txItemId) await loadTxTable();
-      }, 250);
+      refreshDebounce = setTimeout(flush, 180);
     };
 
     try{
-      await pb.collection(ITEMS).subscribe("*", () => debouncedRefresh());
-      await pb.collection(TX).subscribe("*", () => debouncedRefresh());
+      await pb.collection(ITEMS).subscribe("*", (e) => { itemEvtQueue.push(e); queueFlush(); });
+      await pb.collection(TX).subscribe("*", (e) => { txEvtQueue.push(e); queueFlush(); });
     } catch(e){
-      // Realtime may be blocked by rules; app still works without it
-      console.warn("Realtime subscribe failed:", e);
+      // If realtime rules are blocked, the app still works via manual refresh.
+      realtimeBound = false;
     }
   }
+
 
   async function unbindRealtime(){
     try{
@@ -3792,8 +4087,15 @@ function setTab(tab){
   // External full-page modules
   if(tab === 'crm'){ window.location.href = 'crm.html'; return; }
   if(tab === 'schedule'){ window.location.href = 'schedule.html'; return; }
-  if(tab === 'estimator'){ window.location.href = 'Fisher_Stack_with_back.html'; return; }
-    currentTab = tab;
+  if(tab === 'estimator'){ window.location.href = 'estimates.html'; return; }
+    
+  // Defensive: if the requested panel doesn't exist, fall back to dashboard (prevents blank screens)
+  const _panelEl = document.getElementById("tab_" + tab);
+  if(!_panelEl && !["crm","schedule","estimator"].includes(tab)){
+    console.warn("Unknown/disabled tab:", tab, "— falling back to dashboard");
+    tab = "dashboard";
+  }
+currentTab = tab;
 
     // tabs UI
     document.querySelectorAll("#tabs .tab").forEach(b=>{
@@ -3801,7 +4103,7 @@ function setTab(tab){
     });
 
     // panels
-    const panelIds = ["dashboard","inventory","estimator","crm","schedule","production","shipping","projects","transactions","reports"];
+    const panelIds = ["dashboard","inventory","production","shipping","transactions","jobs"];
     for(const p of panelIds){
       const el = $("tab_" + p);
       if(el) el.classList.toggle("active", p === tab);
@@ -3820,6 +4122,7 @@ function setTab(tab){
         reports:"Reports",
         schedule:"Schedule",
         projects:"Projects",
+        jobs:"Jobs",
         transactions:"Transactions"
       };
       const subMap = {
@@ -3833,6 +4136,8 @@ function setTab(tab){
         schedule:"Project dates and status",
         projects:"Projects overview",
         transactions:"Movement log"
+             ,
+        jobs:"Job dashboard and progress"
       };
       const tEl = $("pageTitle"), sEl = $("pageSubtitle");
       if(tEl) tEl.textContent = titleMap[tab] || tab;
@@ -3855,8 +4160,6 @@ document.body.classList.remove("sidebarOpen");
       (tab === "estimator") ? "Print Estimator PDF" :
       (tab === "production") ? "Print Production PDF" :
       (tab === "shipping") ? "Print Shipping PDF" :
-      (tab === "projects") ? "Print Projects PDF" :
-      (tab === "reports") ? "Print Report PDF" :
       "Print PDF";
 
     // tab-specific work
@@ -3870,10 +4173,9 @@ document.body.classList.remove("sidebarOpen");
     if(tab === "production"){
       renderProductionView();
     }
-    if(tab === "projects"){
-      renderProjectsView();
+    if(tab === "jobs"){
+      renderJobsView();
     }
-
     if(tab === "estimator"){
       const fr = $("estimatorFrame");
       if(fr && !fr.getAttribute("src")){
@@ -3900,22 +4202,32 @@ document.body.classList.remove("sidebarOpen");
     if(tab === "shipping"){
       ensureTxLoaded().then(()=> renderShippingView());
     }
-
-    // refresh report preview when opening reports
-    if(tab === "reports"){
-      populateReportProjects();
-      if($("repProject")){
-        const rt = $("repType")?.value || "inventory";
-        $("repProject").style.display = (rt === "inventory") ? "" : "none";
-      }
-      updateReportPreview();
-    }
-
     // ensure sticky offsets remain accurate
     setTimeout(setStickyHeights, 0);
   }
 
-  function parsePBDateTime(val){
+  
+  // Date helpers (avoid "Invalid Date" for PB date strings like "YYYY-MM-DD HH:mm:ss.SSSZ")
+  function parsePBDate(val){
+    if(!val) return null;
+    let s = String(val).trim();
+    if(!s) return null;
+    // Plain date "YYYY-MM-DD" -> local midnight
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+      s = s + "T00:00:00";
+    } else if(!s.includes("T")){
+      // PB datetime: "YYYY-MM-DD HH:mm:ss.SSSZ" (space) -> ISO-like
+      s = s.replace(" ", "T");
+    }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function fmtDate(val){
+    const d = parsePBDate(val);
+    return d ? d.toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" }) : "—";
+  }
+
+function parsePBDateTime(val){
     if(!val) return null;
     const s = String(val);
     const iso = s.includes("T") ? s : s.replace(" ", "T");
@@ -3944,8 +4256,18 @@ document.body.classList.remove("sidebarOpen");
 
   async function fetchAllTransactions(){
     try{
-      // batch size 500 (PocketBase will paginate internally)
-      const tx = await pb.collection(TX).getFullList(500, { sort: "-when", expand: "item,createdBy" });
+      const days = parseInt(($("txRange")?.value || "30"), 10);
+      const dur = (Number.isFinite(days) && days > 0) ? days : 30;
+      const since = new Date(Date.now() - dur*86400000).toISOString();
+
+      // Pull only the selected date range, paged, and cap to keep UI responsive
+      const tx = await fetchAllPaged(TX, {
+        sort: "-when",
+        filter: `when >= "${since}"`,
+        expand: "item,createdBy",
+        perPage: 300
+      }, 5000);
+
       allTx = tx || [];
     }catch(err){
       console.error(err);
@@ -4408,12 +4730,34 @@ function updateReportPreview(){
   $("btnShowRegister").addEventListener("click", () => $("registerPane").style.display = "block");
   $("btnHideRegister").addEventListener("click", () => $("registerPane").style.display = "none");
 
-  $("loginForm").addEventListener("submit", async (e) => {
+    $("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = $("loginEmail").value.trim();
     const pass = $("loginPassword").value;
+
     try{
-      await pb.collection("users").authWithPassword(email, pass);
+      // Try PocketBase Admin (superuser) first, then fall back to app users collection.
+      // This allows the same login form to work for both Admin accounts and normal Users.
+      let ok = false;
+
+      try{
+        // PocketBase v0.22+ typically uses _superusers
+        await pb.collection("_superusers").authWithPassword(email, pass);
+        ok = true;
+      } catch(_e1){
+        try{
+          // Older SDKs exposed pb.admins
+          if(pb.admins?.authWithPassword){
+            await pb.admins.authWithPassword(email, pass);
+            ok = true;
+          }
+        } catch(_e2){}
+      }
+
+      if(!ok){
+        await pb.collection("users").authWithPassword(email, pass);
+      }
+
       toast("Signed in.");
     } catch(err){
       console.error(err);
@@ -4530,7 +4874,9 @@ function updateReportPreview(){
       }
     });
   });
-  ["prodProject","prodSearch","prodQuote","prodStatus","prodScope"].forEach(id=>{
+  $("btnInvLoadMore")?.addEventListener("click", ()=> loadMoreItems());
+
+  ["prodProject","prodSearch","prodQuote","prodScope"].forEach(id=>{
     $(id)?.addEventListener("input", renderProductionView);
     $(id)?.addEventListener("change", renderProductionView);
   });
@@ -4567,6 +4913,450 @@ function updateReportPreview(){
   $("btnTxPurge").addEventListener("click", ()=>{ if(!requireAdmin("Only admins can purge the log.")) return; purgeAllTxForAllItems(); });
 
   $("btnSettings").addEventListener("click", openSettings);
+
+  // Jobs controls
+  $("btnJobsRefresh")?.addEventListener("click", ()=>renderJobsView(true));
+  $("jobsQ")?.addEventListener("input", ()=>{ clearTimeout(window.__jobsQTimer); window.__jobsQTimer = setTimeout(()=>renderJobsTable(), 180); });
+  $("jobsStatus")?.addEventListener("change", ()=>renderJobsTable());
+  $("btnJobOpenDashboard")?.addEventListener("click", ()=>{
+    if(!selectedJobQuote) return;
+    window.location.href = `job.html?quote=${encodeURIComponent(selectedJobQuote)}`;
+  });
+  $("btnJobSaveTarget")?.addEventListener("click", async ()=>{
+    const v = $("jobDtlTargetDate")?.value || "";
+    if(!selectedJobProject){
+      toast("Select a job first.");
+      return;
+    }
+    try{
+      await upsertScheduleOverride(selectedJobProject, v);
+      toast("Target delivery updated.");
+      await renderJobsView(true);
+      // keep detail selected if possible
+      if(selectedJobId){
+        const job = (allJobs||[]).find(x => x.id === selectedJobId);
+        if(job) renderJobDetail(normalizeJob(job));
+      }
+    } catch(e){
+      console.error(e);
+      // Fallback: save to jobs record if overrides are not accessible
+      try{
+        if(selectedJobId){
+          await pb.collection(JOBS).update(selectedJobId, { targetDeliveryDate: v || null });
+          toast("Saved to job record (schedule overrides not available).");
+          jobsLoaded = false;
+          await renderJobsView(true);
+        }else{
+          toast("Save failed.");
+        }
+      }catch(e2){
+        console.error(e2);
+        toast("Save failed. Check rules/fields.");
+      }
+    }
+  });
+
+
+  // --------------------------
+  // Jobs view (Job Dashboard lite inside index)
+  // --------------------------
+  const pick = (obj, keys, fallback="")=>{
+    for(const k of keys){
+      const v = obj?.[k];
+      if(v !== undefined && v !== null && String(v).trim() !== "") return v;
+    }
+    return fallback;
+  };
+
+  function toISODateMaybe(v){
+    if(!v) return "";
+    const s = String(v);
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    if(m) return m[1];
+    const d = new Date(s);
+    if(!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+    return "";
+  }
+
+
+  // Schedule overrides (shared target delivery date with Schedule page)
+  const JOB_OVERRIDES = "project_schedule";
+  let scheduleOverrides = [];
+  let overridesLoaded = false;
+
+  function normProjectKey(s){
+    return String(s||"").trim().toLowerCase();
+  }
+
+  function overrideForProject(projectName){
+    const key = normProjectKey(projectName);
+    if(!key) return null;
+    return scheduleOverrides.find(o => normProjectKey(o.project) === key) || null;
+  }
+
+  async function canUsePBCollection(name){
+    try{ await pb.collection(name).getList(1,1,{fields:"id"}); return true; }catch{ return false; }
+  }
+
+  async function fetchScheduleOverrides(force=false){
+    if(overridesLoaded && !force) return;
+    overridesLoaded = true;
+    scheduleOverrides = [];
+    if(!pb?.authStore?.isValid) return;
+    if(!(await canUsePBCollection(JOB_OVERRIDES))) return;
+    try{
+      const res = await pb.collection(JOB_OVERRIDES).getList(1, 500, { sort: "-updated" });
+      scheduleOverrides = (res.items||[]).map(r => ({
+        id: r.id,
+        project: pick(r, ["project","Project","projectName","ProjectName","name","Name"], ""),
+        status: pick(r, ["status","Status"], ""),
+        delivery: toISODateMaybe(pick(r, ["delivery","Delivery","deliveryDate","DeliveryDate","targetDeliveryDate","TargetDeliveryDate"], "")),
+        notes: pick(r, ["notes","Notes"], "")
+      }));
+    }catch(e){
+      console.warn("Failed to load schedule overrides", e);
+      scheduleOverrides = [];
+    }
+  }
+
+  async function upsertScheduleOverride(projectName, deliveryISO){
+    const project = String(projectName||"").trim();
+    if(!project) throw new Error("Project name is missing.");
+    if(!pb?.authStore?.isValid) throw new Error("Not signed in.");
+    if(!(await canUsePBCollection(JOB_OVERRIDES))) throw new Error("Overrides collection not accessible.");
+    const existing = overrideForProject(project);
+    const payload = {
+      project,
+      status: existing?.status || "",
+      delivery: deliveryISO || "",
+      notes: existing?.notes || ""
+    };
+    if(existing?.id){
+      await pb.collection(JOB_OVERRIDES).update(existing.id, payload);
+    } else {
+      await pb.collection(JOB_OVERRIDES).create(payload);
+    }
+    overridesLoaded = false;
+    await fetchScheduleOverrides(true);
+  }
+
+  function safeJSON(val, fallback){
+    try{
+      if(val === null || val === undefined) return fallback;
+      if(typeof val === "object") return val;
+      const s = String(val).trim();
+      if(!s) return fallback;
+      return JSON.parse(s);
+    } catch {
+      return fallback;
+    }
+  }
+
+  function normStatus(s){
+    return String(s||"").trim().toLowerCase();
+  }
+
+  
+  function jobStatusFromStage(s){
+    const v = normStatus(s);
+    if(!v) return "";
+    if(v === "won") return "production";
+    if(v === "in production" || v === "inproduction") return "production";
+    if(v === "negotiating") return "negotiation";
+    if(v === "quote" ) return "quoted";
+    return v;
+  }
+function itemQuote(it){
+    return pick(it, ["quoteNumber","QuoteNumber","quoteNo","quote","estimateNumber","EstimateNumber","bin","Bin"], "");
+  }
+  function itemQty(it){
+    const v = pick(it, ["qty","Qty","quantity","Quantity"], 0);
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+  function itemStatus(it){
+    return pick(it, ["status","Status"], "");
+  }
+  function itemCastDate(it){
+    return toISODateMaybe(pick(it, ["castDate","CastDate","cast_date","Cast_Date"], ""));
+  }
+
+  function computeJobProgressByItems(quoteNumber){
+    const qn = String(quoteNumber||"").trim();
+    if(!qn) return { casted:0, onHand:0, allocated:0, shipped:0 };
+
+    // Some shops store the quote reference in items.bin and may include extra text.
+    // We treat a match as either exact equality OR a "contains" match with separators.
+    const matchesQ = (v)=>{
+      const s = String(v||"").trim();
+      if(!s) return false;
+      if(s === qn) return true;
+
+      const idx = s.indexOf(qn);
+      if(idx < 0) return false;
+      const before = idx === 0 ? "" : s[idx-1];
+      const after = (idx + qn.length) >= s.length ? "" : s[idx + qn.length];
+      const isSep = (ch)=> !ch || /[\s•|,;:/\\()\[\]{}<>"'_=+]/.test(ch);
+      return isSep(before) && isSep(after);
+    };
+
+    let castedRemaining = 0, onHand = 0, allocated = 0;
+    let shippedFallback = 0;
+
+    for(const it of (allItems||[])){
+      if(!matchesQ(itemQuote(it))) continue;
+
+      const qty = itemQty(it);
+      const st = normStatus(itemStatus(it));
+      const cd = itemCastDate(it);
+
+      if(cd) castedRemaining += qty;
+
+      if(st === "on hand" || st === "onhand") onHand += qty;
+      if(st === "allocated" || st === "reserved") allocated += qty;
+
+      // Many workflows set qty=0 when fully shipped.
+      // Keep a non-zero fallback so jobs don't show 0 forever if tx data isn't available.
+      if(st === "shipped"){
+        if(qty > 0) shippedFallback += qty;
+        else shippedFallback += 1;
+      }
+    }
+
+    // Preferred shipped qty: sum OUT transactions for items belonging to this quote.
+    let shippedTx = 0;
+    if(Array.isArray(allTx) && allTx.length){
+      for(const tx of allTx){
+        const t = normStatus(tx?.type || "");
+        if(t !== "out") continue;
+
+        const it = tx?.expand?.item || null;
+        if(!it) continue;
+
+        if(!matchesQ(itemQuote(it))) continue;
+
+        const delta = Number(tx?.qtyChange ?? tx?.qty ?? 0);
+        if(Number.isFinite(delta) && delta !== 0){
+          shippedTx += Math.abs(delta);
+        }
+      }
+    }
+
+    const shipped = shippedTx > 0 ? shippedTx : shippedFallback;
+    const casted = castedRemaining + (shippedTx > 0 ? shippedTx : 0);
+
+    return { casted, onHand, allocated, shipped };
+  }
+
+  function computePiecesRequiredFromSnapshot(snapshot){
+    const snap = safeJSON(snapshot, null);
+    if(!snap) return null;
+    const items = snap.items || snap.Items || snap.lines || snap.Lines || [];
+    if(!Array.isArray(items)) return null;
+    let total = 0;
+    for(const li of items){
+      const qty = Number(pick(li, ["qty","Qty","quantity","Quantity"], 0)) || 0;
+      // Heuristic: count finished pieces / piece marks. If unknown, count everything.
+      const type = normStatus(pick(li, ["type","Type","itemType","ItemType"], ""));
+      const name = normStatus(pick(li, ["name","Name","item","Item","description","Description"], ""));
+      const isPiece = type.includes("finished") || type.includes("piece") || name.includes("piece mark") || name.includes("box culvert");
+      if(isPiece) total += qty;
+    }
+    return total || null;
+  }
+
+    function normalizeJob(job){
+    const quoteNumber = pick(job, ["quoteNumber","QuoteNumber","quoteNo","quote","estimateNumber","EstimateNumber"]);
+    const opp = quoteNumber ? (oppByQuote?.[quoteNumber] || null) : null;
+
+    const projectNameRaw = pick(job, ["projectName","ProjectName","project","Project"]);
+    const projectName = projectNameRaw || pick(opp, ["relatedProject","RelatedProject","projectName","ProjectName","project","Project","name","Name"], "");
+
+    const customerNameRaw = pick(job, ["customerName","CustomerName","customer","Customer"]);
+    const customerName = customerNameRaw || pick(opp, ["customerName","CustomerName","customer","Customer","company","Company","companyName","CompanyName"], "");
+
+    // Prefer job.status; fallback to CRM opportunity stage/status; then infer from inventory progress
+    const prog = computeJobProgressByItems(quoteNumber);
+    let status = pick(job, ["status","Status","stage","Stage","jobStatus","JobStatus","state","State"], "");
+    if(!status) status = pick(opp, ["stage","Stage","status","Status"], "");
+    status = jobStatusFromStage(status);
+    if(!status){
+      if((prog.shipped||0) > 0) status = "shipped";
+      else if((prog.casted||0) > 0 || (prog.onHand||0) > 0 || (prog.allocated||0) > 0) status = "production";
+      else status = "quoted";
+    }
+
+    const ov = overrideForProject(projectName);
+    const targetDeliveryDate = toISODateMaybe((ov && ov.delivery) ? ov.delivery : pick(job, ["targetDeliveryDate","TargetDeliveryDate","scheduledDate","ScheduledDate","deliveryDate","DeliveryDate"], ""));
+const summary = safeJSON(pick(job, ["summary","Summary"], null), {});
+    const issues = safeJSON(pick(job, ["issues","Issues"], null), []);
+    const quoteSnapshot = pick(job, ["quoteSnapshot","QuoteSnapshot","snapshot","Snapshot"], null);
+
+    const piecesRequired = Number(summary.piecesRequired ?? summary.PiecesRequired ?? summary.requiredPieces ?? "") ||
+                           computePiecesRequiredFromSnapshot(quoteSnapshot) ||
+                           null;
+
+    const totalWeightLb = Number(summary.totalWeightLb ?? summary.TotalWeightLb ?? summary.totalWeight ?? job.totalWeightLb ?? job.TotalWeightLb ?? "") || 0;
+
+    // prog already computed above
+
+    const openIssues = Array.isArray(issues) ? issues.filter(x => !x?.resolved && !x?.Resolved) : [];
+    return {
+      raw: job,
+      id: job.id,
+      quoteNumber,
+      projectName,
+      customerName,
+      status,
+      targetDeliveryDate,
+      piecesRequired,
+      totalWeightLb,
+      progress: prog,
+      openIssues
+    };
+  }
+
+  function renderJobDetail(nj){
+    selectedJobId = nj?.id || null;
+    selectedJobQuote = nj?.quoteNumber || null;
+    selectedJobProject = nj?.projectName || null;
+
+    $("jobDtlTitle").textContent = nj?.quoteNumber ? `Job ${nj.quoteNumber}` : "Select a job";
+    const sub = [nj?.projectName, nj?.customerName].filter(Boolean).join(" • ");
+    $("jobDtlSub").textContent = sub || "—";
+
+    // KPIs
+    const k = $("jobDtlKpis");
+    const req = nj?.piecesRequired ?? "—";
+    const wtTons = nj?.totalWeightLb ? (nj.totalWeightLb/2000) : 0;
+    const prog = nj?.progress || { casted:0, onHand:0, allocated:0, shipped:0 };
+    k.innerHTML = `
+      <div class="pf-kpiCard"><div class="pf-kpiMeta"><div class="pf-kpiK">Required</div><div class="pf-kpiV">${req}</div><div class="pf-kpiS">pieces</div></div><div class="pf-kpiIcon" aria-hidden="true">▦</div></div>
+      <div class="pf-kpiCard"><div class="pf-kpiMeta"><div class="pf-kpiK">On Hand</div><div class="pf-kpiV">${fmtInt(prog.onHand)}</div><div class="pf-kpiS">qty</div></div><div class="pf-kpiIcon" aria-hidden="true">✓</div></div>
+      <div class="pf-kpiCard"><div class="pf-kpiMeta"><div class="pf-kpiK">Allocated</div><div class="pf-kpiV">${fmtInt(prog.allocated)}</div><div class="pf-kpiS">qty</div></div><div class="pf-kpiIcon" aria-hidden="true">⧉</div></div>
+      <div class="pf-kpiCard"><div class="pf-kpiMeta"><div class="pf-kpiK">Weight</div><div class="pf-kpiV">${wtTons ? fmtNum(wtTons) : "—"}</div><div class="pf-kpiS">tons</div></div><div class="pf-kpiIcon" aria-hidden="true">⚖</div></div>
+    `;
+
+    // Issues
+    const issuesWrap = $("jobDtlIssues");
+    const open = nj?.openIssues || [];
+    $("jobDtlIssuesCount").textContent = String(open.length);
+    if(!open.length){
+      issuesWrap.innerHTML = `<div class="pf-muted" style="padding:10px; border:1px dashed var(--stroke); border-radius:14px;">No open issues</div>`;
+    } else {
+      issuesWrap.innerHTML = open.slice(0, 20).map(it=>{
+        const t = (it.title ?? it.Title ?? it.note ?? it.Note ?? "Issue").toString();
+        const sev = (it.severity ?? it.Severity ?? "").toString();
+        return `<div style="padding:10px 12px;border:1px solid var(--stroke);border-radius:14px;background:#fff;">
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+            <div style="font-weight:700;">${escapeHtml(t)}</div>
+            ${sev ? `<span class="badge">${escapeHtml(sev)}</span>` : ""}
+          </div>
+          ${it.details || it.Details ? `<div class="pf-muted" style="margin-top:4px;">${escapeHtml(String(it.details ?? it.Details))}</div>` : ""}
+        </div>`;
+      }).join("");
+    }
+
+    // Target delivery date editor
+    $("jobDtlTargetDate").value = nj?.targetDeliveryDate || "";
+    $("btnJobSaveTarget").disabled = !selectedJobId;
+    $("btnJobOpenDashboard").disabled = !selectedJobQuote;
+  }
+
+  async function fetchJobs(force=false){
+    if(jobsLoadInFlight) return;
+    if(jobsLoaded && !force) return;
+
+    jobsLoadInFlight = true;
+    try{
+      // ensure items exist so progress columns populate
+      if(!allItems || allItems.length === 0) await fetchItems();
+
+      const _jobsRes = await pb.collection(JOBS).getList(1, 500, { sort: "-updated" });
+      allJobs = _jobsRes.items || [];
+      jobsLoaded = true;
+    } catch(e){
+      console.error(e);
+      toast("Failed to load jobs. Check PocketBase rules/collection name.");
+      allJobs = [];
+      jobsLoaded = false;
+    } finally {
+      jobsLoadInFlight = false;
+    }
+  }
+
+  function renderJobsTable(){
+    const tbody = $("jobsTbody");
+    if(!tbody) return;
+
+    const q = ( $("jobsQ")?.value || "" ).toLowerCase().trim();
+    const st = normStatus($("jobsStatus")?.value || "");
+
+    let rows = (allJobs||[]).map(normalizeJob);
+
+    if(st){
+      rows = rows.filter(r => normStatus(r.status) === st);
+    }
+    if(q){
+      rows = rows.filter(r=>{
+        return (r.quoteNumber||"").toLowerCase().includes(q) ||
+               (r.projectName||"").toLowerCase().includes(q) ||
+               (r.customerName||"").toLowerCase().includes(q);
+      });
+    }
+
+    $("jobsCountLabel").textContent = `${rows.length} jobs`;
+
+    if(!rows.length){
+      tbody.innerHTML = `<tr><td colspan="11" class="muted">No jobs found.</td></tr>`;
+      renderJobDetail(null);
+      return;
+    }
+
+    tbody.innerHTML = rows.map(r=>{
+      const wt = r.totalWeightLb ? (r.totalWeightLb/2000) : 0;
+      const req = r.piecesRequired ?? "";
+      const prog = r.progress || {};
+      const openIssues = r.openIssues?.length || 0;
+      return `<tr data-jobid="${escapeHtml(r.id||"")}" data-quote="${escapeHtml(r.quoteNumber||"")}">
+        <td class="mono nowrap">${escapeHtml(r.quoteNumber||"")}</td>
+        <td>${escapeHtml(r.projectName||"")}</td>
+        <td>${escapeHtml(r.status||"")}</td>
+        <td class="nowrap">${escapeHtml(r.targetDeliveryDate||"")}</td>
+        <td class="right">${(req === null || req === "" ? "" : escapeHtml(isFinite(Number(req)) ? fmtInt(req) : String(req)))}</td>
+        <td class="right">${fmtInt(prog.casted||0)}</td>
+        <td class="right">${fmtInt(prog.onHand||0)}</td>
+        <td class="right">${fmtInt(prog.allocated||0)}</td>
+        <td class="right">${fmtInt(prog.shipped||0)}</td>
+        <td class="right">${wt ? fmtNum(wt) : ""}</td>
+        <td class="right">${openIssues ? `<span class="badge">${openIssues}</span>` : ""}</td>
+      </tr>`;
+    }).join("");
+
+    // click handlers
+    tbody.querySelectorAll("tr[data-jobid]").forEach(tr=>{
+      tr.addEventListener("click", ()=>{
+        const id = tr.getAttribute("data-jobid");
+        const job = (allJobs||[]).find(x => x.id === id);
+        if(!job) return;
+        renderJobDetail(normalizeJob(job));
+      });
+    });
+
+    // auto-select first row if none selected
+    if(!selectedJobId && rows[0]) renderJobDetail(rows[0]);
+  }
+
+  async function renderJobsView(force=false){
+    const tbody = $("jobsTbody");
+    if(tbody) tbody.innerHTML = `<tr><td colspan="11" class="muted">Loading…</td></tr>`;
+    await fetchScheduleOverrides(force);
+    await fetchOpps(force);
+    await fetchJobs(force);
+    // Needed for correct 'Shipped' counts (OUT tx is the source of truth when qty is reduced to 0)
+    await ensureTxLoaded();
+    renderJobsTable();
+  }
 
   // Tabs
   // Tabs (full-page for CRM/Schedule/Estimates, in-page for the rest)
@@ -4653,22 +5443,6 @@ function updateReportPreview(){
 
   $("prodQuote")?.addEventListener("input", ()=>{ renderProductionView(); });
 
-  // Production toolbar: filters toggle + clear
-  $("btnProdFilter")?.addEventListener("click", ()=>{
-    const el = $("prodFilters");
-    if(!el) return;
-    const isClosed = (el.style.display === "none" || !el.style.display);
-    el.style.display = isClosed ? "" : "none";
-    if(isClosed){
-      setTimeout(()=>{ $("prodQuote")?.focus?.(); }, 0);
-    }
-  });
-  $("btnProdClear")?.addEventListener("click", ()=>{
-    if($("prodQuote")) $("prodQuote").value = "";
-    if($("prodStatus")) $("prodStatus").value = "";
-    renderProductionView();
-  });
-
   $("btnProdCalendar")?.addEventListener("click", ()=>{
     // Toggle view
     prodViewMode = (prodViewMode === "calendar") ? "board" : "calendar";
@@ -4684,11 +5458,18 @@ function updateReportPreview(){
   });
 
 
+  
   $("prodBoard")?.addEventListener("click", (e)=>{
     const btn = e.target.closest("button[data-act]");
     if(!btn) return;
+
+    const act = btn.getAttribute("data-act") || "";
+    if(act === "openJob"){
+      const q = btn.getAttribute("data-quote") || "";
+      return openJobDashboardByQuote(q);
+    }
+
     const id = btn.getAttribute("data-id");
-    const act = btn.getAttribute("data-act");
     if(!id) return;
     const item = allItems.find(i => i.id === id);
     if(!item) return;
@@ -4702,6 +5483,7 @@ function updateReportPreview(){
       return quickSetStatus(id, to);
     }
   });
+
 
   // Shipping controls
   $("btnShipRefresh")?.addEventListener("click", async ()=>{
@@ -4750,7 +5532,7 @@ $("shipList")?.addEventListener("click", (e)=>{
   $("txQ").addEventListener("input", ()=>{ renderTransactions(); });
 
   // Reports
-  $("repType").addEventListener("change", ()=>{
+  $("repType")?.addEventListener("change", ()=>{
     const rt = $("repType").value;
     $("repInventory").style.display = (rt === "inventory") ? "" : "none";
     $("repTransactions").style.display = (rt === "transactions") ? "" : "none";
@@ -4762,7 +5544,7 @@ $("shipList")?.addEventListener("click", (e)=>{
     updateReportPreview();
   });
 
-  $("btnRepPrint").addEventListener("click", printCurrent);
+  $("btnRepPrint")?.addEventListener("click", printCurrent);
 
   // Initialize default Transactions date range inputs
   applyTxRange();

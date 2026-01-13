@@ -12,27 +12,6 @@
     .statusPill.onTime{background:rgba(22,163,74,.12); color:#166534; border-color:rgba(22,163,74,.18)}
     .statusPill.warning{background:rgba(245,158,11,.16); color:#92400e; border-color:rgba(245,158,11,.22)}
     .statusPill.late{background:rgba(239,68,68,.12); color:#991b1b; border-color:rgba(239,68,68,.18)}
-  /* Calendar modal */
-.pf-calWrap{display:flex; flex-direction:column; gap:12px}
-.pf-calMonthRow{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
-.pf-calGrid{display:grid; grid-template-columns:repeat(7,1fr); gap:8px}
-.pf-calDow{font-size:12px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.04em; padding:0 4px}
-.pf-calCell{border:1px solid #e2e8f0; border-radius:12px; padding:8px; min-height:110px; background:#fff; cursor:pointer; display:flex; flex-direction:column; gap:6px}
-.pf-calCell.isOut{opacity:.5}
-.pf-calCell.isSelected{outline:2px solid rgba(37,99,235,.35)}
-.pf-calDateRow{display:flex; align-items:center; justify-content:space-between}
-.pf-calDate{font-weight:900; font-size:12px; color:#0f172a}
-.pf-calBadge{font-size:12px; font-weight:900; padding:2px 8px; border-radius:999px; background:rgba(37,99,235,.12); color:#1d4ed8}
-.pf-calEvents{display:flex; flex-direction:column; gap:4px; overflow:hidden}
-.pf-calEvt{display:flex; justify-content:space-between; gap:8px; font-size:12px; padding:4px 6px; border-radius:10px; background:#f1f5f9}
-.pf-calEvt .left{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700}
-.pf-calEvt .right{font-weight:900; color:#334155}
-.pf-calDay{border:1px solid #e2e8f0; border-radius:14px; padding:12px; background:#fff}
-.pf-calDay h4{margin:0 0 10px 0}
-.pf-calDayList{display:flex; flex-direction:column; gap:8px}
-.pf-calDayItem{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:10px; border:1px solid #e2e8f0; border-radius:12px}
-.pf-calDayItem .meta{min-width:0}
-.pf-calDayItem .meta b{display:block}
   </style>
 </head>
 <body>
@@ -97,12 +76,14 @@
     <button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
     <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
+    <button type="button" class="tab" data-tab="reports"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19V5a2 2 0 0 1 2-2h12v2H6v14h14v2H6a2 2 0 0 1-2-2Zm5-2V9h2v8H9Zm4 0V7h2v10h-2Zm4 0v-5h2v5h-2Z"/></svg><span class="navLabel">Reports</span></button>
 
     <div class="pf-more">
       <details>
         <summary>More</summary>
         <div class="pf-moreItems">
           <button type="button" class="tab active" data-tab="schedule"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2Zm15 8H4v11h18V10Z"/></svg><span class="navLabel">Schedule</span></button>
+          <button type="button" class="tab" data-tab="projects"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v2H3V6Zm0 6h22v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8Z"/></svg><span class="navLabel">Projects</span></button>
           <button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
         </div>
       </details>
@@ -313,36 +294,30 @@
   </div>
 </div>
 
-<!-- Calendar Modal -->
-<div class="modal-backdrop" id="calendarModal">
-  <div class="modal" style="max-width:1100px">
-    <header>
-      <div style="min-width:0">
-        <div class="badge">Calendar</div>
-        <h3 style="margin-top:8px" id="calTitle">Delivery Calendar</h3>
-      </div>
-      <div class="row end">
-        <button class="btn" id="btnCalPrev" type="button" title="Previous month">←</button>
-        <button class="btn" id="btnCalToday" type="button">Today</button>
-        <button class="btn" id="btnCalNext" type="button" title="Next month">→</button>
-        <button class="btn" id="btnCalClose" type="button">Close</button>
-      </div>
-    </header>
-    <div class="body">
-      <div class="pf-calWrap">
-        <div class="pf-calMonthRow">
-          <div class="pf-h2" id="calMonthLabel" style="margin:0">Month</div>
-          <div class="muted" id="calHint">Shows delivery dates from Overrides</div>
-        </div>
-        <div class="pf-calGrid" id="calGrid" role="grid" aria-label="Calendar grid"></div>
-        <div class="pf-calDay" id="calDay"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
 (() => {
+
+  // --------------------------
+  // Compatibility helpers (fields + dates)
+  // --------------------------
+  const pick = (obj, keys, fallback="")=>{
+    for(const k of keys){
+      const v = obj?.[k];
+      if(v !== undefined && v !== null && String(v).trim() !== "") return v;
+    }
+    return fallback;
+  };
+
+  function toISODateMaybe(v){
+    if(!v) return "";
+    const s = String(v);
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    if(m) return m[1];
+    const d = new Date(s);
+    if(!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+    return "";
+  }
+
   const PB_URL = window.location.origin;
   const ITEMS = "items";
   const TX = "transactions";
@@ -475,130 +450,88 @@
     return (a > b) ? a : b;
   }
 
-  async function fetchAll(col, batch=500, filter="", expand="", sort="-updated"){
-  if(!pb) return [];
-  try{
-    const opts = { sort };
-    if(filter) opts.filter = filter;
-    if(expand) opts.expand = expand;
-    // getFullList paginates internally until all records are fetched
-    const res = await pb.collection(col).getFullList(batch, opts);
-    return res || [];
-  }catch(err){
-    console.warn("Schedule: fetchAll failed for", col, err);
-    return [];
-  }
-}
-
-  function itemProject(it){
-  return (it?.project || it?.Project || it?.projectName || it?.ProjectName || it?.job || it?.Job || "").toString().trim();
-}
-function itemStatus(it){
-  return (it?.status || it?.Status || "").toString().trim();
-}
-function itemQty(it){
-  return parseNum(it?.qty ?? it?.Qty ?? it?.quantity ?? it?.Quantity ?? 0);
-}
-function itemCastDate(it){
-  const v = (it?.castDate || it?.CastDate || it?.pourDate || it?.PourDate || it?.dateCast || it?.DateCast || "").toString();
-  return v ? v.slice(0,10) : "";
-}
-
-async function buildScheduleRows(){
-  if(!pb?.authStore?.isValid) return [];
-
-  // Items drive the schedule
-  const items = await fetchAll(ITEMS, 500, "", "", "-updated");
-
-  // Optional: shipped qty from Transactions (type OUT). If TX isn't accessible, we fall back to Items.status.
-  const shippedByProject = new Map(); // project -> shipped qty
-  try{
-    const txOut = await fetchAll(TX, 500, 'type="OUT"', "item", "-when");
-    for(const tx of txOut){
-      const delta = parseNum(tx?.qtyChange ?? 0);
-      const shippedQty = Math.abs(delta || 0);
-      if(!shippedQty) continue;
-      const proj = itemProject(tx?.expand?.item) || (tx?.project || "").toString().trim();
-      if(!proj) continue;
-      shippedByProject.set(proj, (shippedByProject.get(proj) || 0) + shippedQty);
+  async function fetchAll(col, perPage=200, filter=""){
+    const all = [];
+    let page = 1;
+    while(true){
+      const res = await pb.collection(col).getList(page, perPage, { filter, sort: "-updated" });
+      all.push(...res.items);
+      if(res.items.length < perPage) break;
+      page++;
+      if(page > 20) break; // safety
     }
-  }catch(err){
-    // already logged in fetchAll
+    return all;
   }
 
-  // Group by project
-  const map = new Map();
-  for(const it of items){
-    const project = itemProject(it);
-    if(!project) continue;
+  async function buildScheduleRows(){
+    if(!pb?.authStore?.isValid) return [];
 
-    const qty = itemQty(it);
-    const status = itemStatus(it);
-    const castDate = itemCastDate(it);
+    // Items drive the schedule
+    const items = await fetchAll(ITEMS, 200);
 
-    if(!map.has(project)){
-      map.set(project, {
-        project,
-        totalQty: 0,
-        inProd: 0,
-        onHand: 0,
-        allocated: 0,
-        reserved: 0,
-        shipped: 0,
-        firstCast: "",
-        lastCast: "",
-      });
+    // Group by project
+    const map = new Map();
+    for(const it of items){
+      const project = pick(it, ["projectName","ProjectName","project","Project","job","Job","Project_Name"], "").toString().trim();
+      if(!project) continue;
+
+      const qty = parseNum(pick(it, ["qty","Qty","quantity","Quantity"], 0));
+      const status = pick(it, ["status","Status","state","State"], "").toString();
+      const castDate = toISODateMaybe(pick(it, ["castDate","CastDate","castdate","Cast_Date","Castdate"], ""));
+
+      if(!map.has(project)){
+        map.set(project, {
+          project,
+          totalQty: 0,
+          inProd: 0,
+          onHand: 0,
+          allocated: 0,
+          reserved: 0,
+          shipped: 0,
+          firstCast: "",
+          lastCast: "",
+        });
+      }
+      const s = map.get(project);
+      s.totalQty += qty;
+
+      const st = status.toLowerCase();
+      if(st === "in production") s.inProd += qty;
+      else if(st === "on hand") s.onHand += qty;
+      else if(st === "allocated") s.allocated += qty;
+      else if(st === "reserved") s.reserved += qty;
+      else if(st === "shipped") s.shipped += qty;
+
+      if(castDate){
+        s.firstCast = minDate(s.firstCast, castDate);
+        s.lastCast  = maxDate(s.lastCast, castDate);
+      }
     }
-    const s = map.get(project);
-    s.totalQty += qty;
 
-    const st = (status || "").toLowerCase();
-    if(st === "in production") s.inProd += qty;
-    else if(st === "on hand") s.onHand += qty;
-    else if(st === "allocated") s.allocated += qty;
-    else if(st === "reserved") s.reserved += qty;
-    else if(st === "shipped") s.shipped += qty;
+    const rows = Array.from(map.values()).sort((a,b)=>a.project.localeCompare(b.project));
 
-    if(castDate){
-      s.firstCast = minDate(s.firstCast, castDate);
-      s.lastCast  = maxDate(s.lastCast, castDate);
+    // Merge overrides
+    for(const r of rows){
+      const ov = overrideForProject(r.project);
+      r.override = ov;
+      const autoStatus = inferProjectStatus(r);
+      r.status = (ov && ov.status) ? ov.status : autoStatus;
+      r.delivery = (ov && ov.delivery) ? ov.delivery : "";
+      r.notes = (ov && ov.notes) ? ov.notes : "";
     }
+
+    // KPIs
+    $("kpiProjects").textContent = rows.length.toLocaleString();
+    $("kpiInProd").textContent = rows.filter(r => (r.status||"").toLowerCase() === "in production").length.toLocaleString();
+    $("kpiAlloc").textContent = rows.filter(r => ["allocated","reserved"].includes((r.status||"").toLowerCase())).length.toLocaleString();
+    $("kpiShipped").textContent = rows.filter(r => ["shipped","closed"].includes((r.status||"").toLowerCase())).length.toLocaleString();
+
+    return rows;
   }
-
-  // Merge shipped qty from Transactions (if present)
-  for(const [proj, shippedQty] of shippedByProject.entries()){
-    const s = map.get(proj);
-    if(!s) continue;
-    if(shippedQty > (s.shipped || 0)) s.shipped = shippedQty;
-  }
-
-  const rows = Array.from(map.values()).sort((a,b)=>a.project.localeCompare(b.project));
-
-  // Merge overrides
-  for(const r of rows){
-    const ov = overrideForProject(r.project);
-    r.override = ov;
-    const autoStatus = inferProjectStatus(r);
-    r.status = (ov && ov.status) ? ov.status : autoStatus;
-    r.delivery = (ov && ov.delivery) ? ov.delivery : "";
-    r.notes = (ov && ov.notes) ? ov.notes : "";
-  }
-
-  // KPIs
-  $("kpiProjects").textContent = rows.length.toLocaleString();
-  $("kpiInProd").textContent = rows.filter(r => (r.status||"").toLowerCase() === "in production").length.toLocaleString();
-  $("kpiAlloc").textContent = rows.filter(r => ["allocated","reserved"].includes((r.status||"").toLowerCase())).length.toLocaleString();
-  $("kpiShipped").textContent = rows.filter(r => ["shipped","closed"].includes((r.status||"").toLowerCase())).length.toLocaleString();
-
-  return rows;
-}
 
   function renderTable(rows){
     const q = $("q").value.trim().toLowerCase();
-    const stFilter = (window.__schedStatusFilter || "All").toString().trim().toLowerCase();
-    let filtered = rows || [];
-    if(q) filtered = filtered.filter(r => (r.project||"").toLowerCase().includes(q));
-    if(stFilter && stFilter !== "all") filtered = filtered.filter(r => (r.status||"").toLowerCase() === stFilter);
+    const filtered = q ? rows.filter(r => r.project.toLowerCase().includes(q)) : rows;
 
     $("tbody").innerHTML = filtered.length ? filtered.map(r=>{
       const st = r.status || "—";
@@ -616,7 +549,7 @@ async function buildScheduleRows(){
         <td>${r.delivery ? escapeHtml(r.delivery) : '<span class="muted">—</span>'}</td>
         <td>${r.notes ? escapeHtml(r.notes).slice(0,70) + (String(r.notes).length>70?"…":"") : '<span class="muted">—</span>'}</td>
       </tr>`;
-    }).join("") : `<tr><td colspan="11" class="muted" style="padding:16px">No projects found (check Items.project and your filters).</td></tr>`;
+    }).join("") : `<tr><td colspan="11" class="muted" style="padding:16px">No projects found (need Items.project).</td></tr>`;
   }
 
   // ---- Editor
@@ -641,8 +574,10 @@ async function buildScheduleRows(){
     try{
       await upsertOverride(data);
       closeModal("editor");
-      await refreshSafe();
-}catch(err){
+      await refresh();
+    startAutoRefresh();
+      startAutoRefresh();
+    }catch(err){
       console.error(err);
       alert("Save failed: " + (err?.response?.message || err?.message || "Unknown error") +
         "\n\nIf you're using PocketBase overrides, ensure the 'project_schedule' collection has fields: project (text), status (text/select), delivery (date/text), notes (text).");
@@ -731,172 +666,13 @@ async function buildScheduleRows(){
   }
 
 
-  // ---- Calendar (Delivery)
-const cal = {
-  y: (new Date()).getFullYear(),
-  m: (new Date()).getMonth(),
-  selected: ""
-};
-
-function ymdFromLocalDate(d){
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const day = String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${day}`;
-}
-
-function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
-
-function monthLabel(y,m){
-  return new Date(y, m, 1).toLocaleDateString(undefined, { month:"long", year:"numeric" });
-}
-
-function buildDeliveryMap(rows){
-  const byDay = new Map(); // ymd -> array rows
-  for(const r of (rows || [])){
-    const ymd = (r.delivery || "").toString().slice(0,10);
-    if(!ymd || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(ymd)) continue;
-    if(!byDay.has(ymd)) byDay.set(ymd, []);
-    byDay.get(ymd).push(r);
-  }
-  // stable sort inside each day (project name)
-  for(const [k,arr] of byDay.entries()){
-    arr.sort((a,b)=> String(a.project||"").localeCompare(String(b.project||"")));
-  }
-  return byDay;
-}
-
-function renderCalendar(rows){
-  const grid = $("calGrid");
-  const dayPanel = $("calDay");
-  const monthEl = $("calMonthLabel");
-  if(!grid || !dayPanel || !monthEl) return;
-
-  monthEl.textContent = monthLabel(cal.y, cal.m);
-
-  const byDay = buildDeliveryMap(rows);
-
-  // default selection
-  if(!cal.selected){
-    cal.selected = ymdFromLocalDate(new Date());
-  }
-
-  // Build DOW header
-  const dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  let out = dows.map(d=>`<div class="pf-calDow" role="columnheader">${d}</div>`).join("");
-
-  const firstDow = new Date(cal.y, cal.m, 1).getDay();
-  const dim = daysInMonth(cal.y, cal.m);
-  const totalCells = 42; // 6 weeks
-
-  for(let i=0;i<totalCells;i++){
-    const dayNum = i - firstDow + 1;
-    const inMonth = dayNum >= 1 && dayNum <= dim;
-    let ymd = "";
-    if(inMonth){
-      ymd = `${cal.y}-${String(cal.m+1).padStart(2,"0")}-${String(dayNum).padStart(2,"0")}`;
-    }else{
-      const d = new Date(cal.y, cal.m, dayNum);
-      ymd = ymdFromLocalDate(d);
-    }
-
-    const list = byDay.get(ymd) || [];
-    const count = list.length;
-    const isSelected = (ymd === cal.selected);
-
-    const shown = list.slice(0,3).map(r=>{
-      const name = (r.project || "—").toString();
-      const st = (r.status || "—").toString();
-      return `<div class="pf-calEvt" title="${escapeHtml(name)} • ${escapeHtml(st)}">
-        <div class="left">${escapeHtml(name)}</div>
-        <div class="right">${escapeHtml(st)}</div>
-      </div>`;
-    }).join("");
-
-    out += `
-      <div class="pf-calCell ${inMonth ? "" : "isOut"} ${isSelected ? "isSelected" : ""}" role="gridcell" data-ymd="${escapeHtml(ymd)}">
-        <div class="pf-calDateRow">
-          <div class="pf-calDate">${inMonth ? dayNum : new Date(ymd+"T00:00:00").getDate()}</div>
-          ${count ? `<div class="pf-calBadge">${count}</div>` : ``}
-        </div>
-        <div class="pf-calEvents">${shown}</div>
-      </div>
-    `;
-  }
-
-  grid.innerHTML = out;
-
-  // day list
-  const sel = cal.selected;
-  const list = byDay.get(sel) || [];
-  dayPanel.innerHTML = `
-    <h4>${escapeHtml(sel)}</h4>
-    ${list.length ? `
-      <div class="pf-calDayList">
-        ${list.map(r=>`
-          <div class="pf-calDayItem">
-            <div class="meta">
-              <b>${escapeHtml(r.project || "—")}</b>
-              <div class="muted">${escapeHtml(r.notes || "")}</div>
-            </div>
-            <div>${r.status ? `<span class="tag ${tagClass(r.status)}">${escapeHtml(r.status)}</span>` : `<span class="muted">—</span>`}</div>
-          </div>
-        `).join("")}
-      </div>
-    ` : `<div class="muted">No deliveries on this date.</div>`}
-  `;
-
-  // interaction
-  grid.querySelectorAll(".pf-calCell").forEach(cell=>{
-    cell.addEventListener("click", ()=>{
-      cal.selected = cell.getAttribute("data-ymd") || "";
-      renderCalendar(currentRows);
-    }, { passive:true });
-  });
-}
-
-function openCalendar(){
-  if(!$("calendarModal")) return;
-  openModal("calendarModal");
-  renderCalendar(currentRows);
-}
-
-// ---- events
+  // ---- events
   $("btnBack").addEventListener("click", ()=>{
     try{
       if(window.top && window.top !== window) window.top.location.href = "index.html";
       else window.location.href = "index.html";
     }catch{ window.location.href = "index.html"; }
   });
-
-  $("btnCalendar")?.addEventListener("click", openCalendar);
-
-$("btnCalClose")?.addEventListener("click", ()=> closeModal("calendarModal"));
-$("btnCalToday")?.addEventListener("click", ()=>{
-  const d = new Date();
-  cal.y = d.getFullYear();
-  cal.m = d.getMonth();
-  cal.selected = ymdFromLocalDate(d);
-  renderCalendar(currentRows);
-});
-$("btnCalPrev")?.addEventListener("click", ()=>{
-  cal.m -= 1;
-  if(cal.m < 0){ cal.m = 11; cal.y -= 1; }
-  renderCalendar(currentRows);
-});
-$("btnCalNext")?.addEventListener("click", ()=>{
-  cal.m += 1;
-  if(cal.m > 11){ cal.m = 0; cal.y += 1; }
-  renderCalendar(currentRows);
-});
-
-  $("btnFilter")?.addEventListener("click", ()=>{
-  const cur = (window.__schedStatusFilter || "All");
-  const v = prompt("Filter by status (All, Planning, In Production, On Hand, Allocated, Shipped, Closed):", cur);
-  if(v === null) return;
-  window.__schedStatusFilter = (v || "All").trim() || "All";
-  renderTable(currentRows);
-});
 
   $("btnNew").addEventListener("click", ()=> openEditor(""));
   $("btnRefresh").addEventListener("click", refreshSafe);
@@ -931,8 +707,7 @@ $("btnCalNext")?.addEventListener("click", ()=>{
   (async ()=>{
     $("modePill").textContent = "Connecting…";
     await initAuth();
-    await refreshSafe();
-    startAutoRefresh();
+    await refresh();
   })();
 })();
 </script>

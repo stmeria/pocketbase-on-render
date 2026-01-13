@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fisher Precast • Job Dashboard</title>
+  <script src="vendor/pocketbase.umd.js"></script>
+  <link rel="stylesheet" href="precastflow-ui.css">
+  <style>
+    .pf-search{max-width:520px}
+    .pf-kpiRow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+    @media (max-width:1100px){.pf-kpiRow{grid-template-columns:repeat(3,minmax(0,1fr));}}
+    @media (max-width:640px){.pf-kpiRow{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    .pf-kpi{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:12px 14px}
+    .pf-kpi .k{color:var(--muted);font-weight:800;font-size:12px}
+    .pf-kpi .v{font-weight:950;font-size:18px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pf-kpi .s{color:var(--muted);font-weight:750;font-size:12px;margin-top:4px}
+    .pf-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+    .pf-row .pf-input{min-width:220px}
+    .pf-issues{display:flex;flex-direction:column;gap:8px}
+    .pf-issue{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+    .pf-issue .txt{font-weight:800}
+    .pf-issue .meta{color:var(--muted);font-size:12px;font-weight:700;margin-top:2px}
+    .pf-issue .actions{margin-left:auto;display:flex;gap:8px}
+    .pf-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:900}
+    .pf-badge.good{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.25);color:#166534}
+    .pf-badge.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);color:#92400e}
+    .pf-badge.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.22);color:#7f1d1d}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .pf-tableWrap{overflow:auto;border:1px solid var(--line);border-radius:14px}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+    th{position:sticky;top:0;background:var(--panel);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:900}
+    tr:last-child td{border-bottom:0}
+    .pf-empty{padding:14px;color:var(--muted);font-weight:800}
+  </style>
+</head>
+<body>
+<header class="pf-topbar">
+  <button class="pf-iconBtn" id="btnBack" type="button" title="Back to Estimates" aria-label="Back">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 7l-5 5 5 5V7z"/></svg>
+  </button>
+
+  <div class="pf-topbar-title">
+    <div id="pageTitle">Job Dashboard</div>
+    <div id="pageSubtitle">Single source of truth for production + shipping</div>
+  </div>
+
+  <div class="pf-search" role="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 4a6 6 0 1 1-4.472 10.03l-3.28 3.28a1 1 0 0 1-1.415-1.415l3.28-3.28A6 6 0 0 1 10 4Zm0 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
+    <input id="topSearch" type="search" placeholder="Search by Quote #..." autocomplete="off"/>
+  </div>
+
+  <div class="pf-topbar-actions">
+    <span class="badge" id="modePill">Loading…</span>
+    <button class="btn ghost" type="button" id="btnOpenQuote">Open Quote</button>
+    <button class="btn primary" type="button" id="btnRefresh">Refresh</button>
+  </div>
+</header>
+
+<div class="shell">
+  <div class="appShell">
+    <aside class="sidebar" aria-label="Sidebar navigation">
+      <div class="pf-brandRow">
+        <div class="pf-brandMark" aria-hidden="true">
+          <img src="Fisher_no.png" alt="Fisher Associates" class="pf-brandLogo">
+        </div>
+        <div class="pf-brandName">Fisher Precast Management System</div>
+        <div class="pf-brandHint">›</div>
+      </div>
+
+      <div class="tabs" id="tabs" aria-label="Navigation tabs">
+        <button type="button" class="tab" data-tab="dashboard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11Z"/></svg><span class="navLabel">Dashboard</span></button>
+        <button type="button" class="tab" data-tab="crm"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11a4 4 0 1 0-8 0a4 4 0 0 0 8 0Zm-4 6c-4.42 0-8 2.01-8 4.5V23h16v-1.5C20 19.01 16.42 17 12 17Z"/></svg><span class="navLabel">CRM</span></button>
+        <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
+        <button type="button" class="tab active" data-tab="job"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Job</span></button>
+        <button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
+        <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
+        <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
+
+        <div class="pf-more">
+          <details>
+            <summary>More</summary>
+            <div class="pf-moreItems">
+              <button type="button" class="tab" data-tab="schedule"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3V2Zm15 8H4v11h18V10Z"/></svg><span class="navLabel">Schedule</span></button>
+              <button type="button" class="tab" data-tab="transactions"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H7V7Zm0 4h10v2H7v-2Zm0 4h6v2H7v-2ZM5 3h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg><span class="navLabel">Transactions</span></button>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="pf-userFooter">
+        <div class="pf-userRow">
+          <div class="pf-avatar" id="userInitials">U</div>
+          <div class="pf-userMeta">
+            <div class="pf-userName" id="userName">User</div>
+            <div class="pf-userRole" id="userRole">—</div>
+          </div>
+        </div>
+        <div class="pf-userBadgeWrap">
+          <span class="badge" id="userBadge">Signed in</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="pf-page">
+        <div class="pf-sectionHead">
+          <div>
+            <div class="pf-h2" id="jobHeader">Job</div>
+            <div class="pf-sub" id="jobSub">—</div>
+          </div>
+          <div class="pf-headRight" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <span class="pf-badge" id="jobStatusBadge">Status: —</span>
+            <a class="btn ghost" id="btnOpenCulvert" href="precast_culvert.html" style="text-decoration:none">Open Culvert Estimator</a>
+          </div>
+        </div>
+
+        <div class="pf-row" style="margin-top:10px">
+          <div style="flex:1;min-width:240px">
+            <label>Target delivery date</label>
+            <input class="pf-input" id="targetDeliveryDate" type="date"/>
+          </div>
+          <button class="btn primary" type="button" id="btnSaveTarget">Save Target</button>
+        </div>
+
+        <div class="pf-kpiRow" id="kpis" style="margin-top:12px"></div>
+
+        <div class="pf-card" style="margin-top:14px">
+          <div class="pf-cardTop">
+            <div>
+              <div class="pf-cardTitle">Open issues</div>
+              <div class="pf-cardSub">Track holds, missing embeds, repairs, delivery constraints</div>
+            </div>
+          </div>
+          <div class="pf-cardBody">
+            <div class="pf-row">
+              <input class="pf-input" id="newIssueText" type="text" placeholder="Add an issue (e.g., Waiting on embed shop drawing approval)…" style="flex:1;min-width:260px"/>
+              <button class="btn" type="button" id="btnAddIssue">Add Issue</button>
+            </div>
+            <div class="pf-issues" id="issuesList" style="margin-top:12px"></div>
+            <div class="pf-empty" id="issuesEmpty" style="display:none">No open issues.</div>
+          </div>
+        </div>
+
+        <div class="pf-card" style="margin-top:14px">
+          <div class="pf-cardTop">
+            <div>
+              <div class="pf-cardTitle">Required pieces (from locked quote)</div>
+              <div class="pf-cardSub">This is the locked scope used to plan production.</div>
+            </div>
+          </div>
+          <div class="pf-cardBody">
+            <div class="pf-tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:160px">SKU</th>
+                    <th>Item</th>
+                    <th style="width:110px;text-align:right">Qty</th>
+                    <th style="width:140px;text-align:right">Unit Wt</th>
+                    <th style="width:160px;text-align:right">Line Wt</th>
+                  </tr>
+                </thead>
+                <tbody id="reqTbody"></tbody>
+              </table>
+            </div>
+            <div class="pf-empty" id="reqEmpty" style="display:none">No quote items found in the job snapshot.</div>
+          </div>
+        </div>
+
+        <div class="pf-card" style="margin-top:14px">
+          <div class="pf-cardTop">
+            <div>
+              <div class="pf-cardTitle">Pieces found in inventory (by Quote #)</div>
+              <div class="pf-cardSub">This is what the yard/production currently shows for this job.</div>
+            </div>
+          </div>
+          <div class="pf-cardBody">
+            <div class="pf-tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:170px">SKU</th>
+                    <th>Item</th>
+                    <th style="width:150px">Status</th>
+                    <th style="width:130px">Cast Date</th>
+                    <th style="width:90px;text-align:right">Qty</th>
+                    <th style="width:120px;text-align:right">Unit Wt</th>
+                    <th style="width:140px;text-align:right">Total Wt</th>
+</tr>
+                </thead>
+                <tbody id="invTbody"></tbody>
+              </table>
+            </div>
+            <div class="pf-empty" id="invEmpty" style="display:none">No inventory pieces are tagged with this Quote # yet.</div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-weight:800;display:none;z-index:4000"></div>
+
+<script>
+(() => {
+  const PB_URL = window.location.origin;
+  const pb = new PocketBase(PB_URL);
+  pb.autoCancellation(false);
+
+  const $$ = (id) => document.getElementById(id);
+  const JOBS = "jobs";
+  const OPP = "crm_opportunities";
+  const ITEMS = "items";
+
+  const norm = (v) => (v ?? "").toString().trim().toLowerCase();
+  const escapePB = (s) => String(s||"").replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+
+  let job = null;
+  let quoteNumber = "";
+
+  let toastTimer = null;
+  function toast(msg){
+    const el = $$("toast");
+    if(!el) return;
+    el.textContent = msg;
+    el.style.display = "block";
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> el.style.display="none", 2400);
+  }
+
+  const ensureAuth = async () => {
+    if(pb.authStore.isValid) return true;
+    window.location.href = "index.html";
+    return false;
+  };
+
+  const mapTab = (tab) => {
+    if(tab === "dashboard") return "index.html?view=dashboard";
+    if(tab === "inventory") return "index.html?view=inventory";
+    if(tab === "production") return "index.html?view=production";
+    if(tab === "shipping") return "index.html?view=shipping";
+    if(tab === "crm") return "crm.html";
+    if(tab === "schedule") return "schedule.html";
+    if(tab === "transactions") return "index.html?view=transactions";
+    if(tab === "estimator") return "estimates.html";
+    if(tab === "job") return `job.html?quote=${encodeURIComponent(quoteNumber || "")}`;
+    return "index.html";
+  };
+  document.getElementById("tabs")?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab");
+    if(!btn) return;
+    const tab = btn.getAttribute("data-tab");
+    if(!tab) return;
+    window.location.href = mapTab(tab);
+  });
+
+  function getQuoteParam(){
+    const u = new URL(window.location.href);
+    return (u.searchParams.get("quote") || "").trim();
+  }
+
+
+  // --------------------------
+  // Realtime updates (so Production changes show up immediately)
+  // --------------------------
+  let realtimeBound = false;
+  let _rtTimer = null;
+
+  function scheduleRefresh(){
+    clearTimeout(_rtTimer);
+    _rtTimer = setTimeout(()=> refresh(), 250);
+  }
+
+  async function wireRealtime(){
+    if(realtimeBound) return;
+    realtimeBound = true;
+
+    try{
+      await pb.collection(ITEMS).subscribe("*", (e)=>{
+        const rec = e?.record || {};
+        const raw = (rec.quoteNumber ?? rec.QuoteNumber ?? rec.quote ?? rec.bin ?? "").toString();
+        const key = (quoteNumber || "").trim();
+        if(!key) return;
+        const q = raw.trim();
+        if(q && (q === key || q.toLowerCase().includes(key.toLowerCase()))) scheduleRefresh();
+      });
+      await pb.collection(JOBS).subscribe("*", (e)=>{
+        const rec = e?.record || {};
+        const q = (rec.quoteNumber ?? rec.QuoteNumber ?? rec.estimateNumber ?? rec.EstimateNumber ?? "").toString().trim();
+        if(q && q === (quoteNumber || "").trim()) scheduleRefresh();
+      });
+      await pb.collection(OPP).subscribe("*", (e)=>{
+        const rec = e?.record || {};
+        const q = (rec.quoteNumber ?? rec.QuoteNumber ?? "").toString().trim();
+        if(q && q === (quoteNumber || "").trim()) scheduleRefresh();
+      });
+    } catch(e){
+      // Non-fatal: if realtime is blocked by rules, manual refresh still works.
+    }
+  }
+
+
+  function badgeForStatus(status){
+    const s = norm(status);
+    const el = $$("jobStatusBadge");
+    if(!el) return;
+    el.classList.remove("good","warn","bad");
+    if(s === "shipped") el.classList.add("good");
+    else if(s === "production" || s === "in production" || s === "allocated") el.classList.add("warn");
+    else if(s === "lost") el.classList.add("bad");
+    el.textContent = `Status: ${status || "—"}`;
+  }
+
+  async function findJobByQuoteNumber(qn){
+    const fields = ["quoteNumber","QuoteNumber","estimateNumber","EstimateNumber","jobNumber","JobNumber"];
+    for(const f of fields){
+      try{
+        const res = await pb.collection(JOBS).getList(1, 1, { filter: `${f}="${escapePB(qn)}"`, sort: "-updated" });
+        const it = res?.items?.[0];
+        if(it) return it;
+      } catch(e){}
+    }
+    try{
+      const res = await pb.collection(JOBS).getList(1, 50, { sort: "-updated" });
+      const items = res?.items || [];
+      const key = norm(qn);
+      return items.find(j => fields.some(f => norm(j?.[f]) === key)) || null;
+    } catch(e){
+      return null;
+    }
+  }
+  function jobStatusFromStage(s){
+    const v = norm(s);
+    if(!v) return "";
+    if(v === "won") return "production";
+    if(v === "in production" || v === "inproduction") return "production";
+    if(v === "negotiating") return "negotiation";
+    if(v === "quote") return "quoted";
+    return v;
+  }
+
+  async function findOppByQuoteNumber(qn){
+    const fields = ["quoteNumber","QuoteNumber"];
+    for(const f of fields){
+      try{
+        const res = await pb.collection(OPP).getList(1, 1, {
+          filter: `${f}="${escapePB(qn)}"`,
+          sort: "-updated",
+          // Do NOT fetch notes (can be huge)
+          fields: "id,quoteNumber,QuoteNumber,relatedProject,RelatedProject,projectName,ProjectName,customerName,CustomerName,companyName,CompanyName,stage,Stage,status,Status,updated"
+        });
+        const it = res?.items?.[0];
+        if(it) return it;
+      } catch(e){}
+    }
+    return null;
+  }
+
+
+  function getJobField(j, keys, fallback=""){
+    for(const k of keys){
+      const v = j?.[k];
+      if(v !== undefined && v !== null && String(v).trim() !== "") return v;
+    }
+    return fallback;
+  }
+
+  function toISODateMaybe(v){
+    if(!v) return "";
+    const s = String(v);
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    if(m) return m[1];
+    const d = new Date(s);
+    if(!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+    return "";
+  }
+
+  function getItemSku(it){ return it?.sku ?? it?.SKU ?? it?.Sku ?? ""; }
+  function getItemName(it){ return it?.name ?? it?.Name ?? it?.item ?? it?.Item ?? ""; }
+  function getItemStatus(it){ return it?.Status ?? it?.status ?? it?.stage ?? ""; }
+  function getItemCastDate(it){
+    const v = it?.CastDate ?? it?.castDate ?? it?.castdate ?? "";
+    if(!v) return "";
+    return String(v).split(" ")[0];
+  }
+  function numVal(v){
+    if(v === undefined || v === null) return 0;
+    if(typeof v === "number") return isFinite(v) ? v : 0;
+    const s = String(v).replace(/,/g, "").trim();
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+  }
+  function getItemQty(it){
+    const q = numVal(
+      it?.qty ?? it?.Qty ??
+      it?.quantity ?? it?.Quantity ??
+      it?.onHand ?? it?.OnHand ??
+      it?.count ?? it?.Count ??
+      1
+    );
+    return q > 0 ? q : 1;
+  }
+  function getItemUnitWeight(it){
+    return numVal(
+      it?.unitWeightLb ?? it?.UnitWeightLb ??
+      it?.weightLb ?? it?.WeightLb ??
+      it?.unitWeight ?? it?.UnitWeight ??
+      it?.unitWt ?? it?.UnitWt ??
+      it?.weightPerPiece ?? it?.WeightPerPiece ??
+      it?.pieceWeight ?? it?.PieceWeight ??
+      it?.wt ?? it?.Wt ??
+      it?.weight ?? it?.Weight ??
+      0
+    );
+  }
+  function getItemWeight(it){
+    const tw = numVal(
+      it?.totalWeightLb ?? it?.TotalWeightLb ??
+      it?.totalWeight ?? it?.TotalWeight ??
+      it?.lineWeight ?? it?.LineWeight ??
+      it?.netWeight ?? it?.NetWeight ??
+      0
+    );
+    if(tw) return tw;
+    return getItemUnitWeight(it) * getItemQty(it);
+  }
+
+  function classify(st){
+    const s = norm(st);
+    if(s.includes("ship")) return "shipped";
+    if(s.includes("alloc") || s.includes("reserve")) return "allocated";
+    if(s.includes("hand") || s.includes("yard") || s.includes("stock")) return "onhand";
+    if(s.includes("cast") || s.includes("cure") || s.includes("strip")) return "casted";
+    if(s.includes("prod")) return "casted";
+    return "other";
+  }
+
+  async function fetchInventoryByQuote(qn){
+    // Try filters by common keys; fallback to client-side filter.
+    const filters = [
+      // Your system stores the quote reference in items.bin
+      `bin="${escapePB(qn)}"`,
+      `bin ~ "${escapePB(qn)}"`,
+      `quoteNumber="${escapePB(qn)}"`,
+      `QuoteNumber="${escapePB(qn)}"`,
+      `quote="${escapePB(qn)}"`
+    ];
+    for(const f of filters){
+      try{
+        return await pb.collection(ITEMS).getFullList(500, { filter: f, sort: "-updated" });
+      } catch(e){}
+    }
+    try{
+      const all = await pb.collection(ITEMS).getFullList(500, { sort: "-updated" });
+      const key = norm(qn);
+      return all.filter(it => {
+        const b = (it?.bin ?? "").toString().trim();
+        const candidates = [it?.quoteNumber,it?.QuoteNumber,it?.quote];
+        if(candidates.some(v => norm(v) === key)) return true;
+        if(b && (norm(b) === key || norm(b).includes(key))) return true;
+        return false;
+      });
+    } catch(e){
+      return [];
+    }
+  }
+
+  function renderKpis({required=0, casted=0, onhand=0, allocated=0, shipped=0, totalWt=0, targetDate=""}){
+    const el = $$("kpis");
+    if(!el) return;
+    const fmtWt = (w) => (w>=2000 ? (w/2000).toFixed(2) + " tons" : Math.round(w).toLocaleString() + " lb");
+    el.innerHTML = [
+      {k:"Required pieces", v:String(required), s:"From locked quote"},
+      {k:"Casted", v:String(casted), s:"Cast date / status"},
+      {k:"On hand", v:String(onhand), s:"Ready in yard"},
+      {k:"Allocated", v:String(allocated), s:"Reserved for load"},
+      {k:"Shipped", v:String(shipped), s:"Delivered / in transit"},
+      {k:"Inventory weight", v:fmtWt(totalWt), s: targetDate ? ("Target: " + targetDate) : "Target: —"},
+    ].map(x => `
+      <div class="pf-kpi">
+        <div class="k">${x.k}</div>
+        <div class="v">${x.v}</div>
+        <div class="s">${x.s}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderReqTable(items){
+    const tb = $$("reqTbody");
+    const empty = $$("reqEmpty");
+    if(!tb) return;
+    if(!items || items.length === 0){
+      tb.innerHTML = "";
+      if(empty) empty.style.display = "block";
+      return;
+    }
+    if(empty) empty.style.display = "none";
+    tb.innerHTML = items.map(li => {
+      const sku = (li?.sku || "—");
+      const name = (li?.name || li?.item || "—");
+      const qty = Number(li?.qty || 0);
+      const uw = Number(
+        li?.unitWeightLb ?? li?.weightLb ??
+        li?.unitWeight ?? li?.weight ??
+        0
+      ) || 0;
+      const lw = qty * uw;
+      return `
+        <tr>
+          <td class="mono">${sku}</td>
+          <td>${name}</td>
+          <td style="text-align:right">${qty}</td>
+          <td style="text-align:right">${uw ? uw.toLocaleString() + " lb" : "—"}</td>
+          <td style="text-align:right">${lw ? lw.toLocaleString() + " lb" : "—"}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderInvTable(items){
+    const tb = $$("invTbody");
+    const empty = $$("invEmpty");
+    if(!tb) return;
+    if(!items || items.length === 0){
+      tb.innerHTML = "";
+      if(empty) empty.style.display = "block";
+      return;
+    }
+    if(empty) empty.style.display = "none";
+    tb.innerHTML = items.map(it => {
+      const sku = getItemSku(it) || "—";
+      const name = getItemName(it) || "—";
+      const st = getItemStatus(it) || "—";
+      const cd = getItemCastDate(it) || "—";
+      const qty = getItemQty(it);
+      const tw = getItemWeight(it);
+      const uw0 = getItemUnitWeight(it);
+      const uw = uw0 || (tw && qty ? (tw/qty) : 0);
+      return `
+        <tr>
+          <td class="mono">${sku}</td>
+          <td>${name}</td>
+          <td>${st}</td>
+          <td>${cd}</td>
+          <td style="text-align:right">${qty ? qty : "—"}</td>
+          <td style="text-align:right">${uw ? Math.round(uw).toLocaleString() + " lb" : "—"}</td>
+          <td style="text-align:right">${tw ? Math.round(tw).toLocaleString() + " lb" : "—"}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function getIssues(){
+    const issues = getJobField(job, ["issues","Issues"], null);
+    if(Array.isArray(issues)) return issues;
+    return [];
+  }
+
+  async function saveIssues(issues){
+    const attempts = [
+      { issues },
+      { Issues: issues },
+      { notes: JSON.stringify({ ...(job?.notes ? {notes: job.notes} : {}), issues }) }
+    ];
+    let lastErr = null;
+    for(const a of attempts){
+      try{
+        job = await pb.collection(JOBS).update(job.id, a);
+        return true;
+      } catch(e){ lastErr = e; }
+    }
+    console.warn(lastErr);
+    toast("Unable to save issues (field mismatch).");
+    return false;
+  }
+
+  function renderIssues(){
+    const list = $$("issuesList");
+    const empty = $$("issuesEmpty");
+    if(!list) return;
+    const issues = getIssues().filter(x => x && x.text);
+    const open = issues.filter(x => !x.closed);
+    if(empty) empty.style.display = open.length ? "none" : "block";
+
+    list.innerHTML = open.map((iss) => {
+      const when = iss.createdAt ? toISODateMaybe(iss.createdAt) : "";
+      return `
+        <div class="pf-issue" data-id="${iss.id}">
+          <div>
+            <div class="txt">${iss.text}</div>
+            <div class="meta">${when ? "Added " + when : ""}</div>
+          </div>
+          <div class="actions">
+            <button class="btn small ghost" type="button" data-act="resolve">Resolve</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  async function saveTargetDate(){
+    if(!job) return;
+    const v = $$("targetDeliveryDate")?.value || "";
+    const val = v ? v : null;
+
+    const attempts = [
+      { targetDeliveryDate: val },
+      { TargetDeliveryDate: val },
+      { scheduledDate: val },
+      { etaDate: val }
+    ];
+    let lastErr = null;
+    for(const a of attempts){
+      try{
+        job = await pb.collection(JOBS).update(job.id, a);
+        toast("Saved target date.");
+        return;
+      } catch(e){ lastErr = e; }
+    }
+    console.warn(lastErr);
+    toast("Unable to save target date (field mismatch).");
+  }
+
+  async function refresh(){
+    const ok = await ensureAuth();
+    if(!ok) return;
+
+    quoteNumber = (quoteNumber || getQuoteParam() || "").trim();
+    if(!quoteNumber){
+      $$("jobHeader").textContent = "Job";
+      $$("jobSub").textContent = "No quote number provided.";
+      $$("modePill").textContent = pb.authStore.isValid ? "Online" : "Offline";
+      return;
+    }
+
+    $$("modePill").textContent = pb.authStore.isValid ? "Online" : "Offline";
+    $$("topSearch").value = quoteNumber;
+    $$("btnOpenQuote").onclick = () => window.location.href = `estimates.html`;
+
+    job = await findJobByQuoteNumber(quoteNumber);
+
+    if(!job){
+      $$("jobHeader").textContent = `Job ${quoteNumber}`;
+      $$("jobSub").textContent = "No job record found. Convert the quote to a job from Estimates.";
+      badgeForStatus("—");
+      renderKpis({required:0,casted:0,onhand:0,allocated:0,shipped:0,totalWt:0,targetDate:""});
+      $$("reqTbody").innerHTML = "";
+      $$("reqEmpty").style.display = "block";
+      $$("issuesList").innerHTML = "";
+      $$("issuesEmpty").style.display = "block";
+      $$("invTbody").innerHTML = "";
+      $$("invEmpty").style.display = "block";
+      return;
+    }
+
+    const qn = getJobField(job, ["quoteNumber","QuoteNumber","estimateNumber","EstimateNumber","jobNumber","JobNumber"], quoteNumber) || quoteNumber;
+
+    // If the job record is missing fields, fall back to the CRM opportunity (fields-only, no notes)
+    const opp = await findOppByQuoteNumber(qn);
+
+    const projectName = getJobField(job, ["projectName","ProjectName","project","Project","name","Name"], "") ||
+                        getJobField(opp, ["relatedProject","RelatedProject","projectName","ProjectName","project","Project","name","Name"], "");
+
+    const customerName = getJobField(job, ["customerName","CustomerName","companyName","CompanyName","customer","Customer"], "") ||
+                         getJobField(opp, ["customerName","CustomerName","companyName","CompanyName","customer","Customer"], "");
+
+    let statusRaw = getJobField(job, ["status","Status","stage","Stage","jobStatus","JobStatus","state","State"], "");
+    if(!statusRaw) statusRaw = getJobField(opp, ["stage","Stage","status","Status"], "");
+    const status = jobStatusFromStage(statusRaw) || "production";
+
+    const target = toISODateMaybe(getJobField(job, ["targetDeliveryDate","TargetDeliveryDate","scheduledDate","etaDate"], ""));
+
+    $$("jobHeader").textContent = `Job ${qn}${projectName ? " — " + projectName : ""}`;
+    $$("jobSub").textContent = customerName ? `Customer: ${customerName}` : "—";
+    badgeForStatus(status);
+    $$("targetDeliveryDate").value = target || "";
+
+    // Snapshot items (locked quote)
+    const snap = getJobField(job, ["quoteSnapshot","lockedQuoteSnapshot","data"], null);
+    const quoteItems = (snap && Array.isArray(snap.items)) ? snap.items : (Array.isArray(job?.quoteItems) ? job.quoteItems : []);
+    renderReqTable(quoteItems);
+
+    // Required pieces (from snapshot)
+    const required = (job?.summary?.piecesRequired ?? job?.summary?.PiecesRequired ?? null);
+    const requiredPieces = (required != null) ? Number(required||0) : (quoteItems||[]).reduce((s,li)=>s+Number(li?.qty||0),0);
+
+    // Inventory items associated with quote #
+    const inv = await fetchInventoryByQuote(qn);
+    let casted=0,onhand=0,allocated=0,shipped=0, totalWt=0;
+    for(const it of inv){
+      const st = classify(getItemStatus(it));
+      const q = getItemQty(it);
+      if(st === "casted") casted += q;
+      else if(st === "onhand") onhand += q;
+      else if(st === "allocated") allocated += q;
+      else if(st === "shipped") shipped += q;
+      const w = getItemWeight(it);
+      if(w) totalWt += w;
+    }
+    renderInvTable(inv);
+
+    renderKpis({required: requiredPieces, casted, onhand, allocated, shipped, totalWt, targetDate: target || ""});
+
+    renderIssues();
+  }
+
+  // Events
+  $$("btnBack")?.addEventListener("click", () => window.location.href = "estimates.html");
+  $$("btnRefresh")?.addEventListener("click", refresh);
+  $$("btnSaveTarget")?.addEventListener("click", saveTargetDate);
+
+  $$("topSearch")?.addEventListener("keydown", (e) => {
+    if(e.key !== "Enter") return;
+    const q = (e.target.value || "").trim();
+    if(!q) return;
+    window.location.href = `job.html?quote=${encodeURIComponent(q)}`;
+  });
+
+  $$("btnAddIssue")?.addEventListener("click", async () => {
+    if(!job) return;
+    const txt = ($$("newIssueText")?.value || "").trim();
+    if(!txt) return;
+    const issues = getIssues();
+    issues.push({ id: crypto?.randomUUID?.() || (Date.now()+"-"+Math.random().toString(16).slice(2)), text: txt, createdAt: new Date().toISOString(), closed:false });
+    const ok = await saveIssues(issues);
+    if(ok){
+      $$("newIssueText").value = "";
+      renderIssues();
+    }
+  });
+
+  $$("issuesList")?.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button[data-act]");
+    if(!btn) return;
+    const wrap = e.target.closest(".pf-issue");
+    if(!wrap) return;
+    const id = wrap.getAttribute("data-id");
+    if(!id) return;
+    const act = btn.getAttribute("data-act");
+    if(act !== "resolve") return;
+    const issues = getIssues();
+    const idx = issues.findIndex(x => x && x.id === id);
+    if(idx >= 0){
+      issues[idx].closed = true;
+      issues[idx].closedAt = new Date().toISOString();
+      const ok = await saveIssues(issues);
+      if(ok) renderIssues();
+    }
+  });
+
+  function applyRoleUI(){
+    try{
+      const rec = pb.authStore?.record || {};
+      const email = rec.email || "Signed in";
+      const role = (rec.role ?? rec.Role ?? "user").toString();
+      $$("userBadge").textContent = `${email} • ${role}`;
+      const rawName = (rec.name || rec.fullName || rec.firstName || "").toString().trim();
+      const displayName = rawName || (email.includes("@") ? email.split("@")[0] : email);
+      const initials = displayName.split(/[\s._-]+/).filter(Boolean).slice(0,2).map(s=>s[0].toUpperCase()).join("") || "U";
+      $$("userName").textContent = displayName;
+      $$("userRole").textContent = role;
+      $$("userInitials").textContent = initials;
+    } catch{}
+  }
+
+  // Init
+  (async () => {
+    const ok = await ensureAuth();
+    if(!ok) return;
+    applyRoleUI();
+    quoteNumber = getQuoteParam();
+    $$("topSearch").value = quoteNumber || "";
+    $$("modePill").textContent = pb.authStore.isValid ? "Online" : "Offline";
+    await wireRealtime();
+    refresh();
+  })();
+})();
+</script>
+</body>
+</html>
