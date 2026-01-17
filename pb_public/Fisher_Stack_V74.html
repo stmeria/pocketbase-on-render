@@ -3,12 +3,6 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<meta http-equiv="Pragma" content="no-cache"/>
-<meta http-equiv="Expires" content="0"/>
-<script>(function(){try{document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l){var h=(l.getAttribute('href')||'').toLowerCase();if(h.includes('precastflow')) l.remove();});}catch(e){}})();</script>
-
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Fisher Precast Stack Designer</title>
 <style>
 *{box-sizing:border-box}
@@ -489,28 +483,6 @@ button:hover{background:#1d4ed8}
 
 .inline-check{display:inline-flex;align-items:center;gap:8px;}
 #extendedBaseWrap.disabled{opacity:0.5;pointer-events:none;}
-
-
-/* Back button (Estimator only) */
-.back-link{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  margin-bottom:10px;
-  background:#0ea5e9;
-  color:#ffffff !important;
-  text-decoration:none;
-  border-radius:10px;
-  font-weight:700;
-  font-size:13px;
-  width:fit-content;
-}
-.back-link:hover{background:#0284c7}
-@media (max-width: 640px){
-  .back-link{width:100%; justify-content:center}
-}
-
 </style>
 </head>
 <body>
@@ -527,19 +499,6 @@ button:hover{background:#1d4ed8}
 </div>
 <!-- INPUT AREA -->
 <div class="card" style="margin-top:12px;">
-<a id="backLink" class="back-link" href="estimates.html">← Back to Estimates</a>
-<script>
-(function(){
-  try{
-    var p=new URLSearchParams(location.search);
-    var back=p.get("back");
-    if(back){
-      var a=document.getElementById("backLink");
-      if(a){ a.href = back; a.textContent = "← Back"; }
-    }
-  }catch(e){}
-})();
-</script>
 <h1 style="margin:0;">Fisher Precast Stack Designer</h1>
 </div>
 <div aria-label="Application Tabs" class="tabs" role="tablist">
@@ -701,10 +660,9 @@ button:hover{background:#1d4ed8}
 </div>
 <div class="ref-wrap" id="refWrap">
 <!-- Manhole reference image (must exist in same folder as this HTML) -->
-<img alt="Precast Concrete Manhole reference" id="refManholeImg" src="Manhole image.png"/>
-<img alt="Precast Concrete Vault reference" id="refVaultImg" src="Vault image.png" style="display:none;"/>
+<img alt="Precast Concrete Manhole reference" id="refManholeImg" src="Manhole image.png"/><img alt="Precast Concrete Vault reference" id="refVaultImg" src="Vault image.png" style="display:none;"/>
 <!-- Vault reference image (must exist in same folder as this HTML) -->
-
+<img alt="Precast Concrete Vault reference" id="refVaultImg" src="Vault image.png" style="display:none;"/>
 <!-- Vault reference (inline schematic fallback) -->
 <svg aria-label="Vault reference schematic" id="refVaultSvg" role="img" viewbox="0 0 320 420">
 <rect fill="none" height="270" stroke="#e5e7eb" stroke-width="3" width="272" x="24" y="70"></rect>
