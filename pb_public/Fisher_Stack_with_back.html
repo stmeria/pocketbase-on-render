@@ -392,6 +392,8 @@ button:hover{background:#1d4ed8}
   display:block;
 }
 #refManholeImg{background:#0b1220}
+
+.ref-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:13px;text-align:center;padding:18px;pointer-events:none;}
 #refVaultSvg{display:none; padding:12px}
 .callout{
   position:absolute;
@@ -701,8 +703,9 @@ button:hover{background:#1d4ed8}
 </div>
 <div class="ref-wrap" id="refWrap">
 <!-- Manhole reference image (must exist in same folder as this HTML) -->
-<img alt="Precast Concrete Manhole reference" id="refManholeImg" src="Manhole image.png"/>
-<img alt="Precast Concrete Vault reference" id="refVaultImg" src="Vault image.png" style="display:none;"/>
+<img alt="Precast Concrete Manhole reference" id="refManholeImg" src="Manhole_image.png"/>
+<img alt="Precast Concrete Vault reference" id="refVaultImg" src="Vault%20image.png" style="display:none;"/>
+<div class="ref-msg" id="refImgMsg" style="display:none;"></div>
 <!-- Vault reference image (must exist in same folder as this HTML) -->
 
 <!-- Vault reference (inline schematic fallback) -->
@@ -6722,13 +6725,88 @@ function validateStructure(){
     if(!st || !man || !vaultImg || !vaultSvg || !title) return;
 
     const isVault = (st.value === 'vault');
+    const vaultFailed = (vaultImg.dataset.failed === '1');
+
     man.style.display = isVault ? 'none' : 'block';
-    vaultImg.style.display = isVault ? 'block' : 'none';
-    vaultSvg.style.display = 'none';
+
+    if(isVault){
+      vaultImg.style.display = vaultFailed ? 'none' : 'block';
+      vaultSvg.style.display = vaultFailed ? 'block' : 'none';
+    }else{
+      vaultImg.style.display = 'none';
+      vaultSvg.style.display = 'none';
+    }
+
     title.textContent = isVault ? 'Vault Reference' : 'Manhole Reference';
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
+    function setupImgFallback(img, candidates, opts){
+      if(!img) return;
+      opts = opts || {};
+      const msgEl = document.getElementById('refImgMsg');
+      let idx = 0;
+      const cur = img.getAttribute('src') || '';
+      const pos = candidates.indexOf(cur);
+      idx = (pos >= 0) ? (pos + 1) : 0;
+
+      function exhaust(){
+        img.dataset.failed = '1';
+        if(typeof opts.onExhaust === 'function') opts.onExhaust();
+        if(opts.message && msgEl){
+          msgEl.textContent = opts.message;
+          msgEl.style.display = 'flex';
+        }
+      }
+
+      function tryNext(){
+        if(idx >= candidates.length){
+          exhaust();
+          return;
+        }
+        img.src = candidates[idx++];
+      }
+
+      img.addEventListener('error', ()=>{
+        // hide message once we start trying alternatives
+        if(msgEl) msgEl.style.display = 'none';
+        tryNext();
+      });
+    }
+
+    // Reference image loading:
+    // Place these files in the SAME folder as this HTML (PocketBase pb_public recommended):
+    // - Manhole_image.png
+    // - Vault image.png (or Vault%20image.png)
+    const _manImg = document.getElementById('refManholeImg');
+    const _vaultImg = document.getElementById('refVaultImg');
+    const _vaultSvg = document.getElementById('refVaultSvg');
+
+    setupImgFallback(_manImg, [
+      'Manhole_image.png',
+      'Manhole%20image.png',
+      'Manhole image.png',
+      '/Manhole_image.png',
+      '/Manhole%20image.png',
+      '/Manhole image.png'
+    ], {
+      message: 'Manhole reference image not found. Place Manhole_image.png in the same folder as this HTML.'
+    });
+
+    setupImgFallback(_vaultImg, [
+      'Vault%20image.png',
+      'Vault image.png',
+      'Vault_image.png',
+      '/Vault%20image.png',
+      '/Vault image.png',
+      '/Vault_image.png'
+    ], {
+      onExhaust: ()=>{
+        // Switch to SVG fallback if the image is missing.
+        if(_vaultSvg) _vaultSvg.style.display = 'block';
+      }
+    });
+
     // Structure type drives reference image + relevance rules
     const st = document.getElementById('structureType');
     const refreshAll = ()=>{

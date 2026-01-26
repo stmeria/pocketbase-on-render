@@ -138,7 +138,8 @@
     <button type="button" class="tab" data-tab="jobs"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2h3a2 2 0 0 1 2 2v3H1V9a2 2 0 0 1 2-2h5Zm2 0h4V5h-4v2ZM1 14h22v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-6Z"/></svg><span class="navLabel">Jobs</span></button>
 
     <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
-    <button type="button" class="tab active" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
+        <button type="button" class="tab" data-tab="yard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4h-2V6H6v4H4Zm16 2v8a2 2 0 0 1-2 2h-3v-3h-6v3H6a2 2 0 0 1-2-2v-8h16Zm-10 0v5h4v-5h-4Z"/></svg><span class="navLabel">Yard</span></button>
+<button type="button" class="tab active" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
     <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>    <div class="pf-more">
       <details>
@@ -383,7 +384,8 @@
   const mapTab = (tab) => {
     if(tab === "dashboard") return "index.html?view=dashboard";
     if(tab === "inventory") return "index.html?view=inventory";
-    if(tab === "production") return "index.html?view=production";
+        if(tab === "yard") return "index.html?view=yard";
+if(tab === "production") return "index.html?view=production";
     if(tab === "shipping") return "index.html?view=shipping";
     if(tab === "jobs") return "index.html?view=jobs";
     if(tab === "reports") return "index.html?view=reports";

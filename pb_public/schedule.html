@@ -58,9 +58,9 @@
     <aside class="sidebar" aria-label="Sidebar navigation">
   <div class="pf-brandRow">
     <div class="pf-brandMark" aria-hidden="true">
-      <img src="Fisher_no.png" alt="Fisher Associates" class="pf-brandLogo">
+      <img src="Image.jpg" alt="Fisher Associates" class="pf-brandLogo">
     </div>
-    <div class="pf-brandName">Fisher Precast Management System</div>
+    <div class="pf-brandName">Precast Information Management</div>
     <div class="pf-brandHint">›</div>
   </div>
 
@@ -73,7 +73,8 @@
     <button type="button" class="tab" data-tab="dashboard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11Z"/></svg><span class="navLabel">Dashboard</span></button>
     <button type="button" class="tab" data-tab="crm"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11a4 4 0 1 0-8 0a4 4 0 0 0 8 0Zm-4 6c-4.42 0-8 2.01-8 4.5V23h16v-1.5C20 19.01 16.42 17 12 17Z"/></svg><span class="navLabel">CRM</span></button>
     <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
-    <button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
+        <button type="button" class="tab" data-tab="yard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4h-2V6H6v4H4Zm16 2v8a2 2 0 0 1-2 2h-3v-3h-6v3H6a2 2 0 0 1-2-2v-8h16Zm-10 0v5h4v-5h-4Z"/></svg><span class="navLabel">Yard</span></button>
+<button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
     <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
     <button type="button" class="tab" data-tab="reports"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19V5a2 2 0 0 1 2-2h12v2H6v14h14v2H6a2 2 0 0 1-2-2Zm5-2V9h2v8H9Zm4 0V7h2v10h-2Zm4 0v-5h2v5h-2Z"/></svg><span class="navLabel">Reports</span></button>
@@ -720,7 +721,8 @@
     if(tab === "estimator") return "estimates.html";
     if(tab === "dashboard") return "index.html?view=dashboard";
     if(tab === "inventory") return "index.html?view=inventory";
-    if(tab === "production") return "index.html?view=production";
+        if(tab === "yard") return "index.html?view=yard";
+if(tab === "production") return "index.html?view=production";
     if(tab === "shipping") return "index.html?view=shipping";
     if(tab === "reports") return "index.html?view=reports";
     if(tab === "projects") return "index.html?view=projects";
