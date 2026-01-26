@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Fisher Precast • Schedule</title>
-  <script src="/vendor/pocketbase.umd.js"></script>
+  <title>Precast Information Management • Schedule</title>
+  <script src="vendor/pocketbase.umd.js"></script>
   <link rel="stylesheet" href="precastflow-ui.css">
   <style>
     #btnBack{display:none}
@@ -58,7 +58,7 @@
     <aside class="sidebar" aria-label="Sidebar navigation">
   <div class="pf-brandRow">
     <div class="pf-brandMark" aria-hidden="true">
-      <img src="Image.jpg" alt="Fisher Associates" class="pf-brandLogo">
+      <img src="Fisher_no.png" alt="Fisher Associates" class="pf-brandLogo">
     </div>
     <div class="pf-brandName">Precast Information Management</div>
     <div class="pf-brandHint">›</div>
@@ -73,8 +73,7 @@
     <button type="button" class="tab" data-tab="dashboard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11Z"/></svg><span class="navLabel">Dashboard</span></button>
     <button type="button" class="tab" data-tab="crm"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11a4 4 0 1 0-8 0a4 4 0 0 0 8 0Zm-4 6c-4.42 0-8 2.01-8 4.5V23h16v-1.5C20 19.01 16.42 17 12 17Z"/></svg><span class="navLabel">CRM</span></button>
     <button type="button" class="tab" data-tab="inventory"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7l9-4 9 4-9 4-9-4Zm0 4l9 4 9-4v8l-9 4-9-4v-8Z"/></svg><span class="navLabel">Inventory</span></button>
-        <button type="button" class="tab" data-tab="yard"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4h-2V6H6v4H4Zm16 2v8a2 2 0 0 1-2 2h-3v-3h-6v3H6a2 2 0 0 1-2-2v-8h16Zm-10 0v5h4v-5h-4Z"/></svg><span class="navLabel">Yard</span></button>
-<button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
+    <button type="button" class="tab" data-tab="estimator"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h6v2H9V7Zm0 4h6v2H9v-2Zm0 4h4v2H9v-2Z"/></svg><span class="navLabel">Estimates</span></button>
     <button type="button" class="tab" data-tab="production"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 7h16v10H4V7Zm-2 4h2v2H2v-2Zm18 0h2v2h-2v-2ZM7 20h10v2H7v-2Z"/></svg><span class="navLabel">Production</span></button>
     <button type="button" class="tab" data-tab="shipping"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7h11v10H3V7Zm13 3h3l2 3v4h-5v-7ZM7 19a2 2 0 1 0 0 4a2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg><span class="navLabel">Shipping</span></button>
     <button type="button" class="tab" data-tab="reports"><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 19V5a2 2 0 0 1 2-2h12v2H6v14h14v2H6a2 2 0 0 1-2-2Zm5-2V9h2v8H9Zm4 0V7h2v10h-2Zm4 0v-5h2v5h-2Z"/></svg><span class="navLabel">Reports</span></button>
@@ -106,167 +105,141 @@
 </aside>
 
     <main class="content">
-      <section class="pf-page">
-        <div class="pf-sectionHead">
-          <div>
-            <div class="pf-h2">Project Schedule</div>
-            <div class="pf-sub">Built from Items + Transactions (with optional Overrides)</div>
-          </div>
-          <div class="pf-headRight">
-            <button class="btn ghost" type="button" id="btnCalendar" title="Placeholder">Calendar</button>
-            <button class="btn ghost" type="button" id="btnFilter" title="Placeholder">Filter</button>
-            <button class="btn primary" type="button" onclick="document.getElementById('btnNew').click()">New Override</button>
-          </div>
+  <section class="pf-page">
+    <div class="pf-sectionHead">
+      <div>
+        <div class="pf-h2">Production Calendar</div>
+        <div class="pf-sub">Week view (Mon–Sun) • Cast + Shipping plan</div>
+      </div>
+      <div class="pf-headRight">
+        <div class="wk-nav">
+          <button class="btn" id="btnPrevWeek" type="button" title="Previous week">←</button>
+          <button class="btn" id="btnToday" type="button" title="Jump to current week">Today</button>
+          <button class="btn" id="btnNextWeek" type="button" title="Next week">→</button>
+          <span class="badge" id="weekLabel">—</span>
         </div>
+      </div>
+    </div>
 
-        <div class="pf-kpiRow">
-          <div class="pf-kpiCard">
-            <div class="pf-kpiTop">
-              <div class="pf-kpiLabel">Projects</div>
-              <div class="pf-kpiIcon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v2H4V4Zm0 5h10v2H4V9Zm0 5h16v2H4v-2Zm0 5h10v2H4v-2Z"/></svg>
-              </div>
-            </div>
-            <div class="pf-kpiValue" id="kpiProjects">0</div>
-            <div class="pf-kpiSub muted">Active projects</div>
-          </div>
-
-          <div class="pf-kpiCard">
-            <div class="pf-kpiTop">
-              <div class="pf-kpiLabel">In Production</div>
-              <div class="pf-kpiIcon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 7h18v4H3V7Zm2 6h14v8H5v-8Zm2 2v4h10v-4H7Z"/></svg>
-              </div>
-            </div>
-            <div class="pf-kpiValue" id="kpiInProd">0</div>
-            <div class="pf-kpiSub muted">Work in progress</div>
-          </div>
-
-          <div class="pf-kpiCard">
-            <div class="pf-kpiTop">
-              <div class="pf-kpiLabel">Allocated</div>
-              <div class="pf-kpiIcon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l9 4.9v10.2L12 22 3 17.1V6.9L12 2Zm0 2.2L5 7v8l7 3.8 7-3.8V7l-7-2.8Z"/></svg>
-              </div>
-            </div>
-            <div class="pf-kpiValue" id="kpiAlloc">0</div>
-            <div class="pf-kpiSub muted">Reserved for shipping</div>
-          </div>
-
-          <div class="pf-kpiCard">
-            <div class="pf-kpiTop">
-              <div class="pf-kpiLabel">Shipped</div>
-              <div class="pf-kpiIcon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 8h-3V4H3v13h2a3 3 0 0 0 6 0h6a3 3 0 0 0 6 0h1v-5l-4-4Zm-5 0H5V6h10v2Zm-8 11a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm13.5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3ZM22 12h-5V10h3.17L22 12Z"/></svg>
-              </div>
-            </div>
-            <div class="pf-kpiValue" id="kpiShipped">0</div>
-            <div class="pf-kpiSub muted">Delivered (MTD)</div>
-          </div>
+    <div class="pf-card" style="margin-top:12px">
+      <div class="pf-cardTop">
+        <div>
+          <div class="pf-cardTitle">Filters</div>
+          <div class="pf-cardSub">Use the search box in the top bar to filter by project/quote</div>
         </div>
+        <div class="row end wrap" style="gap:10px; align-items:center">
+          <label class="muted" style="font-size:12px">Show</label>
+          <select id="fType" class="wk-input" aria-label="Type filter">
+            <option value="both">Cast + Ship</option>
+            <option value="cast">Cast only</option>
+            <option value="ship">Ship only</option>
+          </select>
 
-        <div class="pf-split" style="margin-top:14px">
-          <div class="pf-card">
-            <div class="pf-cardTop">
-              <div>
-                <div class="pf-cardTitle">Schedule</div>
-                <div class="pf-cardSub">Click a row to edit overrides</div>
-              </div>
-              <div class="row end">
-                <button class="btn" id="btnRefreshInline" type="button" onclick="document.getElementById('btnRefresh').click()">Refresh</button>
-              </div>
-            </div>
+          <label class="muted" style="font-size:12px">Owner</label>
+          <select id="fOwner" class="wk-input" aria-label="Owner filter">
+            <option value="">All</option>
+          </select>
 
-            <div class="table-wrap">
-              <table style="min-width:1100px">
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>Status</th>
-                    <th class="right">Qty</th>
-                    <th class="right">In Prod</th>
-                    <th class="right">On Hand</th>
-                    <th class="right">Alloc</th>
-                    <th class="right">Shipped</th>
-                    <th>First Cast</th>
-                    <th>Last Cast</th>
-                    <th>Delivery</th>
-                    <th>Notes</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody"></tbody>
-              </table>
-            </div>
+          <label class="muted" style="font-size:12px">Status</label>
+          <select id="fHealth" class="wk-input" aria-label="Status filter">
+            <option value="">All</option>
+            <option value="onPlan">On plan</option>
+            <option value="atRisk">At risk</option>
+            <option value="behind">Behind</option>
+            <option value="empty">Empty</option>
+          </select>
 
-            <div class="pf-cardFoot muted">
-              This view is built from your <b>Items</b> (<code>project</code>, <code>status</code>, <code>qty</code>, <code>castDate</code>) and your <b>Transactions</b> (shipping). Optional delivery dates / notes / manual status are stored as <b>Overrides</b> in <code>project_schedule</code>.
-            </div>
-          </div>
-
-          <div class="pf-card">
-            <div class="pf-cardTop">
-              <div>
-                <div class="pf-cardTitle">Overrides</div>
-                <div class="pf-cardSub">Delivery date, manual status, notes</div>
-              </div>
-              <div class="badge" id="overrideMode">—</div>
-            </div>
-            <div class="pf-cardBody muted" style="font-size:13px; line-height:1.5">
-              Use <b>Add / Override</b> to set:
-              <ul style="margin:8px 0 0 18px;padding:0">
-                <li>Delivery date</li>
-                <li>Manual project status</li>
-                <li>Notes / constraints</li>
-              </ul>
-              <div class="hr"></div>
-              Tip: Leave status blank to use automatic status based on production/shipping.
-            </div>
-          </div>
+          <button class="btn" id="btnRefreshWeek" type="button">Refresh</button>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
+
+    <div class="wk-gridWrap" style="margin-top:12px">
+      <div class="wk-grid" id="weekGrid" aria-label="Week calendar grid"></div>
+    </div>
+
+    <div class="pf-cardFoot muted" style="margin-top:10px">
+      <b>Colors:</b>
+      <span class="statusPill onTime" style="margin-left:8px">Green • On plan</span>
+      <span class="statusPill warning" style="margin-left:8px">Yellow • At risk</span>
+      <span class="statusPill late" style="margin-left:8px">Red • Behind</span>
+      <span class="statusPill" style="margin-left:8px; background:rgba(148,163,184,.18); color:#334155; border-color:rgba(148,163,184,.35)">Gray • No work</span>
+    </div>
+  </section>
+</main>
   </div>
 </div>
 
-<!-- Editor Modal -->
-<div class="modal-backdrop" id="editor">
-  <div class="modal">
+
+
+<!-- Day Detail Modal -->
+<div class="modal-backdrop" id="dayModal">
+  <div class="modal" style="max-width:980px">
     <header>
       <div style="min-width:0">
-        <div class="badge">Project Override</div>
-        <h3 style="margin-top:8px" id="editorTitle">Add / Override</h3>
+        <div class="badge" id="dayBadge">Day</div>
+        <h3 style="margin-top:8px" id="dayTitle">—</h3>
+        <div class="muted" id="daySub" style="margin-top:6px; font-size:13px">—</div>
       </div>
       <div class="row end">
-        <button class="btn danger" id="btnDelete" type="button" style="display:none">Delete Override</button>
-        <button class="btn" id="btnClose" type="button">Close</button>
-        <button class="btn primary" id="btnSave" type="button">Save</button>
+        <button class="btn" id="btnDayClose" type="button">Close</button>
       </div>
     </header>
     <div class="body">
       <div class="grid">
         <div class="col-12">
-          <label class="muted">Project Name (must match Items.project)</label>
-          <input id="f_project" placeholder="e.g., Job 24-118 • Downtown Garage"/>
+          <div class="pf-card" style="margin:0">
+            <div class="pf-cardTop">
+              <div>
+                <div class="pf-cardTitle">Pieces scheduled to cast</div>
+                <div class="pf-cardSub" id="castSub">—</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table style="min-width:860px">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Quote</th>
+                    <th class="right">Qty</th>
+                    <th>Bed</th>
+                    <th>Form</th>
+                    <th>Owner</th>
+                  </tr>
+                </thead>
+                <tbody id="castTbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="col-6">
-          <label class="muted">Manual Status</label>
-          <select id="f_status">
-            <option value="">(auto)</option>
-            <option>Planning</option>
-            <option>In Production</option>
-            <option>On Hand</option>
-            <option>Allocated</option>
-            <option>Shipped</option>
-            <option>Closed</option>
-          </select>
+
+        <div class="col-12" style="margin-top:12px">
+          <div class="pf-card" style="margin:0">
+            <div class="pf-cardTop">
+              <div>
+                <div class="pf-cardTitle">Pieces scheduled to ship</div>
+                <div class="pf-cardSub" id="shipSub">—</div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table style="min-width:860px">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Quote</th>
+                    <th class="right">Qty</th>
+                    <th>Owner</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="shipTbody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="col-6">
-          <label class="muted">Delivery Date</label>
-          <input id="f_delivery" type="date"/>
-        </div>
-        <div class="col-12">
-          <label class="muted">Notes</label>
-          <textarea id="f_notes" placeholder="Constraints, site needs, approvals, trucking, etc."></textarea>
+
+        <div class="col-12 muted" style="margin-top:10px; font-size:12px">
+          Tip: Use the top-bar search to filter by project/quote before clicking a day.
         </div>
       </div>
     </div>
@@ -280,6 +253,7 @@
       <div>
         <div class="badge">PocketBase</div>
         <h3 style="margin-top:8px">Sign in</h3>
+        <div class="muted" style="margin-top:6px; font-size:12px" id="pbUrlLabel">Server: —</div>
       </div>
     </header>
     <div class="body">
@@ -295,420 +269,596 @@
   </div>
 </div>
 
+<style>
+  .wk-nav{display:flex; gap:8px; align-items:center}
+  .wk-input{height:36px; border-radius:10px; border:1px solid rgba(148,163,184,.45); padding:0 10px; background:#fff; font-weight:650}
+  .wk-gridWrap{overflow-x:auto}
+  .wk-grid{display:grid; grid-template-columns:repeat(7, minmax(160px, 1fr)); gap:10px; min-width:1050px}
+  .dayCell{border:1px solid rgba(148,163,184,.35); border-radius:14px; padding:10px; background:#fff; cursor:pointer; user-select:none}
+  .dayCell:hover{box-shadow:0 6px 18px rgba(2,6,23,.06)}
+  .dayTop{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+  .dayName{font-weight:900; letter-spacing:.2px}
+  .dayDate{font-size:12px; color:#64748b; font-weight:750}
+  .dayStats{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px; font-size:12px}
+  .stat{padding:8px 8px; border-radius:12px; border:1px solid rgba(148,163,184,.28); background:rgba(248,250,252,.8)}
+  .stat b{font-size:13px}
+  .mini{margin-top:8px; font-size:12px; color:#475569; line-height:1.35}
+  .mini span{display:inline-block; margin-right:6px}
+  .healthPill{margin-top:10px}
+  .dayCell.onPlan{border-color:rgba(22,163,74,.22); background:linear-gradient(180deg, rgba(22,163,74,.10), rgba(255,255,255,.98))}
+  .dayCell.atRisk{border-color:rgba(245,158,11,.25); background:linear-gradient(180deg, rgba(245,158,11,.10), rgba(255,255,255,.98))}
+  .dayCell.behind{border-color:rgba(239,68,68,.22); background:linear-gradient(180deg, rgba(239,68,68,.10), rgba(255,255,255,.98))}
+  .dayCell.empty{border-color:rgba(148,163,184,.35); background:rgba(255,255,255,.9)}
+  @media (max-width: 860px){
+    .wk-grid{min-width:980px}
+  }
+</style>
+
 <script>
 (() => {
+  const PB_URL = window.location.origin;
+  const ITEMS = "items";
+  const TX = "transactions";
+  const JOBS = "jobs";
 
-  // --------------------------
-  // Compatibility helpers (fields + dates)
-  // --------------------------
-  const pick = (obj, keys, fallback="")=>{
-    for(const k of keys){
+  const $ = (id) => document.getElementById(id);
+  const escapeHtml = (s) => (s ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const pick = (obj, keys, fallback="") => {
+    for (const k of keys){
       const v = obj?.[k];
       if(v !== undefined && v !== null && String(v).trim() !== "") return v;
     }
     return fallback;
   };
-
-  function toISODateMaybe(v){
-    if(!v) return "";
-    const s = String(v);
-    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
-    if(m) return m[1];
-    const d = new Date(s);
-    if(!isNaN(d.getTime())) return d.toISOString().slice(0,10);
-    return "";
-  }
-
-  const PB_URL = window.location.origin;
-  const ITEMS = "items";
-  const TX = "transactions";
-  const OVERRIDES = "project_schedule";
-  const OVERRIDES_LS = "project_schedule_overrides_v1";
-
-  const $ = (id) => document.getElementById(id);
-  const escapeHtml = (s) => (s ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const parseNum = (v) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : 0;
   };
 
-  let pb = null;
-  let overridesMode = "local";
-  let overrides = []; // {id, project, status, delivery, notes}
+  const DAY_MS = 86400000;
 
   function openModal(id){ $(id).classList.add("open"); }
   function closeModal(id){ $(id).classList.remove("open"); }
 
-  function uid(){ return (crypto?.randomUUID ? crypto.randomUUID() : ("id_" + Math.random().toString(16).slice(2))); }
-
-  function getUserEmail(){
-    const u = pb?.authStore?.model;
-    return (u && (u.email || u.username)) || "";
+  function isoDate(d){
+    const x = new Date(d);
+    x.setHours(0,0,0,0);
+    const y = x.getFullYear();
+    const m = String(x.getMonth()+1).padStart(2,'0');
+    const da = String(x.getDate()).padStart(2,'0');
+    return `${y}-${m}-${da}`;
   }
 
-  async function canUsePBCollection(name){
-    try{ await pb.collection(name).getList(1,1,{fields:"id"}); return true; }catch{ return false; }
-  }
-
-  function loadOverridesLocal(){
-    try{ return JSON.parse(localStorage.getItem(OVERRIDES_LS) || "[]"); }catch{ return []; }
-  }
-  function saveOverridesLocal(arr){
-    localStorage.setItem(OVERRIDES_LS, JSON.stringify(arr));
-  }
-
-  async function loadOverrides(){
-    if(pb && await canUsePBCollection(OVERRIDES)){
-      overridesMode = "pb";
-      const res = await pb.collection(OVERRIDES).getList(1, 500, { sort: "-updated" });
-      overrides = res.items.map(r => ({
-        id: r.id,
-        project: r.project || r.name || r.projectName || "",
-        status: r.status || "",
-        delivery: r.delivery || r.deliveryDate || "",
-        notes: r.notes || ""
-      }));
-    }else{
-      overridesMode = "local";
-      overrides = loadOverridesLocal();
-    }
-    $("overrideMode").textContent = overridesMode === "pb" ? "PocketBase Overrides" : "Local Overrides";
-  }
-
-  function overrideForProject(project){
-    const p = (project||"").trim().toLowerCase();
-    return overrides.find(o => (o.project||"").trim().toLowerCase() === p) || null;
-  }
-
-  async function upsertOverride(data){
-    const project = (data.project||"").trim();
-    if(!project) throw new Error("Project is required.");
-    const existing = overrideForProject(project);
-
-    if(overridesMode === "pb"){
-      // IMPORTANT: send only common field names (project, status, delivery, notes).
-      // Ensure your PB collection fields match these.
-      const payload = { project, status: data.status || "", delivery: data.delivery || "", notes: data.notes || "" };
-      if(existing){
-        const r = await pb.collection(OVERRIDES).update(existing.id, payload);
-        existing.status = r.status || payload.status;
-        existing.delivery = r.delivery || payload.delivery;
-        existing.notes = r.notes || payload.notes;
-      }else{
-        const r = await pb.collection(OVERRIDES).create(payload);
-        overrides.unshift({ id:r.id, project: payload.project, status: payload.status, delivery: payload.delivery, notes: payload.notes });
-      }
-      return;
-    }
-
-    if(existing){
-      existing.status = data.status || "";
-      existing.delivery = data.delivery || "";
-      existing.notes = data.notes || "";
-    }else{
-      overrides.unshift({ id: uid(), project, status: data.status || "", delivery: data.delivery || "", notes: data.notes || "" });
-    }
-    saveOverridesLocal(overrides);
-  }
-
-  async function deleteOverride(project){
-    const existing = overrideForProject(project);
-    if(!existing) return;
-    if(overridesMode === "pb"){
-      await pb.collection(OVERRIDES).delete(existing.id);
-      overrides = overrides.filter(o => o.id !== existing.id);
-      return;
-    }
-    overrides = overrides.filter(o => o.id !== existing.id);
-    saveOverridesLocal(overrides);
-  }
-
-  function tagClass(status){
-    const x = (status||"").toLowerCase();
-    if(["shipped","closed"].includes(x)) return "ok";
-    if(["allocated","in production","planning"].includes(x)) return "warn";
+  function parseDateKey(v){
+    if(!v) return "";
+    const s = String(v);
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    if(m) return m[1];
+    const d = new Date(s);
+    if(!isNaN(d.getTime())) return isoDate(d);
     return "";
   }
 
-  function inferProjectStatus(stats){
-    const total = stats.totalQty;
-    if(total <= 0) return "—";
-    if(stats.shipped >= total) return "Shipped";
-    if(stats.inProd > 0) return "In Production";
-    if(stats.allocated + stats.reserved > 0) return "Allocated";
-    if(stats.onHand > 0) return "On Hand";
-    return "—";
+  function startOfWeek(d){
+    const x = new Date(d);
+    x.setHours(0,0,0,0);
+    // Monday as start
+    const day = (x.getDay() + 6) % 7; // Mon=0..Sun=6
+    x.setDate(x.getDate() - day);
+    return x;
   }
 
-  function minDate(a,b){
-    if(!a) return b || "";
-    if(!b) return a || "";
-    return (a < b) ? a : b;
-  }
-  function maxDate(a,b){
-    if(!a) return b || "";
-    if(!b) return a || "";
-    return (a > b) ? a : b;
+  function addDays(d, n){
+    const x = new Date(d);
+    x.setDate(x.getDate() + n);
+    return x;
   }
 
-  async function fetchAll(col, perPage=200, filter=""){
-    const all = [];
+  function niceDate(d){
+    return new Intl.DateTimeFormat(undefined, { weekday:"short", month:"short", day:"numeric" }).format(d);
+  }
+
+  function weekLabel(start){
+    const end = addDays(start, 6);
+    const fmt = new Intl.DateTimeFormat(undefined, { month:"short", day:"numeric" });
+    const y = start.getFullYear();
+    return `${fmt.format(start)} – ${fmt.format(end)}, ${y}`;
+  }
+
+  function getProject(it){
+    return String(pick(it, ["projectName","ProjectName","project","Project","job","Job","Project_Name"], "")).trim();
+  }
+
+  function getQuote(it){
+    const q = String(pick(it, ["quoteNumber","QuoteNumber","estimateNumber","EstimateNumber","quote","Quote","jobNumber","JobNumber"], "")).trim();
+    if(q) return q;
+    const bin = String(pick(it, ["bin","Bin"], "")).trim();
+    // Try to pull a quote-like token (e.g., 26-015)
+    const m = bin.match(/\b\d{2}-\d{1,5}\b/);
+    return m ? m[0] : "";
+  }
+
+  function getOwner(it){
+    return String(pick(it, ["owner","Owner","ownerName","OwnerName","assignedTo","AssignedTo","salesRep","SalesRep","preparedBy","PreparedBy","createdBy","CreatedBy","responsible","Responsible"], "")).trim();
+  }
+
+  function getBed(it){
+    return String(pick(it, ["bed","Bed","bedNo","bedNumber","BedNumber","bed_id"], "")).trim();
+  }
+
+  function getForm(it){
+    return String(pick(it, ["form","Form","formNo","formNumber","FormNumber","mold","Mold","mould","Mould"], "")).trim();
+  }
+
+  function txQty(tx){
+    const qc = pick(tx, ["qtyChange","QtyChange","quantityChange","QuantityChange"], null);
+    if(qc !== null && qc !== undefined && qc !== "") return Math.abs(parseNum(qc));
+    const q = pick(tx, ["qty","Qty","quantity","Quantity"], null);
+    if(q !== null && q !== undefined && q !== "") return Math.abs(parseNum(q));
+    return 1;
+  }
+
+  function isOutTx(tx){
+    const t = String(pick(tx, ["type","Type","kind","Kind","direction","Direction"], "")).toLowerCase();
+    if(!t) return true; // if no type, include
+    return ["out","ship","shipped","delivery","delivered"].includes(t);
+  }
+
+  let pb = null;
+  let weekStart = startOfWeek(new Date());
+  let rawWeek = []; // 7 buckets with raw arrays
+  let jobsByQuote = new Map();
+
+  function setTopSubtitle(){
+    const el = $("pageSubtitle");
+    if(el) el.textContent = "Weekly production calendar";
+  }
+
+  async function fetchPaged(collection, opts){
+    const perPage = opts?.perPage || 200;
+    const items = [];
     let page = 1;
     while(true){
-      const res = await pb.collection(col).getList(page, perPage, { filter, sort: "-updated" });
-      all.push(...res.items);
+      const res = await pb.collection(collection).getList(page, perPage, {
+        filter: opts?.filter || "",
+        sort: opts?.sort || "",
+        expand: opts?.expand || "",
+        fields: opts?.fields || ""
+      });
+      items.push(...res.items);
       if(res.items.length < perPage) break;
       page++;
-      if(page > 20) break; // safety
+      if(page > 50) break; // safety
     }
-    return all;
+    return items;
   }
 
-  async function buildScheduleRows(){
-    if(!pb?.authStore?.isValid) return [];
-
-    // Items drive the schedule
-    const items = await fetchAll(ITEMS, 200);
-
-    // Group by project
-    const map = new Map();
-    for(const it of items){
-      const project = pick(it, ["projectName","ProjectName","project","Project","job","Job","Project_Name"], "").toString().trim();
-      if(!project) continue;
-
-      const qty = parseNum(pick(it, ["qty","Qty","quantity","Quantity"], 0));
-      const status = pick(it, ["status","Status","state","State"], "").toString();
-      const castDate = toISODateMaybe(pick(it, ["castDate","CastDate","castdate","Cast_Date","Castdate"], ""));
-
-      if(!map.has(project)){
-        map.set(project, {
-          project,
-          totalQty: 0,
-          inProd: 0,
-          onHand: 0,
-          allocated: 0,
-          reserved: 0,
-          shipped: 0,
-          firstCast: "",
-          lastCast: "",
-        });
-      }
-      const s = map.get(project);
-      s.totalQty += qty;
-
-      const st = status.toLowerCase();
-      if(st === "in production") s.inProd += qty;
-      else if(st === "on hand") s.onHand += qty;
-      else if(st === "allocated") s.allocated += qty;
-      else if(st === "reserved") s.reserved += qty;
-      else if(st === "shipped") s.shipped += qty;
-
-      if(castDate){
-        s.firstCast = minDate(s.firstCast, castDate);
-        s.lastCast  = maxDate(s.lastCast, castDate);
-      }
-    }
-
-    const rows = Array.from(map.values()).sort((a,b)=>a.project.localeCompare(b.project));
-
-    // Merge overrides
-    for(const r of rows){
-      const ov = overrideForProject(r.project);
-      r.override = ov;
-      const autoStatus = inferProjectStatus(r);
-      r.status = (ov && ov.status) ? ov.status : autoStatus;
-      r.delivery = (ov && ov.delivery) ? ov.delivery : "";
-      r.notes = (ov && ov.notes) ? ov.notes : "";
-    }
-
-    // KPIs
-    $("kpiProjects").textContent = rows.length.toLocaleString();
-    $("kpiInProd").textContent = rows.filter(r => (r.status||"").toLowerCase() === "in production").length.toLocaleString();
-    $("kpiAlloc").textContent = rows.filter(r => ["allocated","reserved"].includes((r.status||"").toLowerCase())).length.toLocaleString();
-    $("kpiShipped").textContent = rows.filter(r => ["shipped","closed"].includes((r.status||"").toLowerCase())).length.toLocaleString();
-
-    return rows;
-  }
-
-  function renderTable(rows){
-    const q = $("q").value.trim().toLowerCase();
-    const filtered = q ? rows.filter(r => r.project.toLowerCase().includes(q)) : rows;
-
-    $("tbody").innerHTML = filtered.length ? filtered.map(r=>{
-      const st = r.status || "—";
-      const tag = st !== "—" ? `<span class="tag ${tagClass(st)}">${escapeHtml(st)}</span>` : '<span class="muted">—</span>';
-      return `<tr data-project="${escapeHtml(r.project)}">
-        <td><b>${escapeHtml(r.project)}</b></td>
-        <td>${tag}</td>
-        <td class="right">${escapeHtml(String(Math.round(r.totalQty)))}</td>
-        <td class="right">${escapeHtml(String(Math.round(r.inProd)))}</td>
-        <td class="right">${escapeHtml(String(Math.round(r.onHand)))}</td>
-        <td class="right">${escapeHtml(String(Math.round(r.allocated + r.reserved)))}</td>
-        <td class="right">${escapeHtml(String(Math.round(r.shipped)))}</td>
-        <td>${r.firstCast ? escapeHtml(r.firstCast) : '<span class="muted">—</span>'}</td>
-        <td>${r.lastCast ? escapeHtml(r.lastCast) : '<span class="muted">—</span>'}</td>
-        <td>${r.delivery ? escapeHtml(r.delivery) : '<span class="muted">—</span>'}</td>
-        <td>${r.notes ? escapeHtml(r.notes).slice(0,70) + (String(r.notes).length>70?"…":"") : '<span class="muted">—</span>'}</td>
-      </tr>`;
-    }).join("") : `<tr><td colspan="11" class="muted" style="padding:16px">No projects found (need Items.project).</td></tr>`;
-  }
-
-  // ---- Editor
-  let currentRows = [];
-  function openEditor(project){
-    const ov = project ? overrideForProject(project) : null;
-    $("f_project").value = project || "";
-    $("f_status").value = (ov && ov.status) ? ov.status : "";
-    $("f_delivery").value = (ov && ov.delivery) ? ov.delivery : "";
-    $("f_notes").value = (ov && ov.notes) ? ov.notes : "";
-    $("btnDelete").style.display = ov ? "" : "none";
-    openModal("editor");
-  }
-
-  async function saveEditor(){
-    const data = {
-      project: $("f_project").value.trim(),
-      status: $("f_status").value,
-      delivery: $("f_delivery").value,
-      notes: $("f_notes").value.trim(),
-    };
+  async function loadJobsMap(){
+    // Best effort: map by quoteNumber for owner fallback
     try{
-      await upsertOverride(data);
-      closeModal("editor");
-      await refresh();
-    startAutoRefresh();
-      startAutoRefresh();
+      const jobs = await fetchPaged(JOBS, { perPage: 200, sort: "-updated", fields: "id,quoteNumber,projectName,owner,Owner,assignedTo,salesRep,targetDeliveryDate" });
+      jobsByQuote = new Map();
+      for(const j of jobs){
+        const q = String(pick(j, ["quoteNumber","QuoteNumber"], "")).trim();
+        if(q) jobsByQuote.set(q, j);
+      }
     }catch(err){
-      console.error(err);
-      alert("Save failed: " + (err?.response?.message || err?.message || "Unknown error") +
-        "\n\nIf you're using PocketBase overrides, ensure the 'project_schedule' collection has fields: project (text), status (text/select), delivery (date/text), notes (text).");
+      console.warn("Schedule: jobs map unavailable", err);
+      jobsByQuote = new Map();
     }
   }
 
-  async function doDeleteOverride(){
-    const p = $("f_project").value.trim();
-    if(!p) return;
-    if(!confirm("Delete override for this project?")) return;
-    await deleteOverride(p);
-    closeModal("editor");
-    await refresh();
+  function derivedOwnerFromJobs(quote){
+    const j = jobsByQuote.get(quote);
+    if(!j) return "";
+    return String(pick(j, ["owner","Owner","assignedTo","AssignedTo","salesRep","SalesRep"], "")).trim();
   }
 
-  // ---- Auth
+  function computeHealth(dayKey, castQty, shipQty){
+    const total = castQty + shipQty;
+    if(total <= 0) return "empty";
+    const todayKey = isoDate(new Date());
+    if(dayKey < todayKey) return "behind";
+    const d0 = new Date(todayKey);
+    const d1 = new Date(dayKey);
+    const diff = Math.round((d1 - d0) / DAY_MS);
+    if(diff <= 2) return "atRisk";
+    return "onPlan";
+  }
+
+  function healthLabel(h){
+    if(h === "behind") return { text: "Behind", cls: "late" };
+    if(h === "atRisk") return { text: "At risk", cls: "warning" };
+    if(h === "onPlan") return { text: "On plan", cls: "onTime" };
+    return { text: "No work", cls: "" };
+  }
+
+  function applyFiltersToDay(day){
+    const type = $("fType")?.value || "both";
+    const owner = $("fOwner")?.value || "";
+    const health = $("fHealth")?.value || "";
+    const q = ($("q")?.value || "").trim().toLowerCase();
+
+    const matchSearch = (obj) => {
+      if(!q) return true;
+      const proj = (obj.project || "").toLowerCase();
+      const quo = (obj.quote || "").toLowerCase();
+      return proj.includes(q) || quo.includes(q);
+    };
+
+    const cast = (type === "ship") ? [] : day.castItems.filter(x => {
+      if(owner && (x.owner || "") !== owner) return false;
+      return matchSearch(x);
+    });
+
+    const ship = (type === "cast") ? [] : day.shipItems.filter(x => {
+      if(owner && (x.owner || "") !== owner) return false;
+      return matchSearch(x);
+    });
+
+    const castQty = cast.reduce((a,x)=>a + x.qty, 0);
+    const shipQty = ship.reduce((a,x)=>a + x.qty, 0);
+    const beds = Array.from(new Set(cast.map(x=>x.bed).filter(Boolean))).sort();
+    const forms = Array.from(new Set(cast.map(x=>x.form).filter(Boolean))).sort();
+    const h = computeHealth(day.key, castQty, shipQty);
+
+    const out = { ...day, castItems: cast, shipItems: ship, castQty, shipQty, beds, forms, health: h };
+
+    if(health && out.health !== health) out._hidden = true;
+    else out._hidden = false;
+
+    return out;
+  }
+
+  function renderWeek(){
+    $("weekLabel").textContent = weekLabel(weekStart);
+
+    const grid = $("weekGrid");
+    grid.innerHTML = "";
+
+    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    for(let i=0;i<7;i++){
+      const d = addDays(weekStart, i);
+      const key = isoDate(d);
+
+      const base = rawWeek[i];
+      const day = applyFiltersToDay(base);
+
+      if(day._hidden) {
+        // still render, but dim
+      }
+
+      const bedsText = day.beds.length ? day.beds.slice(0,6).join(", ") + (day.beds.length>6 ? ` +${day.beds.length-6}` : "") : "—";
+      const formsText = day.forms.length ? day.forms.slice(0,6).join(", ") + (day.forms.length>6 ? ` +${day.forms.length-6}` : "") : "—";
+      const hl = healthLabel(day.health);
+
+      const cell = document.createElement("div");
+      cell.className = `dayCell ${day.health}` + (day._hidden ? " wk-dim" : "");
+      cell.setAttribute("data-idx", String(i));
+      cell.innerHTML = `
+        <div class="dayTop">
+          <div class="dayName">${dayNames[i]}</div>
+          <div class="dayDate">${niceDate(d)}</div>
+        </div>
+
+        <div class="dayStats">
+          <div class="stat"><div class="muted">Cast</div><b>${day.castQty.toLocaleString()}</b></div>
+          <div class="stat"><div class="muted">Ship</div><b>${day.shipQty.toLocaleString()}</b></div>
+        </div>
+
+        <div class="mini">
+          <span><b>Beds:</b> ${escapeHtml(bedsText)}</span><br/>
+          <span><b>Forms:</b> ${escapeHtml(formsText)}</span>
+        </div>
+
+        <div class="healthPill">
+          <span class="statusPill ${hl.cls}">${hl.text}</span>
+        </div>
+      `;
+      cell.addEventListener("click", ()=> openDay(i));
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderDayTables(day){
+    $("dayTitle").textContent = day.label;
+    const hl = healthLabel(day.health);
+    $("dayBadge").innerHTML = `<span class="statusPill ${hl.cls}">${hl.text}</span>`;
+    $("daySub").textContent = `Cast: ${day.castQty} • Ship: ${day.shipQty} • Beds: ${day.beds.join(", ") || "—"} • Forms: ${day.forms.join(", ") || "—"}`;
+
+    // Cast
+    $("castSub").textContent = day.castItems.length ? `${day.castItems.length} line(s)` : "No cast scheduled";
+    $("castTbody").innerHTML = day.castItems.length ? day.castItems.map(x => `
+      <tr>
+        <td><b>${escapeHtml(x.project || "—")}</b></td>
+        <td>${escapeHtml(x.quote || "—")}</td>
+        <td class="right">${escapeHtml(String(x.qty))}</td>
+        <td>${escapeHtml(x.bed || "—")}</td>
+        <td>${escapeHtml(x.form || "—")}</td>
+        <td>${escapeHtml(x.owner || "—")}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="6" class="muted" style="padding:14px">No cast scheduled for this day.</td></tr>`;
+
+    // Ship
+    $("shipSub").textContent = day.shipItems.length ? `${day.shipItems.length} line(s)` : "No shipping scheduled";
+    $("shipTbody").innerHTML = day.shipItems.length ? day.shipItems.map(x => `
+      <tr>
+        <td><b>${escapeHtml(x.project || "—")}</b></td>
+        <td>${escapeHtml(x.quote || "—")}</td>
+        <td class="right">${escapeHtml(String(x.qty))}</td>
+        <td>${escapeHtml(x.owner || "—")}</td>
+        <td>${escapeHtml(x.notes || "—")}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="5" class="muted" style="padding:14px">No shipping scheduled for this day.</td></tr>`;
+  }
+
+  function openDay(idx){
+    const base = rawWeek[idx];
+    const day = applyFiltersToDay(base);
+    renderDayTables(day);
+    openModal("dayModal");
+  }
+
+  async function buildWeekBuckets(){
+    const startKey = isoDate(weekStart);
+    const endKey = isoDate(addDays(weekStart, 6));
+    const startDT = `${startKey} 00:00:00`;
+    const endDT = `${endKey} 23:59:59`;
+
+        // Fetch cast items for the week (best effort)
+    let items = [];
+    let castFetched = false;
+
+    // Try multiple field name conventions (CastDate vs castDate) and both date-time + date-only filters
+    const castFields = ["castDate","CastDate","castdate"];
+    for(const f of castFields){
+      if(castFetched) break;
+      try{
+        items = await fetchPaged(ITEMS, { perPage: 200, sort: f, filter: `${f} >= "${startDT}" && ${f} <= "${endDT}"` });
+        castFetched = true;
+        break;
+      }catch(_){}
+      try{
+        items = await fetchPaged(ITEMS, { perPage: 200, sort: f, filter: `${f} >= "${startKey}" && ${f} <= "${endKey}"` });
+        castFetched = true;
+        break;
+      }catch(_){}
+    }
+
+    if(!castFetched){
+      console.warn("Schedule: CastDate/castDate filter not supported; falling back to recent items.");
+      items = await fetchPaged(ITEMS, { perPage: 200, sort: "-updated" });
+    }
+
+// Fetch shipping transactions for the week
+    let tx = [];
+    try{
+      tx = await fetchPaged(TX, { perPage: 200, sort: "scheduledDate", expand: "item", filter: `scheduledDate >= "${startDT}" && scheduledDate <= "${endDT}"` });
+    }catch(err1){
+      try{
+        tx = await fetchPaged(TX, { perPage: 200, sort: "scheduledShipDate", expand: "item", filter: `scheduledShipDate >= "${startDT}" && scheduledShipDate <= "${endDT}"` });
+      }catch(err2){
+        console.warn("Schedule: scheduledDate filter not supported; falling back to recent transactions.", err2);
+        tx = await fetchPaged(TX, { perPage: 200, sort: "-created", expand: "item" });
+      }
+    }
+
+    // Build raw week buckets
+    rawWeek = [];
+    for(let i=0;i<7;i++){
+      const d = addDays(weekStart, i);
+      const key = isoDate(d);
+
+      const castItems = items
+        .filter(it => parseDateKey(pick(it, ["castDate","CastDate","castdate"], "")) === key)
+        .map(it => {
+          const qty = parseNum(pick(it, ["qty","Qty","quantity","Quantity"], 0));
+          const project = getProject(it);
+          const quote = getQuote(it);
+          const owner = getOwner(it) || derivedOwnerFromJobs(quote) || "";
+          return {
+            id: it.id,
+            project,
+            quote,
+            qty,
+            owner,
+            bed: getBed(it),
+            form: getForm(it),
+            raw: it
+          };
+        });
+
+      const shipItems = tx
+        .filter(t => isOutTx(t))
+        .filter(t => {
+          const sd = parseDateKey(pick(t, ["scheduledDate","scheduledShipDate","ScheduledDate","ScheduledShipDate"], ""));
+          return sd === key;
+        })
+        .map(t => {
+          const it = t.expand?.item || {};
+          const project = getProject(it) || String(pick(t, ["project","Project","projectName","ProjectName"], "")).trim();
+          const quote = getQuote(it) || String(pick(t, ["quoteNumber","QuoteNumber"], "")).trim();
+          const owner = getOwner(it) || getOwner(t) || derivedOwnerFromJobs(quote) || "";
+          const notes = String(pick(t, ["notes","Notes","memo","Memo","comment","Comment"], "")).trim();
+          return {
+            id: t.id,
+            project,
+            quote,
+            qty: txQty(t),
+            owner,
+            notes,
+            raw: t
+          };
+        });
+
+      const castQty = castItems.reduce((a,x)=>a+x.qty,0);
+      const shipQty = shipItems.reduce((a,x)=>a+x.qty,0);
+      const beds = Array.from(new Set(castItems.map(x=>x.bed).filter(Boolean))).sort();
+      const forms = Array.from(new Set(castItems.map(x=>x.form).filter(Boolean))).sort();
+      const health = computeHealth(key, castQty, shipQty);
+
+      rawWeek.push({
+        key,
+        date: d,
+        label: new Intl.DateTimeFormat(undefined, { weekday:"long", month:"long", day:"numeric", year:"numeric" }).format(d),
+        castItems,
+        shipItems,
+        castQty,
+        shipQty,
+        beds,
+        forms,
+        health
+      });
+    }
+  }
+
+  function rebuildOwnerOptions(){
+    const sel = $("fOwner");
+    const current = sel.value || "";
+    const owners = new Set();
+    for(const d of rawWeek){
+      for(const x of d.castItems) if(x.owner) owners.add(x.owner);
+      for(const x of d.shipItems) if(x.owner) owners.add(x.owner);
+    }
+    const sorted = Array.from(owners).sort((a,b)=>a.localeCompare(b));
+    sel.innerHTML = `<option value="">All</option>` + sorted.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("");
+    sel.value = sorted.includes(current) ? current : "";
+  }
+
+  async function refreshWeek(){
+    if(!pb?.authStore?.isValid) return;
+
+    $("modePill").textContent = "Loading…";
+    $("pbUrlLabel").textContent = `Server: ${PB_URL}`;
+
+    await loadJobsMap();
+    await buildWeekBuckets();
+    rebuildOwnerOptions();
+    $("modePill").textContent = "Week view";
+    renderWeek();
+  }
+
   async function initAuth(){
+    if(typeof PocketBase === "undefined"){
+      $("modePill").textContent = "PocketBase SDK missing";
+      openModal("loginModal");
+      $("loginErr").style.display = "";
+      $("loginErr").textContent = "PocketBase JS SDK not loaded. Make sure vendor/pocketbase.umd.js is available.";
+      return;
+    }
+
     pb = new PocketBase(PB_URL);
     pb.autoCancellation(false);
 
-    $("btnLogout").addEventListener("click", async ()=>{
-      pb.authStore.clear();
-      await initAuth();
-    });
+    $("pbUrlLabel").textContent = `Server: ${PB_URL}`;
 
     if(pb.authStore.isValid){
-      $("loginModal").classList.remove("open");
-      $("btnLogout").style.display = "";
-      $("userPill").textContent = getUserEmail() || "Signed in";
-    }else{
-      $("btnLogout").style.display = "none";
-      $("userPill").textContent = "Not signed in";
-      openModal("loginModal");
-    }
-  }
-
-  async function refresh(){
-    await loadOverrides();
-    currentRows = await buildScheduleRows();
-    $("modePill").textContent = (pb?.authStore?.isValid ? "Signed in • " : "Not signed in • ") + (overridesMode === "pb" ? "PocketBase Overrides" : "Local Overrides");
-    renderTable(currentRows);
-  }
-
-  
-  // ---- auto refresh (realtime + polling)
-  let _refreshBusy = false;
-  let _refreshPending = false;
-  async function refreshSafe(){
-    if(_refreshBusy){ _refreshPending = true; return; }
-    _refreshBusy = true;
-    try{ await refresh(); }
-    finally{
-      _refreshBusy = false;
-      if(_refreshPending){ _refreshPending = false; refreshSafe(); }
-    }
-  }
-
-  function startAutoRefresh(){
-    // Poll (works even if realtime is blocked by proxies)
-    setInterval(()=>{
-      if(pb?.authStore?.isValid && document.visibilityState === "visible"){
-        refreshSafe();
-      }
-    }, 12000);
-
-    document.addEventListener("visibilitychange", ()=>{
-      if(document.visibilityState === "visible") refreshSafe();
-    });
-
-    // Realtime subscriptions (best UX)
-    try{
-      pb.collection(ITEMS).subscribe("*", ()=> refreshSafe());
-      pb.collection(TX).subscribe("*", ()=> refreshSafe());
-      pb.collection(OVERRIDES).subscribe("*", ()=> refreshSafe());
-
-      window.addEventListener("beforeunload", ()=>{
-        try{
-          pb.collection(ITEMS).unsubscribe("*");
-          pb.collection(TX).unsubscribe("*");
-          pb.collection(OVERRIDES).unsubscribe("*");
-        }catch{}
-      });
-    }catch(err){
-      console.warn("Schedule: realtime subscriptions not available.", err);
-    }
-  }
-
-
-  // ---- events
-  $("btnBack").addEventListener("click", ()=>{
-    try{
-      if(window.top && window.top !== window) window.top.location.href = "index.html";
-      else window.location.href = "index.html";
-    }catch{ window.location.href = "index.html"; }
-  });
-
-  $("btnNew").addEventListener("click", ()=> openEditor(""));
-  $("btnRefresh").addEventListener("click", refreshSafe);
-  $("q").addEventListener("input", ()=> renderTable(currentRows));
-
-  $("tbody").addEventListener("click", (e)=>{
-    const tr = e.target.closest("tr[data-project]");
-    if(!tr) return;
-    openEditor(tr.getAttribute("data-project"));
-  });
-
-  $("btnClose").addEventListener("click", ()=> closeModal("editor"));
-  $("btnSave").addEventListener("click", saveEditor);
-  $("btnDelete").addEventListener("click", doDeleteOverride);
-
-  $("loginForm").addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    $("loginErr").style.display = "none";
-    try{
-      await pb.collection("users").authWithPassword($("loginEmail").value.trim(), $("loginPassword").value);
       closeModal("loginModal");
       $("btnLogout").style.display = "";
-      $("userPill").textContent = getUserEmail() || "Signed in";
-      await refresh();
-    }catch(err){
-      $("loginErr").style.display = "";
-      $("loginErr").textContent = "Login failed: " + (err?.response?.message || err?.message || "Unknown error");
+      const u = pb.authStore.model;
+      $("userPill").style.display = "";
+      $("userPill").textContent = u?.email || u?.username || "Signed in";
+      $("modePill").textContent = "Week view";
+    } else {
+      openModal("loginModal");
+      $("modePill").textContent = "Sign in required";
+      $("btnLogout").style.display = "none";
+      $("userPill").style.display = "none";
     }
-  });
+
+    $("btnLogout").addEventListener("click", ()=>{
+      pb.authStore.clear();
+      openModal("loginModal");
+      $("btnLogout").style.display = "none";
+      $("userPill").style.display = "none";
+      $("modePill").textContent = "Signed out";
+    });
+  }
+
+  async function login(email, password){
+    // Try admin/superusers first (PocketBase v0.22+), then users.
+    try{
+      await pb.collection("_superusers").authWithPassword(email, password);
+      return;
+    }catch(_){}
+    try{
+      // Older PB may still have admins helper; if present, use it.
+      if(pb.admins?.authWithPassword){
+        await pb.admins.authWithPassword(email, password);
+        return;
+      }
+    }catch(_){}
+    await pb.collection("users").authWithPassword(email, password);
+  }
+
+  function wireUI(){
+    $("btnPrevWeek").addEventListener("click", async ()=>{
+      weekStart = addDays(weekStart, -7);
+      $("weekLabel").textContent = weekLabel(weekStart);
+      await refreshWeek();
+    });
+    $("btnNextWeek").addEventListener("click", async ()=>{
+      weekStart = addDays(weekStart, 7);
+      $("weekLabel").textContent = weekLabel(weekStart);
+      await refreshWeek();
+    });
+    $("btnToday").addEventListener("click", async ()=>{
+      weekStart = startOfWeek(new Date());
+      $("weekLabel").textContent = weekLabel(weekStart);
+      await refreshWeek();
+    });
+    $("btnRefreshWeek").addEventListener("click", refreshWeek);
+
+    $("fType").addEventListener("change", renderWeek);
+    $("fOwner").addEventListener("change", renderWeek);
+    $("fHealth").addEventListener("change", renderWeek);
+    $("q").addEventListener("input", renderWeek);
+
+    $("btnDayClose").addEventListener("click", ()=> closeModal("dayModal"));
+
+    $("loginForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      $("loginErr").style.display = "none";
+      try{
+        await login($("loginEmail").value.trim(), $("loginPassword").value);
+        closeModal("loginModal");
+        $("btnLogout").style.display = "";
+        $("userPill").style.display = "";
+        const u = pb.authStore.model;
+        $("userPill").textContent = u?.email || u?.username || "Signed in";
+        await refreshWeek();
+      }catch(err){
+        console.error(err);
+        $("loginErr").style.display = "";
+        $("loginErr").textContent = "Login failed: " + (err?.response?.message || err?.message || "Unknown error");
+      }
+    });
+  }
 
   // boot
   (async ()=>{
-    $("modePill").textContent = "Connecting…";
+    setTopSubtitle();
+    $("weekLabel").textContent = weekLabel(weekStart);
+
+    // Make sure top-bar placeholders don't confuse users
+    const calBtn = $("btnCalendar"); if(calBtn) calBtn.style.display = "none";
+    const filterBtn = $("btnFilter"); if(filterBtn) filterBtn.style.display = "none";
+    // Quick add no longer used for overrides
+    const btnNew = $("btnNew"); if(btnNew) btnNew.style.display = "none";
+
     await initAuth();
-    await refresh();
+    wireUI();
+
+    if(pb?.authStore?.isValid){
+      await refreshWeek();
+    }
+
+    // Lightweight auto-refresh while visible
+    setInterval(()=>{
+      if(pb?.authStore?.isValid && document.visibilityState === "visible"){
+        refreshWeek().catch(()=>{});
+      }
+    }, 30000);
   })();
 })();
 </script>
@@ -721,8 +871,7 @@
     if(tab === "estimator") return "estimates.html";
     if(tab === "dashboard") return "index.html?view=dashboard";
     if(tab === "inventory") return "index.html?view=inventory";
-        if(tab === "yard") return "index.html?view=yard";
-if(tab === "production") return "index.html?view=production";
+    if(tab === "production") return "index.html?view=production";
     if(tab === "shipping") return "index.html?view=shipping";
     if(tab === "reports") return "index.html?view=reports";
     if(tab === "projects") return "index.html?view=projects";

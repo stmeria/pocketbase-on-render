@@ -1155,6 +1155,18 @@
 <label>Pour #</label>
 <input class="mono" id="iPour" placeholder="e.g., P-301"/>
 </div>
+<div class="col-2">
+<label>Bed #</label>
+<input class="mono" id="iBed" placeholder="e.g., Bed 3"/>
+</div>
+<div class="col-2">
+<label>Form #</label>
+<input class="mono" id="iForm" placeholder="e.g., Form 12"/>
+</div>
+<div class="col-2">
+<label>Owner</label>
+<input id="iOwner" placeholder="e.g., Crew A"/>
+</div>
 <div class="col-12">
 <label>Notes</label>
 <textarea id="iNotes" placeholder="Optional… (heat #, QC notes, etc.)" rows="3"></textarea>
@@ -3955,6 +3967,9 @@ async function createDeliveryTransaction(preferred){
     $("iReorder").value = item?.reorderpoint ?? item?.reorderPoint ?? 0;
     $("iCastDate").value = getCastDate(item);
     $("iPour").value = item?.pournumber ?? item?.pourNumber ?? "";
+    $("iBed").value = item?.bed ?? item?.Bed ?? "";
+    $("iForm").value = item?.form ?? item?.Form ?? "";
+    $("iOwner").value = item?.owner ?? item?.Owner ?? item?.ownerName ?? "";
     $("iNotes").value = item?.notes || "";
 
     $("itemModal").style.display = "flex";
@@ -3996,6 +4011,9 @@ async function createDeliveryTransaction(preferred){
       reorderpoint: parseNum($("iReorder").value),
       CastDate: formatPBDate($("iCastDate").value),
       pournumber: $("iPour").value.trim(),
+      bed: $("iBed").value.trim(),
+      form: $("iForm").value.trim(),
+      owner: $("iOwner").value.trim(),
       notes: $("iNotes").value.trim(),
       updatedBy: pb.authStore?.record?.id || null
     };
